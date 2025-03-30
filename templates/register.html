@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>文件传输 - 注册</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            学生注册
+        </h2>
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                <form id="registerForm" class="space-y-6" method="POST">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">
+                            姓名
+                        </label>
+                        <div class="mt-1">
+                            <input 
+                                id="name" 
+                                name="name" 
+                                type="text" 
+                                required 
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="student_id" class="block text-sm font-medium text-gray-700">
+                            学号
+                        </label>
+                        <div class="mt-1">
+                            <input 
+                                id="student_id" 
+                                name="student_id" 
+                                type="text" 
+                                required 
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">
+                            邮箱
+                        </label>
+                        <div class="mt-1">
+                            <input 
+                                id="email" 
+                                name="email" 
+                                type="email" 
+                                required 
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">
+                            密码
+                        </label>
+                        <div class="mt-1">
+                            <input 
+                                id="password" 
+                                name="password" 
+                                type="password" 
+                                required 
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                        </div>
+                    </div>
+
+                    <div id="verifyCodeSection" style="display:none;">
+                        <label for="verify_code" class="block text-sm font-medium text-gray-700">
+                            邮箱验证码
+                        </label>
+                        <div class="mt-1 flex">
+                            <input 
+                                id="verify_code" 
+                                name="verify_code" 
+                                type="text" 
+                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm mr-2"
+                            >
+                            <button 
+                                type="button" 
+                                id="confirmVerifyCodeBtn"
+                                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                            >
+                                确认
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button 
+                            type="button" 
+                            id="sendVerifyCodeBtn"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            发送验证码
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const studentIdInput = document.getElementById('student_id');
+        const passwordInput = document.getElementById('password');
+        const sendVerifyCodeBtn = document.getElementById('sendVerifyCodeBtn');
+        const verifyCodeSection = document.getElementById('verifyCodeSection');
+        const verifyCodeInput = document.getElementById('verify_code');
+        const confirmVerifyCodeBtn = document.getElementById('confirmVerifyCodeBtn');
+
+        // 阻止表单默认提交行为
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+        });
+
+        sendVerifyCodeBtn.addEventListener('click', async () => {
+            const name = nameInput.value;
+            const email = emailInput.value;
+            const studentId = studentIdInput.value;
+
+            if (!name || !email || !studentId) {
+                alert('请填写完整信息');
+                return;
+            }
+
+            try {
+                const response = await fetch('/send_verify_code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        student_id: studentId
+                    })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    verifyCodeSection.style.display = 'block';
+                    alert('验证码已发送');
+                } else {
+                    alert(result.message || '发送失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('发送验证码出错');
+            }
+        });
+
+        confirmVerifyCodeBtn.addEventListener('click', async () => {
+            const name = nameInput.value;
+            const email = emailInput.value;
+            const studentId = studentIdInput.value;
+            const password = passwordInput.value;
+            const verifyCode = verifyCodeInput.value;
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        student_id: studentId,
+                        password: password,
+                        verify_code: verifyCode
+                    })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('注册成功');
+                    window.location.href = '/login';
+                } else {
+                    alert(result.message || '注册失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('注册出错');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!-- templates/upload.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>作业提交</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        #dropZone {
+            transition: all 0.3s ease;
+        }
+        #dropZone.dragover {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+        #progressContainer {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            作业提交
+        </h2>
+        <div class="mt-4">
+            <label for="course" class="block text-sm font-medium text-gray-700">
+                选择课程
+            </label>
+            <select 
+                id="course" 
+                name="course" 
+                required 
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            >
+                <option value="">请选择课程</option>
+                {% for course in courses %}
+                <option value="{{ course }}">{{ course }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="mt-4">
+            <label for="assignment_name" class="block text-sm font-medium text-gray-700">
+                作业名称
+            </label>
+            <input 
+                type="text" 
+                id="assignment_name" 
+                name="assignment_name" 
+                required 
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                placeholder="例如：实验1"
+            >
+        </div>
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                <div 
+                    id="dropZone" 
+                    class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition"
+                >
+                    <input 
+                        type="file" 
+                        id="fileInput" 
+                        class="hidden" 
+                        multiple
+                    >
+                    <div id="dropText" class="text-gray-500">
+                        点击或拖拽文件到此处上传
+                    </div>
+                </div>
+
+                <div id="progressContainer" class="mt-4">
+                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                        <span id="fileName">filename.txt</span>
+                        <span id="uploadSpeed">0 KB/s</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                            id="progressBar" 
+                            class="bg-blue-600 h-2.5 rounded-full" 
+                            style="width: 0%"
+                        ></div>
+                    </div>
+                    <div class="text-center mt-2 text-sm text-gray-600">
+                        <span id="progressText">上传中: 0%</span>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <a 
+                        href="/logout" 
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    >
+                        退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const dropText = document.getElementById('dropText');
+        const progressContainer = document.getElementById('progressContainer');
+        const fileName = document.getElementById('fileName');
+        const uploadSpeed = document.getElementById('uploadSpeed');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        const courseSelect = document.getElementById('course');
+        const assignmentNameInput = document.getElementById('assignment_name');
+
+
+        // 拖拽事件处理
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropZone.classList.add('dragover');
+        }
+
+        function unhighlight() {
+            dropZone.classList.remove('dragover');
+        }
+
+        // 点击和拖拽文件上传
+        dropZone.addEventListener('click', () => fileInput.click(), false);
+        dropZone.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFiles, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            files = files.target ? files.target.files : files;
+            uploadFiles(files);
+        }
+
+        function uploadFiles(files) {
+            const file = files[0];  // 仅支持单文件上传
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            // 添加课程和作业信息
+            const course = courseSelect.value;
+            const assignmentName = assignmentNameInput.value;
+
+            if (!course || !assignmentName) {
+                alert('请选择课程和作业名称');
+                return;
+            }
+
+            formData.append('course', course);
+            formData.append('assignment_name', assignmentName);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/', true);
+
+            // 进度追踪
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    progressContainer.style.display = 'block';
+                    fileName.textContent = file.name;
+                    progressBar.style.width = `${percentComplete}%`;
+                    progressText.textContent = `上传中: ${percentComplete.toFixed(0)}%`;
+
+                    // 计算上传速度
+                    const speedInKBps = (e.loaded / e.timeStamp * 1000 / 1024).toFixed(2);
+                    uploadSpeed.textContent = `${speedInKBps} KB/s`;
+                }
+            };
+
+            xhr.onload = () => {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (xhr.status === 200 && response.status === 'success') {
+                        progressText.textContent = response.message;
+                        progressText.classList.remove('text-gray-600');
+                        progressText.classList.add('text-green-600');
+                        progressBar.classList.remove('bg-blue-600');
+                        progressBar.classList.add('bg-green-600');
+                    } else {
+                        progressText.textContent = response.message || '上传失败';
+                        progressText.classList.remove('text-gray-600');
+                        progressText.classList.add('text-red-600');
+                        progressBar.classList.remove('bg-blue-600');
+                        progressBar.classList.add('bg-red-600');
+                    }
+                } catch (e) {
+                    progressText.textContent = '服务器响应异常';
+                    progressText.classList.remove('text-gray-600');
+                    progressText.classList.add('text-red-600');
+                    progressBar.classList.remove('bg-blue-600');
+                    progressBar.classList.add('bg-red-600');
+                }
+            };
+
+            xhr.onerror = () => {
+                progressText.textContent = '网络错误，上传失败';
+                progressText.classList.remove('text-gray-600');
+                progressText.classList.add('text-red-600');
+                progressBar.classList.remove('bg-blue-600');
+                progressBar.classList.add('bg-red-600');
+            };
+
+            xhr.send(formData);
+        }
+    </script>
+</body>
+</html>
