@@ -27,6 +27,10 @@
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
+        select:focus, input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -39,7 +43,12 @@
     </div>
 
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <!-- Logo 图片 -->
+        <div class="flex justify-center">
+            <img src="/static/img/logo.png" alt="Logo" class="h-20 w-auto">
+        </div>
+        
+        <h2 class="mt-4 text-center text-3xl font-extrabold text-gray-900">
             作业提交
         </h2>
         <div class="mt-4">
