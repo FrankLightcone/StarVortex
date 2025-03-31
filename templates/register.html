@@ -4,10 +4,58 @@
     <meta charset="UTF-8">
     <title>文件传输 - 注册</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        /* Toast Notification 样式 */
+        #toast {
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        /* 输入框样式优化 */
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+        .input-group input.error {
+            border-color: #ef4444;
+        }
+        .error-message {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        /* 按钮禁用状态 */
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <!-- Toast Notification -->
+    <div 
+        id="toast" 
+        class="fixed top-4 left-1/2 z-50 px-4 py-2 bg-red-500 text-white rounded-lg shadow-lg text-center"
+    >
+        提示信息
+    </div>
+
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <!-- Logo 图片 -->
+        <div class="flex justify-center">
+            <img src="/static/img/logo.png" alt="Logo" class="h-20 w-auto">
+        </div>
+        
+        <h2 class="mt-4 text-center text-3xl font-extrabold text-gray-900">
             学生注册
         </h2>
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -73,7 +121,7 @@
                         </div>
                     </div>
 
-                    <div id="verifyCodeSection" style="display:none;">
+                    <div>
                         <label for="verify_code" class="block text-sm font-medium text-gray-700">
                             邮箱验证码
                         </label>
@@ -83,27 +131,50 @@
                                 name="verify_code" 
                                 type="text" 
                                 class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm mr-2"
+                                placeholder="请输入验证码"
                             >
                             <button 
                                 type="button" 
-                                id="confirmVerifyCodeBtn"
-                                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                                id="sendVerifyCodeBtn"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
                             >
-                                确认
+                                发送验证码
                             </button>
                         </div>
                     </div>
 
-                    <div>
+                    <div class="mt-6">
                         <button 
                             type="button" 
-                            id="sendVerifyCodeBtn"
-                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            id="registerBtn"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition"
                         >
-                            发送验证码
+                            注册
                         </button>
                     </div>
                 </form>
+
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-white text-gray-500">
+                                已有账号？
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a 
+                            href="/login" 
+                            class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
+                        >
+                            返回登录
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -114,25 +185,99 @@
         const studentIdInput = document.getElementById('student_id');
         const passwordInput = document.getElementById('password');
         const sendVerifyCodeBtn = document.getElementById('sendVerifyCodeBtn');
-        const verifyCodeSection = document.getElementById('verifyCodeSection');
         const verifyCodeInput = document.getElementById('verify_code');
-        const confirmVerifyCodeBtn = document.getElementById('confirmVerifyCodeBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const toast = document.getElementById('toast');
+        
+        let countdown = 0;
+        let countdownInterval;
+
+        // Toast notification function
+        function showToast(message, type = 'error') {
+            // Set the message
+            toast.textContent = message;
+            
+            // Set the color based on message type
+            if (type === 'success') {
+                toast.classList.remove('bg-red-500');
+                toast.classList.add('bg-green-500');
+            } else if (type === 'error') {
+                toast.classList.remove('bg-green-500');
+                toast.classList.add('bg-red-500');
+            }
+            
+            // Show the toast
+            toast.classList.add('show');
+            
+            // Hide the toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 验证邮箱格式
+        function validateEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
 
         // 阻止表单默认提交行为
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
         });
+        
+        // 开始倒计时
+        function startCountdown() {
+            countdown = 60;
+            updateSendButtonText();
+            
+            sendVerifyCodeBtn.disabled = true;
+            
+            countdownInterval = setInterval(() => {
+                countdown--;
+                updateSendButtonText();
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    sendVerifyCodeBtn.disabled = false;
+                }
+            }, 1000);
+        }
+        
+        // 更新发送按钮文本
+        function updateSendButtonText() {
+            if (countdown > 0) {
+                sendVerifyCodeBtn.textContent = `重新发送(${countdown}s)`;
+            } else {
+                sendVerifyCodeBtn.textContent = '发送验证码';
+            }
+        }
 
         sendVerifyCodeBtn.addEventListener('click', async () => {
-            const name = nameInput.value;
-            const email = emailInput.value;
-            const studentId = studentIdInput.value;
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const studentId = studentIdInput.value.trim();
 
-            if (!name || !email || !studentId) {
-                alert('请填写完整信息');
+            if (!name) {
+                showToast('请输入姓名');
                 return;
             }
-
+            
+            if (!studentId) {
+                showToast('请输入学号');
+                return;
+            }
+            
+            if (!email) {
+                showToast('请输入邮箱');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showToast('邮箱格式不正确');
+                return;
+            }
+            
             try {
                 const response = await fetch('/send_verify_code', {
                     method: 'POST',
@@ -148,25 +293,64 @@
 
                 const result = await response.json();
                 if (result.status === 'success') {
-                    verifyCodeSection.style.display = 'block';
-                    alert('验证码已发送');
+                    startCountdown();
+                    showToast('验证码已发送', 'success');
                 } else {
-                    alert(result.message || '发送失败');
+                    showToast(result.message || '发送失败');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('发送验证码出错');
+                showToast('发送验证码出错');
             }
         });
 
-        confirmVerifyCodeBtn.addEventListener('click', async () => {
-            const name = nameInput.value;
-            const email = emailInput.value;
-            const studentId = studentIdInput.value;
-            const password = passwordInput.value;
-            const verifyCode = verifyCodeInput.value;
+        registerBtn.addEventListener('click', async () => {
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const studentId = studentIdInput.value.trim();
+            const password = passwordInput.value.trim();
+            const verifyCode = verifyCodeInput.value.trim();
+            
+            // 验证所有字段
+            if (!name) {
+                showToast('请输入姓名');
+                return;
+            }
+            
+            if (!studentId) {
+                showToast('请输入学号');
+                return;
+            }
+            
+            if (!email) {
+                showToast('请输入邮箱');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showToast('邮箱格式不正确');
+                return;
+            }
+            
+            if (!password) {
+                showToast('请输入密码');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showToast('密码长度至少为6位');
+                return;
+            }
+            
+            if (!verifyCode) {
+                showToast('请输入验证码');
+                return;
+            }
 
             try {
+                registerBtn.disabled = true;
+                registerBtn.textContent = '注册中...';
+                
                 const response = await fetch('/register', {
                     method: 'POST',
                     headers: {
@@ -183,14 +367,21 @@
 
                 const result = await response.json();
                 if (result.status === 'success') {
-                    alert('注册成功');
-                    window.location.href = '/login';
+                    showToast('注册成功', 'success');
+                    // 延迟跳转，让用户看到成功消息
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
                 } else {
-                    alert(result.message || '注册失败');
+                    showToast(result.message || '注册失败');
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = '注册';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('注册出错');
+                showToast('注册出错');
+                registerBtn.disabled = false;
+                registerBtn.textContent = '注册';
             }
         });
     </script>

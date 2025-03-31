@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>作业提交</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         #dropZone {
             transition: all 0.3s ease;
@@ -16,9 +17,27 @@
         #progressContainer {
             display: none;
         }
+        /* Toast Notification 样式 */
+        #toast {
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <!-- Toast Notification -->
+    <div 
+        id="toast" 
+        class="fixed top-4 left-1/2 z-50 px-4 py-2 bg-red-500 text-white rounded-lg shadow-lg text-center"
+    >
+        提示信息
+    </div>
+
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
             作业提交
@@ -108,10 +127,33 @@
         const uploadSpeed = document.getElementById('uploadSpeed');
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
+        const toast = document.getElementById('toast');
 
         const courseSelect = document.getElementById('course');
         const assignmentNameInput = document.getElementById('assignment_name');
 
+        // Toast notification function
+        function showToast(message, type = 'error') {
+            // Set the message
+            toast.textContent = message;
+            
+            // Set the color based on message type
+            if (type === 'success') {
+                toast.classList.remove('bg-red-500');
+                toast.classList.add('bg-green-500');
+            } else if (type === 'error') {
+                toast.classList.remove('bg-green-500');
+                toast.classList.add('bg-red-500');
+            }
+            
+            // Show the toast
+            toast.classList.add('show');
+            
+            // Hide the toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
 
         // 拖拽事件处理
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -156,6 +198,11 @@
         }
 
         function uploadFiles(files) {
+            if (files.length === 0) {
+                showToast('请选择文件');
+                return;
+            }
+            
             const file = files[0];  // 仅支持单文件上传
             const formData = new FormData();
             formData.append('file', file);
@@ -165,7 +212,7 @@
             const assignmentName = assignmentNameInput.value;
 
             if (!course || !assignmentName) {
-                alert('请选择课程和作业名称');
+                showToast('请选择课程和作业名称');
                 return;
             }
 
@@ -199,12 +246,16 @@
                         progressText.classList.add('text-green-600');
                         progressBar.classList.remove('bg-blue-600');
                         progressBar.classList.add('bg-green-600');
+                        
+                        showToast(response.message, 'success');
                     } else {
                         progressText.textContent = response.message || '上传失败';
                         progressText.classList.remove('text-gray-600');
                         progressText.classList.add('text-red-600');
                         progressBar.classList.remove('bg-blue-600');
                         progressBar.classList.add('bg-red-600');
+                        
+                        showToast(response.message || '上传失败');
                     }
                 } catch (e) {
                     progressText.textContent = '服务器响应异常';
@@ -212,6 +263,8 @@
                     progressText.classList.add('text-red-600');
                     progressBar.classList.remove('bg-blue-600');
                     progressBar.classList.add('bg-red-600');
+                    
+                    showToast('服务器响应异常');
                 }
             };
 
@@ -221,6 +274,8 @@
                 progressText.classList.add('text-red-600');
                 progressBar.classList.remove('bg-blue-600');
                 progressBar.classList.add('bg-red-600');
+                
+                showToast('网络错误，上传失败');
             };
 
             xhr.send(formData);

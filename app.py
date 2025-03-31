@@ -308,4 +308,4 @@ def register():
 
 if __name__ == '__main__':
     # 注意：为局域网访问，host设置为'0.0.0.0'
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=10099, debug=True)
