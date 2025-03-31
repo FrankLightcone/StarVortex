@@ -44,11 +44,15 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# 邮件配置
-SMTP_SERVER = 'smtp.gmail.com'
-SMTP_PORT = 587
-SMTP_USERNAME = 'lightconefrank@gmail.com'  # 替换为您的Gmail
-SMTP_PASSWORD = 'bbub ogts cokw rieg'     # 使用应用专用密码
+try:
+    # 尝试导入实际配置文件
+    from util.config import *
+except ImportError:
+    # 如果实际配置文件不存在，提示用户创建
+    print("警告: 配置文件不存在，请基于config_template.py创建config.py文件并填写正确的配置信息")
+    # 可选: 退出程序
+    import sys
+    sys.exit(1)
 
 # 验证码存储
 verification_codes = {}

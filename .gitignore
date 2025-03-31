@@ -1,3 +1,6 @@
 /users.json
 /file_upload.log
 /static/upload
+/util/config.py
+/mail_demo.py
+/.idea
