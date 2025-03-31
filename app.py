@@ -36,6 +36,8 @@ ALLOWED_EXTENSIONS = {
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 256 * 1024 * 1024  # 256 MB 文件大小限制
 
+app.config['APP_ALREADY_STARTED'] = False  # 用于标记应用是否已经启动
+
 # 确保上传目录存在
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -56,6 +58,53 @@ except ImportError:
 
 # 验证码存储
 verification_codes = {}
+
+# 添加配置文件读取函数
+def load_course_config():
+    try:
+        with open('course_config.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        # 默认配置
+        default_config = {
+            "courses": [
+                {
+                    "name": "GNSS",
+                    "assignments": ["实验1", "实验2", "大作业"]
+                },
+                {
+                    "name": "DIP",
+                    "assignments": ["实验1", "实验2", "实验3", "期末大作业"]
+                },
+                {
+                    "name": "地理学原理",
+                    "assignments": ["作业1", "作业2", "期中论文", "期末论文"]
+                },
+                {
+                    "name": "误差理论",
+                    "assignments": ["作业1", "作业2", "作业3", "期末报告"]
+                }
+            ]
+        }
+        # 创建默认配置文件
+        with open('course_config.json', 'w', encoding='utf-8') as f:
+            json.dump(default_config, f, ensure_ascii=False, indent=2)
+        return default_config
+    
+# 新增压缩文件夹的函数
+def compress_folder(folder_path, zip_filepath):
+    try:
+        with zipfile.ZipFile(zip_filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # 遍历文件夹
+            for root, _, files in os.walk(folder_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    # 计算相对路径，保留文件夹结构
+                    arcname = os.path.relpath(file_path, os.path.dirname(folder_path))
+                    zipf.write(file_path, arcname=arcname)
+        logging.info(f'Folder compressed to zip: {zip_filepath}')
+    except Exception as e:
+        logging.error(f'Error compressing folder {folder_path}: {e}')
 
 def send_verification_email(email, code):
     try:
@@ -175,11 +224,13 @@ def compress_file(original_filepath, zip_filepath):
         logging.error(f'Error compressing file {original_filepath}: {e}')
 
 
+# 修改上传路由
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def upload_file():
-    # 获取课程列表
-    courses = ['GNSS', 'DIP', '地理学原理', '误差理论']
+    # 获取课程配置
+    config = load_course_config()
+    courses = [course['name'] for course in config['courses']]
     
     if request.method == 'POST':
         # 获取课程和作业名称
@@ -188,7 +239,7 @@ def upload_file():
         
         # 检查课程和作业名称
         if not course or not assignment_name:
-            return jsonify({'status': 'error', 'message': '请选择课程并输入作业名称'}), 400
+            return jsonify({'status': 'error', 'message': '请选择课程和作业名称'}), 400
 
         # 检查是否有文件
         if 'file' not in request.files:
@@ -214,35 +265,48 @@ def upload_file():
             
             # 获取用户信息
             student_id = load_users()[current_user.id]['student_id']
-            # 将用户ID、课程和作业名称加入文件名
-            filename = f"{student_id}_{current_user.id}_{course}_{assignment_name}{ext}"
             
-            # 确保文件名唯一
+            # 创建课程和作业文件夹结构
+            course_folder = os.path.join(app.config['UPLOAD_FOLDER'], course)
+            assignment_folder = os.path.join(course_folder, assignment_name)
+            
+            # 确保文件夹存在
+            os.makedirs(assignment_folder, exist_ok=True)
+            
+            # 创建以学生信息命名的子文件夹
+            student_folder_name = f"{student_id}_{current_user.id}"
+            student_folder = os.path.join(assignment_folder, student_folder_name)
+            os.makedirs(student_folder, exist_ok=True)
+            
+            # 保存文件到学生文件夹
+            file_path = os.path.join(student_folder, original_filename)
+            
+            # 处理文件重名情况
             counter = 1
-            upload_folder = app.config['UPLOAD_FOLDER']
-            file_path = os.path.join(upload_folder, filename)
             while os.path.exists(file_path):
-                filename = f"{current_user.id}_{course}_{assignment_name}_{base}_{counter}{ext}"
-                file_path = os.path.join(upload_folder, filename)
+                new_filename = f"{base}_{counter}{ext}"
+                file_path = os.path.join(student_folder, new_filename)
                 counter += 1
             
             # 保存文件
             file.save(file_path)
-            logging.info(f'File uploaded successfully: {filename}')
-
-            # 如果文件不是 zip 文件，则在新线程中压缩它
-            if ext.lower() != '.zip':
-                # 构造新的 zip 文件名，注意这里可以修改为你希望的命名格式，
-                # 比如将后缀改为 .zip
-                zip_filename = f"{student_id}_{current_user.id}_{course}_{assignment_name}.zip"
-                zip_filepath = os.path.join(upload_folder, zip_filename)
-                t = threading.Thread(target=compress_file, args=(file_path, zip_filepath))
-                t.start()
+            logging.info(f'File uploaded to: {file_path}')
+            
+            # 同时创建一个压缩文件
+            zip_filename = f"{student_folder_name}.zip"
+            zip_filepath = os.path.join(assignment_folder, zip_filename)
+            
+            # 启动线程压缩文件夹
+            t = threading.Thread(
+                target=compress_folder, 
+                args=(student_folder, zip_filepath)
+            )
+            t.start()
             
             return jsonify({
                 'status': 'success', 
                 'message': '文件上传成功', 
-                'filename': filename
+                'filename': os.path.basename(file_path)
             }), 200
         
         except Exception as e:
@@ -253,8 +317,37 @@ def upload_file():
                 'message': f'文件上传失败: {str(e)}'
             }), 500
     
-    return render_template('upload.html', courses=courses)
+    return render_template('upload.html', courses=courses, course_config=config)
 
+# 应用启动前，确保课程配置文件存在
+@app.before_request
+def initialize_app():
+    if not app.config['APP_ALREADY_STARTED']:
+        # 在第一个请求时执行代码
+        app.config['APP_ALREADY_STARTED'] = True
+        # 确保上传目录存在
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        
+        # 加载课程配置
+        load_course_config()
+        
+        # 确保用户数据文件存在
+        if not os.path.exists('users.json'):
+            save_users({})
+
+# 新增API端点，用于获取特定课程的作业列表
+@app.route('/get_assignments', methods=['GET'])
+def get_assignments():
+    course = request.args.get('course')
+    if not course:
+        return jsonify({'assignments': []})
+    
+    config = load_course_config()
+    for course_config in config['courses']:
+        if course_config['name'] == course:
+            return jsonify({'assignments': course_config['assignments']})
+    
+    return jsonify({'assignments': []})
 
 @app.route('/files/<filename>')
 @login_required
