@@ -4,32 +4,14 @@
     <meta charset="UTF-8">
     <title>作业传输系统 - 登录</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/static/css/toast.css" rel="stylesheet">
+    <link href="/static/css/forms.css" rel="stylesheet">
+    <link href="/static/css/login.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        /* 移除 HTML 中 transform 类后，在这里合并水平和垂直偏移 */
-        #toast {
-            transition: all 0.3s ease;
-            opacity: 0;
-            /* left 50% + 水平偏移 -50%，垂直偏移 -20px */
-            transform: translateX(-50%) translateY(-20px);
-        }
-        #toast.show {
-            opacity: 1;
-            /* 显示时恢复垂直位置 */
-            transform: translateX(-50%) translateY(0);
-        }
-        .form-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-        }
-    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <!-- Toast Notification -->
-    <div 
-        id="toast" 
-        class="fixed top-4 left-1/2 z-50 px-4 py-2 bg-red-500 text-white rounded-lg shadow-lg text-center"
-    >
+    <div id="toast" class="fixed top-4 left-1/2 z-50 px-4 py-2 bg-red-500 text-white rounded-lg shadow-lg text-center">
         登录失败，请检查用户名和密码
     </div>
 
@@ -110,35 +92,7 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-
-            fetch('/login', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.redirected) {
-                    // 登录成功，跳转页面
-                    window.location.href = response.url;
-                } else {
-                    // 登录失败，显示Toast
-                    const toast = document.getElementById('toast');
-                    toast.classList.add('show');
-                    
-                    // 3秒后隐藏Toast
-                    setTimeout(() => {
-                        toast.classList.remove('show');
-                    }, 3000);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    </script>
+    <script src="/static/js/toast.js"></script>
+    <script src="/static/js/login.js"></script>
 </body>
 </html>

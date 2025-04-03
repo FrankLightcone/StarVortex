@@ -1,0 +1,26 @@
+/* 输入框样式优化 */
+.input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.input-group input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+.input-group input.error {
+    border-color: #ef4444;
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* 按钮禁用状态 */
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

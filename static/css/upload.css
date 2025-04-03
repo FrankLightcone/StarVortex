@@ -1,0 +1,29 @@
+#dropZone {
+    transition: all 0.3s ease;
+}
+
+#dropZone.dragover {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+}
+
+#progressContainer {
+    display: none;
+}
+
+.file-item {
+    transition: all 0.2s;
+}
+
+.file-item:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.file-item .remove-file {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.file-item:hover .remove-file {
+    opacity: 1;
+}
