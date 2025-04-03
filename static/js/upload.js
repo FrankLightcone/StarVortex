@@ -13,9 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
     
-    // 保存课程配置 (从服务器传递的JSON)
-    const courseConfig = JSON.parse('{{ course_config | tojson | safe }}');
-    
     // 文件列表数组
     let selectedFiles = [];
 
@@ -31,24 +28,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 启用作业名称下拉框
                 assignmentSelect.disabled = false;
                 
-                // 获取选中课程的作业列表
-                const course = courseConfig.courses.find(c => c.name === selectedCourse);
-                
-                if (course && course.assignments) {
-                    // 添加默认选项
-                    const defaultOption = document.createElement('option');
-                    defaultOption.value = '';
-                    defaultOption.textContent = '请选择作业';
-                    assignmentSelect.appendChild(defaultOption);
-                    
-                    // 添加作业选项
-                    course.assignments.forEach(assignment => {
+                // 从服务器获取选中课程的作业列表
+                fetch(`/get_assignments?course=${encodeURIComponent(selectedCourse)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // 添加默认选项
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = '请选择作业';
+                        assignmentSelect.appendChild(defaultOption);
+                        
+                        // 添加作业选项
+                        if (data.assignments && data.assignments.length > 0) {
+                            data.assignments.forEach(assignment => {
+                                const option = document.createElement('option');
+                                option.value = assignment;
+                                option.textContent = assignment;
+                                assignmentSelect.appendChild(option);
+                            });
+                        } else {
+                            const option = document.createElement('option');
+                            option.value = '';
+                            option.textContent = '该课程暂无作业';
+                            assignmentSelect.appendChild(option);
+                        }
+                        
+                        // 更新上传按钮状态
+                        updateUploadButtonState();
+                    })
+                    .catch(error => {
+                        console.error('获取作业列表失败:', error);
+                        // 添加错误提示选项
                         const option = document.createElement('option');
-                        option.value = assignment;
-                        option.textContent = assignment;
+                        option.value = '';
+                        option.textContent = '加载作业失败';
                         assignmentSelect.appendChild(option);
                     });
-                }
             } else {
                 // 禁用作业名称下拉框
                 assignmentSelect.disabled = true;
@@ -85,11 +100,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         function highlight() {
-            dropZone.classList.add('dragover');
+            dropZone.classList.add('border-blue-500');
+            dropZone.classList.add('bg-blue-50');
         }
 
         function unhighlight() {
-            dropZone.classList.remove('dragover');
+            dropZone.classList.remove('border-blue-500');
+            dropZone.classList.remove('bg-blue-50');
         }
 
         // 点击和拖拽文件选择
@@ -364,6 +381,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // 重新启用上传按钮
         uploadBtn.disabled = false;
         uploadBtn.textContent = '重试上传';
+    }
+    
+    // 格式化文件大小
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        
+        const units = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        
+        return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + units[i];
     }
 
     // 初始化

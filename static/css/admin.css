@@ -1,0 +1,57 @@
+/* Toast 通知样式 */
+#toast {
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+}
+
+#toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* 表单输入框焦点样式 */
+.form-input:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+/* 标签页内容样式 */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* 作业项悬停样式 */
+.assignment-item:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* 学生提交项悬停样式 */
+.student-submission:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* 弹窗关闭按钮样式 */
+.modal-close-btn:hover {
+    color: #4B5563;
+}
+
+/* 按钮禁用状态 */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 表格行交替背景色 */
+tr:nth-child(even) {
+    background-color: #F9FAFB;
+}
+
+/* 文件列表项悬停效果 */
+.file-item:hover {
+    background-color: #F3F4F6;
+}

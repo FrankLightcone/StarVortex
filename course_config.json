@@ -3,20 +3,26 @@
     {
       "name": "GNSS",
       "assignments": [
-        "计算卫星星历误差"
+        "卫星星历误差计算"
       ]
     },
     {
       "name": "DIP",
-      "assignments": []
+      "assignments": [
+        "进行频率域滤波"
+      ]
     },
     {
       "name": "地理学原理",
-      "assignments": []
+      "assignments": [
+        "计算路网"
+      ]
     },
     {
       "name": "误差理论",
-      "assignments": []
+      "assignments": [
+        "条件误差"
+      ]
     }
   ]
 }

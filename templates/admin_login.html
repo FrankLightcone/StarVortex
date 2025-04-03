@@ -4,22 +4,10 @@
     <meta charset="UTF-8">
     <title>作业传输系统 - 管理员登录</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/static/css/toast.css" rel="stylesheet">
+    <link href="/static/css/forms.css" rel="stylesheet">
+    <link href="/static/css/admin_login.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        #toast {
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateX(-50%) translateY(-20px);
-        }
-        #toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-        .form-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-        }
-    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <!-- Toast Notification -->
@@ -119,21 +107,7 @@
         </div>
     </div>
 
-    <script>
-        // 检查是否有错误信息需要显示
-        const errorElement = document.querySelector('.bg-red-50');
-        
-        if (errorElement) {
-            // 如果有错误信息，显示 Toast
-            const toast = document.getElementById('toast');
-            toast.textContent = errorElement.querySelector('h3').textContent;
-            toast.classList.add('show');
-            
-            // 3秒后隐藏 Toast
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-    </script>
+    <script src="/static/js/toast.js"></script>
+    <script src="/static/js/admin_login.js"></script>
 </body>
 </html>
