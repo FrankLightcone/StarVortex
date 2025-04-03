@@ -461,6 +461,21 @@
         // 标签页切换
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
+                // 使用直接映射而不是字符串替换，以确保准确匹配
+                const tabMapping = {
+                    'tabAssignments': 'assignmentsTab',
+                    'tabSubmissions': 'submissionsTab'
+                };
+                
+                const tabContentId = tabMapping[button.id];
+                
+                // 安全检查
+                if (!tabContentId) {
+                    console.error(`找不到与按钮ID "${button.id}" 对应的标签页内容元素`);
+                    return;
+                }
+                
+                // 更新按钮样式
                 tabButtons.forEach(btn => {
                     btn.classList.remove('text-blue-600', 'border-blue-500');
                     btn.classList.add('text-gray-500', 'border-transparent');
@@ -469,13 +484,17 @@
                 button.classList.remove('text-gray-500', 'border-transparent');
                 button.classList.add('text-blue-600', 'border-blue-500');
                 
-                const tabId = button.id.replace('tab', '') + 'Tab';
-                
+                // 切换标签页内容
                 tabContents.forEach(content => {
                     content.classList.remove('active');
                 });
                 
-                document.getElementById(tabId).classList.add('active');
+                const targetTab = document.getElementById(tabContentId);
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                } else {
+                    console.error(`找不到ID为 "${tabContentId}" 的标签页内容元素`);
+                }
             });
         });
         
