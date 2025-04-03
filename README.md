@@ -1,108 +1,78 @@
-# 作业提交系统
+# 作业传输系统
 
-这是一个简单的作业提交系统，允许学生注册账号、登录并提交作业文件。
+一个基于Flask的学生作业提交和管理系统，支持学生注册、文件上传和管理员审核功能。
 
-## 系统特性
+## 功能特点
 
-- 用户注册与登录功能
-- 邮箱验证码注册
-- 按课程和作业分类上传文件
-- 文件队列管理
-- 上传进度实时显示
-- 文件自动压缩
-- 课程与作业配置管理
+- 学生账户注册与登录（邮箱验证）
+- 作业文件上传与管理
+- 管理员控制面板
+- 作业截止日期设置
+- 文件批量下载
+- 响应式界面设计
+
+## 项目结构
+
+```
+作业传输系统/
+├── main.py                   # 主应用程序入口
+├── README.md                 # 项目说明文档
+├── static/                   # 静态文件目录
+│   ├── img/                  # 图片资源
+│   └── upload/               # 上传文件存储目录
+├── templates/                # HTML模板目录
+│   ├── admin.html            # 管理员界面
+│   ├── admin_login.html      # 管理员登录页面
+│   ├── login.html            # 学生登录页面
+│   ├── register.html         # 学生注册页面
+│   └── upload.html           # 文件上传页面
+└── util/                     # 工具模块目录
+    ├── __init__.py           # 包初始化文件
+    ├── admin.py              # 管理员功能模块
+    ├── api.py                # API接口模块
+    ├── auth.py               # 认证功能模块
+    ├── config.py             # 配置参数模块
+    ├── email_config.py       # 邮件配置（需自行配置）
+    ├── models.py             # 数据模型模块
+    ├── student.py            # 学生功能模块
+    └── utils.py              # 通用工具函数
+```
 
 ## 安装与配置
 
-1. 克隆代码库:
-```bash
-git clone https://github.com/your-username/assignment-system.git
-cd assignment-system
-```
+1. 克隆或下载项目代码
+2. 安装依赖包：
+   ```
+   pip install flask flask-login werkzeug
+   ```
+3. 配置邮件服务：
+   - 编辑 `util/email_config.py` 文件，填入有效的SMTP服务器信息
 
-2. 安装依赖:
-```bash
-pip install -r requirements.txt
-```
+## 运行方法
 
-3. 配置系统:
-```bash
-# 复制配置模板
-cp util/config_template.py util/config.py
+1. 启动应用：
+   ```
+   python main.py
+   ```
+2. 访问以下链接：
+   - 学生界面：http://localhost:10099/
+   - 管理员界面：http://localhost:10099/admin
 
-# 编辑配置文件
-nano util/config.py  # 或使用任何文本编辑器
-```
+## 默认账户
 
-4. 配置课程和作业:
-```bash
-# 运行课程管理工具
-python manage_courses.py
-```
+- 管理员账户：
+  - 用户名：admin
+  - 密码：admin123（请在生产环境中修改）
 
-5. 启动应用:
-```bash
-python app.py
-```
+## 数据文件
 
-应用将在 http://localhost:10099 上运行。
-
-## 文件结构
-
-- `app.py`: 主应用程序
-- `manage_courses.py`: 课程管理工具
-- `course_config.json`: 课程与作业配置
-- `users.json`: 用户数据
-- `util/config.py`: 系统配置
-- `templates/`: HTML模板
-  - `login.html`: 登录页面
-  - `register.html`: 注册页面
-  - `upload.html`: 文件上传页面
-- `static/`: 静态资源
-  - `img/`: 图片资源
-  - `upload/`: 上传文件存储目录
-
-## 系统工作流程
-
-1. 学生通过邮箱验证注册账号
-2. 登录系统
-3. 选择课程和作业
-4. 选择要上传的文件（可以选择多个）
-5. 点击"开始上传"按钮提交文件
-6. 系统自动创建文件夹结构并保存文件
-7. 系统自动将学生提交的文件打包为ZIP文件
-
-## 文件存储结构
-
-```
-static/upload/
-├── 课程1/
-│   ├── 作业1/
-│   │   ├── 学号_姓名/
-│   │   │   ├── 文件1
-│   │   │   └── 文件2
-│   │   └── 学号_姓名.zip
-│   └── 作业2/
-└── 课程2/
-    └── ...
-```
-
-## 管理课程与作业
-
-使用课程管理工具可以:
-
-- 添加新课程
-- 修改课程名称
-- 删除课程
-- 为课程添加作业
-- 删除作业
-
-```bash
-python manage_courses.py
-```
+- `users.json`：用户数据
+- `course_config.json`：课程配置
+- `assignments.json`：作业信息
 
 ## 注意事项
 
-- 确保邮箱服务器配置正确，否则无法发送验证码
-- 请定期备份 `users.json` 和 `course_config.json` 文件
-- 在生产环境中部署时，建议修改 `SECRET_KEY` 为随机字符串，并关闭调试模式
+1. 首次运行时会自动创建默认配置文件
+2. 默认端口为10099，可在main.py中修改
+3. 生产环境部署时，请修改默认密钥和管理员密码
+4. 确保邮件配置正确，否则注册功能将无法使用
