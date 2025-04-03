@@ -14,6 +14,13 @@ from werkzeug.utils import secure_filename
 import threading
 import zipfile
 
+import datetime
+import shutil
+from functools import wraps
+
+# Add the following configuration constants
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD_HASH = generate_password_hash('admin123')  # Change this in production!
 
 # 配置日志
 logging.basicConfig(
@@ -107,9 +114,26 @@ def send_verify_code():
     else:
         return jsonify({'status': 'error', 'message': '验证码发送失败'})
 
+# Add this class to extend User with role support
 class User(UserMixin):
-    def __init__(self, username):
+    def __init__(self, username, is_admin=False):
         self.id = username
+        self.is_admin = is_admin
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
 
 def load_users():
     try:
@@ -133,9 +157,422 @@ def validate_user(username, password):
     users = load_users()
     return (username in users) and check_password_hash(users[username]['password'], password)
 
+# Update the load_user function
 @login_manager.user_loader
 def load_user(user_id):
-    return User(user_id) if user_id in load_users() else None
+    users = load_users()
+    if user_id in users:
+        return User(user_id, users[user_id].get('is_admin', False))
+    elif user_id == ADMIN_USERNAME:
+        return User(ADMIN_USERNAME, True)
+    return None
+
+# Load and save assignments functionality
+def load_assignments():
+    try:
+        with open('assignments.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+def save_assignments(assignments):
+    with open('assignments.json', 'w', encoding='utf-8') as f:
+        json.dump(assignments, f, ensure_ascii=False, indent=2)
+
+# Admin required decorator
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Admin login route
+@app.route('/admin', methods=['GET', 'POST'])
+def admin_login():
+    if current_user.is_authenticated and current_user.is_admin:
+        return redirect(url_for('admin_dashboard'))
+        
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
+            user = User(ADMIN_USERNAME, True)
+            login_user(user)
+            return redirect(url_for('admin_dashboard'))
+        
+        return render_template('admin_login.html', error='用户名或密码错误')
+    
+    return render_template('admin_login.html')
+
+# Admin dashboard route
+@app.route('/admin/dashboard')
+@admin_required
+def admin_dashboard():
+    # 获取课程配置
+    course_config = load_course_config()
+    courses = [course['name'] for course in course_config['courses']]
+    
+    return render_template('admin.html', 
+                          courses=courses, 
+                          course_config=course_config, 
+                          admin_name=ADMIN_USERNAME)
+
+
+# API routes for admin functionality
+
+# Get all assignments
+@app.route('/admin/assignments', methods=['GET'])
+@admin_required
+def get_assignments():
+    assignments = load_assignments()
+    
+    # Calculate submission count for each assignment
+    for assignment in assignments:
+        course = assignment['course']
+        assignment_name = assignment['name']
+        
+        # Create path to assignment directory
+        assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], course, assignment_name)
+        
+        # Count student folders if the directory exists
+        if os.path.exists(assignment_path):
+            student_folders = [f for f in os.listdir(assignment_path) 
+                              if os.path.isdir(os.path.join(assignment_path, f)) 
+                              and not f.endswith('.zip')]
+            assignment['submissionCount'] = len(student_folders)
+        else:
+            assignment['submissionCount'] = 0
+            
+        # Calculate status based on due date
+        due_date = datetime.datetime.fromisoformat(assignment['dueDate'])
+        assignment['status'] = 'expired' if due_date < datetime.datetime.now() else 'active'
+    
+    return jsonify({'assignments': assignments})
+
+# Create new assignment
+@app.route('/admin/assignments', methods=['POST'])
+@admin_required
+def create_assignment():
+    data = request.json
+    assignments = load_assignments()
+    
+    # Generate new ID
+    new_id = str(max([int(a['id']) for a in assignments], default=0) + 1)
+    
+    # Create new assignment object
+    new_assignment = {
+        'id': new_id,
+        'course': data['course'],
+        'name': data['name'],
+        'dueDate': data['dueDate'],
+        'description': data.get('description', ''),
+        'createdAt': datetime.datetime.now().isoformat()
+    }
+    
+    # Add to assignments and save
+    assignments.append(new_assignment)
+    save_assignments(assignments)
+    
+    # Update course config if this is a new assignment for a course
+    course_config = load_course_config()
+    for course in course_config['courses']:
+        if course['name'] == data['course'] and data['name'] not in course['assignments']:
+            course['assignments'].append(data['name'])
+    
+    # Save updated course config
+    with open('course_config.json', 'w', encoding='utf-8') as f:
+        json.dump(course_config, f, ensure_ascii=False, indent=2)
+    
+    return jsonify({'status': 'success', 'assignment': new_assignment})
+
+# Update existing assignment
+@app.route('/admin/assignments/<assignment_id>', methods=['PUT'])
+@admin_required
+def update_assignment(assignment_id):
+    data = request.json
+    assignments = load_assignments()
+    
+    # Find assignment by ID
+    for i, assignment in enumerate(assignments):
+        if assignment['id'] == assignment_id:
+            # Update assignment
+            assignments[i]['course'] = data['course']
+            assignments[i]['name'] = data['name']
+            assignments[i]['dueDate'] = data['dueDate']
+            assignments[i]['description'] = data.get('description', '')
+            assignments[i]['updatedAt'] = datetime.datetime.now().isoformat()
+            
+            # Save changes
+            save_assignments(assignments)
+            return jsonify({'status': 'success', 'assignment': assignments[i]})
+    
+    return jsonify({'status': 'error', 'message': '作业不存在'}), 404
+
+# Delete assignment
+@app.route('/admin/assignments/<assignment_id>', methods=['DELETE'])
+@admin_required
+def delete_assignment(assignment_id):
+    assignments = load_assignments()
+    
+    # Find assignment by ID
+    for i, assignment in enumerate(assignments):
+        if assignment['id'] == assignment_id:
+            course = assignment['course']
+            name = assignment['name']
+            
+            # Remove assignment from list
+            deleted = assignments.pop(i)
+            save_assignments(assignments)
+            
+            # Update course config
+            course_config = load_course_config()
+            for course_item in course_config['courses']:
+                if course_item['name'] == course and name in course_item['assignments']:
+                    course_item['assignments'].remove(name)
+            
+            with open('course_config.json', 'w', encoding='utf-8') as f:
+                json.dump(course_config, f, ensure_ascii=False, indent=2)
+            
+            # Optionally: Delete assignment directory
+            assignment_dir = os.path.join(app.config['UPLOAD_FOLDER'], course, name)
+            if os.path.exists(assignment_dir):
+                shutil.rmtree(assignment_dir)
+            
+            return jsonify({'status': 'success'})
+    
+    return jsonify({'status': 'error', 'message': '作业不存在'}), 404
+
+@app.route('/admin/submissions', methods=['GET'])
+@admin_required
+def get_submissions():
+    course = request.args.get('course')
+    assignment = request.args.get('assignment')
+    
+    if not course or not assignment:
+        return jsonify({'submissions': [], 'stats': None})
+    
+    # Get assignment details
+    assignments = load_assignments()
+    assignment_obj = next((a for a in assignments if a['course'] == course and a['name'] == assignment), None)
+    
+    # If assignment doesn't exist in assignments.json but does exist in course_config, create a default assignment object
+    if not assignment_obj:
+        course_config = load_course_config()
+        for course_item in course_config['courses']:
+            if course_item['name'] == course and assignment in course_item['assignments']:
+                # Create a default assignment object
+                assignment_obj = {
+                    'id': f"{course}_{assignment}",
+                    'course': course,
+                    'name': assignment,
+                    'dueDate': (datetime.datetime.now() + datetime.timedelta(days=7)).isoformat(),
+                    'description': '',
+                    'createdAt': datetime.datetime.now().isoformat()
+                }
+                break
+        
+        if not assignment_obj:
+            return jsonify({'status': 'error', 'message': '作业不存在'}), 404
+    
+    # Format due date for display
+    due_date = datetime.datetime.fromisoformat(assignment_obj['dueDate'])
+    due_date_str = due_date.strftime('%Y-%m-%d %H:%M')
+    
+    # Create path to assignment directory
+    assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], course, assignment)
+    
+    # Get all users for student count
+    users = load_users()
+    student_count = sum(1 for user in users.values() if not user.get('is_admin', False))
+    
+    submissions = []
+    
+    # Check if the assignment directory exists
+    if os.path.exists(assignment_path):
+        # Get student folders
+        student_folders = [f for f in os.listdir(assignment_path) 
+                          if os.path.isdir(os.path.join(assignment_path, f)) 
+                          and not f.endswith('.zip')]
+        
+        for folder in student_folders:
+            # Folder name format: student_id_name
+            parts = folder.split('_', 1)
+            if len(parts) < 2:
+                continue
+                
+            student_id = parts[0]
+            student_name = parts[1]
+            folder_path = os.path.join(assignment_path, folder)
+            
+            # Get files in the folder
+            files = []
+            latest_time = None
+            
+            for file in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, file)
+                if os.path.isfile(file_path):
+                    file_size = os.path.getsize(file_path)
+                    file_time = os.path.getmtime(file_path)
+                    file_datetime = datetime.datetime.fromtimestamp(file_time)
+                    
+                    if latest_time is None or file_time > latest_time:
+                        latest_time = file_time
+                    
+                    files.append({
+                        'name': file,
+                        'size': format_file_size(file_size),
+                        'uploadTime': file_datetime.isoformat(),
+                        'path': f"/admin/file/{course}/{assignment}/{folder}/{file}"
+                    })
+            
+            submission_time = datetime.datetime.fromtimestamp(latest_time) if latest_time else datetime.datetime.now()
+            
+            # Sort files by upload time, newest first
+            files.sort(key=lambda x: x['uploadTime'], reverse=True)
+            
+            submissions.append({
+                'studentId': student_id,
+                'studentName': student_name,
+                'submissionTime': submission_time.isoformat(),
+                'fileCount': len(files),
+                'files': files
+            })
+        
+        # Sort submissions by submission time, newest first
+        submissions.sort(key=lambda x: x['submissionTime'], reverse=True)
+    
+    # Calculate statistics
+    submission_count = len(submissions)
+    submission_rate = f"{(submission_count / student_count * 100):.1f}%" if student_count > 0 else "0%"
+    
+    stats = {
+        'totalStudents': student_count,
+        'submittedCount': submission_count,
+        'submissionRate': submission_rate,
+        'dueDateStr': due_date_str
+    }
+    
+    return jsonify({'submissions': submissions, 'stats': stats})
+
+# Helper function to format file size
+def format_file_size(size_bytes):
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    elif size_bytes < 1024 * 1024:
+        return f"{size_bytes / 1024:.1f} KB"
+    elif size_bytes < 1024 * 1024 * 1024:
+        return f"{size_bytes / (1024 * 1024):.1f} MB"
+    else:
+        return f"{size_bytes / (1024 * 1024 * 1024):.1f} GB"
+
+# Serve individual file
+@app.route('/admin/file/<course>/<assignment>/<folder>/<filename>')
+@admin_required
+def serve_file(course, assignment, folder, filename):
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], course, assignment, folder, filename)
+    directory = os.path.join(app.config['UPLOAD_FOLDER'], course, assignment, folder)
+    
+    if not os.path.exists(file_path):
+        return "文件不存在", 404
+    
+    return send_from_directory(directory, filename)
+
+# Download single student submission or all submissions for an assignment
+@app.route('/admin/download')
+@admin_required
+def download_submissions():
+    course = request.args.get('course')
+    assignment = request.args.get('assignment')
+    student = request.args.get('student')
+    
+    if not course or not assignment:
+        return "Missing parameters", 400
+    
+    assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], course, assignment)
+    
+    if not os.path.exists(assignment_path):
+        return "Assignment not found", 404
+    
+    # Temporary directory for preparing the download
+    temp_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'temp')
+    os.makedirs(temp_dir, exist_ok=True)
+    
+    timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    
+    if student:
+        # Download single student submission
+        student_folders = [f for f in os.listdir(assignment_path) 
+                          if os.path.isdir(os.path.join(assignment_path, f)) 
+                          and f.startswith(student)]
+        
+        if not student_folders:
+            return "Student submission not found", 404
+        
+        student_folder = student_folders[0]
+        student_path = os.path.join(assignment_path, student_folder)
+        
+        # Create zip file
+        zip_filename = f"{course}_{assignment}_{student_folder}_{timestamp}.zip"
+        zip_path = os.path.join(temp_dir, zip_filename)
+        
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, _, files in os.walk(student_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, student_path)
+                    zipf.write(file_path, arcname=arcname)
+        
+        # Serve the zip file
+        return send_from_directory(temp_dir, zip_filename, as_attachment=True, 
+                                  attachment_filename=zip_filename)
+    else:
+        # Download all submissions
+        # Check if a combined zip already exists and is recent (less than 1 hour old)
+        existing_zips = [f for f in os.listdir(assignment_path) 
+                         if f.endswith('.zip') and f.startswith(f"{course}_{assignment}_all_")]
+        
+        if existing_zips:
+            # Get the most recent zip
+            most_recent = max(existing_zips, key=lambda f: os.path.getmtime(os.path.join(assignment_path, f)))
+            most_recent_path = os.path.join(assignment_path, most_recent)
+            
+            # Check if it's less than 1 hour old
+            mtime = os.path.getmtime(most_recent_path)
+            if (datetime.datetime.now() - datetime.datetime.fromtimestamp(mtime)).total_seconds() < 3600:
+                # Serve the existing zip
+                return send_from_directory(assignment_path, most_recent, as_attachment=True)
+        
+        # Create a new zip file with all submissions
+        zip_filename = f"{course}_{assignment}_all_{timestamp}.zip"
+        zip_path = os.path.join(assignment_path, zip_filename)
+        
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # Get all student folders
+            student_folders = [f for f in os.listdir(assignment_path) 
+                              if os.path.isdir(os.path.join(assignment_path, f)) 
+                              and not f.endswith('.zip')]
+            
+            for folder in student_folders:
+                folder_path = os.path.join(assignment_path, folder)
+                
+                for root, _, files in os.walk(folder_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        # Use student folder as the top-level directory in the zip
+                        arcname = os.path.join(folder, os.path.relpath(file_path, folder_path))
+                        zipf.write(file_path, arcname=arcname)
+        
+        # Serve the zip file
+        return send_from_directory(assignment_path, zip_filename, as_attachment=True)
+
+# Create a simple admin login template
+@app.route('/admin_login_template')
+def admin_login_template():
+    return render_template('admin_login.html')
+
 
 def allowed_file(filename):
     return '.' in filename and \

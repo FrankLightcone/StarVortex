@@ -781,3 +781,5 @@
 2025-03-30 19:28:28,334 - INFO:  * Detected change in 'E:\\Code\\Temp\\file_transfer_app\\static\\upload\\范睿捷_DIP_实验2.zip', reloading
 2025-03-30 19:28:28,405 - INFO:  * Detected change in 'E:\\Code\\Temp\\file_transfer_app\\static\\upload\\范睿捷_GNSS_实验1.zip', reloading
 2025-03-30 19:28:29,228 - INFO:  * Restarting with watchdog (windowsapi)
+2025-03-30 19:28:31,335 - WARNING:  * Debugger is active!
+2025-03-30 19:28:31,354 - INFO:  * Debugger PIN: 110-753-226
