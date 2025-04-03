@@ -1,7 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 获取DOM元素
+    // ===== DOM 元素 =====
+    // 标签页
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    // 上传表单元素
     const courseSelect = document.getElementById('course');
     const assignmentSelect = document.getElementById('assignment_name');
+    const assignmentInfo = document.getElementById('assignmentInfo');
+    const assignmentDueDate = document.getElementById('assignmentDueDate');
+    const assignmentSubmissionCount = document.getElementById('assignmentSubmissionCount');
+    const assignmentStatus = document.getElementById('assignmentStatus');
+    const mySubmissionStatus = document.getElementById('mySubmissionStatus');
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const dropText = document.getElementById('dropText');
@@ -13,9 +23,83 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
     
+    // 我的提交标签页元素
+    const mySubmissionCourseFilter = document.getElementById('mySubmissionCourseFilter');
+    const mySubmissionsList = document.getElementById('mySubmissionsList');
+    
+    // 提交详情弹窗
+    const mySubmissionDetailModal = document.getElementById('mySubmissionDetailModal');
+    const mySubmissionDetailTitle = document.getElementById('mySubmissionDetailTitle');
+    const detailCourse = document.getElementById('detailCourse');
+    const detailAssignmentName = document.getElementById('detailAssignmentName');
+    const detailSubmissionTime = document.getElementById('detailSubmissionTime');
+    const detailAssignmentDueDate = document.getElementById('detailAssignmentDueDate');
+    const myFilesList = document.getElementById('myFilesList');
+    const closeMySubmissionDetailBtn = document.getElementById('closeMySubmissionDetailBtn');
+    const downloadSubmissionBtn = document.getElementById('downloadSubmissionBtn');
+    const replaceSubmissionBtn = document.getElementById('replaceSubmissionBtn');
+    
+    // 个人设置表单
+    const profileForm = document.getElementById('profileForm');
+    const profileName = document.getElementById('profile_name');
+    const profileCurrentPassword = document.getElementById('profile_current_password');
+    const profileNewPassword = document.getElementById('profile_new_password');
+    const profileConfirmPassword = document.getElementById('profile_confirm_password');
+    
     // 文件列表数组
     let selectedFiles = [];
-
+    
+    // 当前查看的提交详情
+    let currentSubmissionDetail = null;
+    
+    // ===== 标签页切换逻辑 =====
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // 使用直接映射而不是字符串替换，以确保准确匹配
+            const tabMapping = {
+                'tabUpload': 'uploadTab',
+                'tabSubmissions': 'submissionsTab',
+                'tabProfile': 'profileTab'
+            };
+            
+            const tabContentId = tabMapping[button.id];
+            
+            // 安全检查
+            if (!tabContentId) {
+                console.error(`找不到与按钮ID "${button.id}" 对应的标签页内容元素`);
+                return;
+            }
+            
+            // 更新按钮样式
+            tabButtons.forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-blue-500');
+                btn.classList.add('text-gray-500', 'border-transparent');
+            });
+            
+            button.classList.remove('text-gray-500', 'border-transparent');
+            button.classList.add('text-blue-600', 'border-blue-500');
+            
+            // 切换标签页内容
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const targetTab = document.getElementById(tabContentId);
+            if (targetTab) {
+                targetTab.classList.add('active');
+                
+                // 如果切换到"我的提交"标签页，加载提交记录
+                if (tabContentId === 'submissionsTab') {
+                    loadMySubmissions();
+                }
+            } else {
+                console.error(`找不到ID为 "${tabContentId}" 的标签页内容元素`);
+            }
+        });
+    });
+    
+    // ===== 作业上传相关逻辑 =====
+    
     // 课程选择事件
     if (courseSelect) {
         courseSelect.addEventListener('change', function() {
@@ -23,6 +107,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 清空作业名称下拉框
             assignmentSelect.innerHTML = '';
+            
+            // 隐藏作业信息
+            assignmentInfo.classList.add('hidden');
             
             if (selectedCourse) {
                 // 启用作业名称下拉框
@@ -73,6 +160,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 option.value = '';
                 option.textContent = '请先选择课程';
                 assignmentSelect.appendChild(option);
+            }
+            
+            // 更新上传按钮状态
+            updateUploadButtonState();
+        });
+    }
+    
+    // 作业选择事件 - 加载作业统计信息
+    if (assignmentSelect) {
+        assignmentSelect.addEventListener('change', function() {
+            const selectedCourse = courseSelect.value;
+            const selectedAssignment = this.value;
+            
+            // 隐藏作业信息
+            assignmentInfo.classList.add('hidden');
+            
+            if (selectedCourse && selectedAssignment) {
+                // 获取作业统计信息
+                fetch(`/get_assignment_stats?course=${encodeURIComponent(selectedCourse)}&assignment=${encodeURIComponent(selectedAssignment)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.stats) {
+                            // 更新统计信息
+                            assignmentDueDate.textContent = data.stats.dueDate;
+                            assignmentSubmissionCount.textContent = data.stats.submissionCount;
+                            assignmentStatus.textContent = data.stats.status;
+                            mySubmissionStatus.textContent = data.stats.mySubmission;
+                            
+                            // 根据状态修改颜色
+                            if (data.stats.status === "已截止") {
+                                assignmentStatus.classList.add('text-red-600');
+                                assignmentStatus.classList.remove('text-green-600');
+                            } else {
+                                assignmentStatus.classList.add('text-green-600');
+                                assignmentStatus.classList.remove('text-red-600');
+                            }
+                            
+                            // 根据提交状态修改颜色
+                            if (data.stats.hasSubmitted) {
+                                mySubmissionStatus.classList.add('text-green-600');
+                                mySubmissionStatus.classList.remove('text-red-600');
+                            } else {
+                                mySubmissionStatus.classList.add('text-red-600');
+                                mySubmissionStatus.classList.remove('text-green-600');
+                            }
+                            
+                            // 显示作业信息
+                            assignmentInfo.classList.remove('hidden');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('获取作业统计信息失败:', error);
+                        showToast('获取作业统计信息失败', 'error');
+                    });
             }
             
             // 更新上传按钮状态
@@ -239,11 +380,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 监听作业名称变化
-    if (assignmentSelect) {
-        assignmentSelect.addEventListener('change', updateUploadButtonState);
-    }
-
     // 上传按钮点击事件
     if (uploadBtn) {
         uploadBtn.addEventListener('click', uploadFiles);
@@ -283,6 +419,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 fileList.innerHTML = '';
                 updateFileListView();
                 progressContainer.style.display = 'none';
+                
+                // 刷新作业统计信息
+                refreshAssignmentStats();
             }, 2000);
             return;
         }
@@ -383,16 +522,321 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadBtn.textContent = '重试上传';
     }
     
-    // 格式化文件大小
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
+    // 刷新作业统计信息
+    function refreshAssignmentStats() {
+        const course = courseSelect.value;
+        const assignment = assignmentSelect.value;
         
-        const units = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        
-        return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + units[i];
+        if (course && assignment) {
+            fetch(`/get_assignment_stats?course=${encodeURIComponent(course)}&assignment=${encodeURIComponent(assignment)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.stats) {
+                        // 更新统计信息
+                        assignmentDueDate.textContent = data.stats.dueDate;
+                        assignmentSubmissionCount.textContent = data.stats.submissionCount;
+                        assignmentStatus.textContent = data.stats.status;
+                        mySubmissionStatus.textContent = data.stats.mySubmission;
+                        
+                        // 根据提交状态修改颜色
+                        if (data.stats.hasSubmitted) {
+                            mySubmissionStatus.classList.add('text-green-600');
+                            mySubmissionStatus.classList.remove('text-red-600');
+                        } else {
+                            mySubmissionStatus.classList.add('text-red-600');
+                            mySubmissionStatus.classList.remove('text-green-600');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('刷新作业统计信息失败:', error);
+                });
+        }
     }
-
-    // 初始化
-    updateFileListView();
+    
+    // ===== 我的提交相关逻辑 =====
+    
+    // 加载我的提交记录
+    function loadMySubmissions() {
+        const courseFilter = mySubmissionCourseFilter.value;
+        let url = '/get_my_submissions';
+        
+        if (courseFilter) {
+            url += `?course=${encodeURIComponent(courseFilter)}`;
+        }
+        
+        // 显示加载中
+        mySubmissionsList.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <svg class="animate-spin h-5 w-5 mx-auto text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="mt-2 block">加载中...</span>
+                </td>
+            </tr>
+        `;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                // 处理数据
+                renderMySubmissions(data.submissions || []);
+            })
+            .catch(error => {
+                console.error('获取提交记录失败:', error);
+                mySubmissionsList.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-sm text-red-500">
+                            获取提交记录失败
+                        </td>
+                    </tr>
+                `;
+            });
+    }
+    
+    // 渲染我的提交记录
+    function renderMySubmissions(submissions) {
+        // 清空列表
+        mySubmissionsList.innerHTML = '';
+        
+        // 检查是否有提交
+        if (submissions.length === 0) {
+            mySubmissionsList.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                        暂无提交记录
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // 添加提交到列表
+        submissions.forEach(submission => {
+            const row = document.createElement('tr');
+            row.className = 'my-submission-item';
+            
+            // 格式化提交时间
+            const submissionTime = new Date(submission.submissionTime);
+            const formattedSubmissionTime = submissionTime.toLocaleString('zh-CN');
+            
+            // 状态样式
+            let statusClass = 'bg-green-100 text-green-800';
+            if (submission.status === '逾期提交') {
+                statusClass = 'bg-orange-100 text-orange-800';
+            }
+            
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    ${submission.course}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${submission.assignmentName}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${formattedSubmissionTime}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                        ${submission.status}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${submission.fileCount}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button 
+                        class="text-blue-600 hover:text-blue-900 mr-3 view-submission"
+                        data-course="${submission.course}"
+                        data-assignment="${submission.assignmentName}"
+                    >
+                        查看详情
+                    </button>
+                    <button 
+                        class="text-red-600 hover:text-red-900 delete-submission"
+                        data-course="${submission.course}"
+                        data-assignment="${submission.assignmentName}"
+                    >
+                        删除
+                    </button>
+                </td>
+            `;
+            
+            mySubmissionsList.appendChild(row);
+            
+            // 添加事件监听器
+            const viewBtn = row.querySelector('.view-submission');
+            viewBtn.addEventListener('click', () => {
+                viewSubmissionDetail(submission);
+            });
+            
+            const deleteBtn = row.querySelector('.delete-submission');
+            deleteBtn.addEventListener('click', () => {
+                deleteSubmission(submission.course, submission.assignmentName);
+            });
+        });
+    }
+    
+    // 查看提交详情
+    function viewSubmissionDetail(submission) {
+        // 保存当前查看的提交信息
+        currentSubmissionDetail = submission;
+        
+        // 更新详情弹窗内容
+        mySubmissionDetailTitle.textContent = `${submission.course} - ${submission.assignmentName} 提交详情`;
+        detailCourse.textContent = submission.course;
+        detailAssignmentName.textContent = submission.assignmentName;
+        
+        // 格式化并显示提交时间
+        const submissionTime = new Date(submission.submissionTime);
+        detailSubmissionTime.textContent = submissionTime.toLocaleString('zh-CN');
+        
+        // 显示截止日期
+        if (submission.dueDate) {
+            const dueDate = new Date(submission.dueDate);
+            detailAssignmentDueDate.textContent = dueDate.toLocaleString('zh-CN');
+            // 如果提交时间晚于截止日期，则标记为逾期提交
+            if (submissionTime > dueDate) {
+                detailSubmissionTime.innerHTML += ' <span class="text-orange-600 text-xs">(逾期提交)</span>';
+            }
+        } else {
+            detailAssignmentDueDate.textContent = '未知';
+        }
+        
+        // 渲染文件列表
+        myFilesList.innerHTML = '';
+        if (submission.files && submission.files.length > 0) {
+            submission.files.forEach(file => {
+                const row = document.createElement('tr');
+                const uploadTime = new Date(file.uploadTime);
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        ${file.name}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${file.size}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${uploadTime.toLocaleString('zh-CN')}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <a 
+                            href="${file.path}" 
+                            class="text-blue-600 hover:text-blue-900 download-file" 
+                            download
+                        >
+                            下载
+                        </a>
+                    </td>
+                `;
+                myFilesList.appendChild(row);
+            });
+        } else {
+            myFilesList.innerHTML = `
+                <tr>
+                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                        无文件记录
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // 显示提交详情弹窗
+        mySubmissionDetailModal.classList.remove('hidden');
+    }
+    
+    // 关闭提交详情弹窗
+    if (closeMySubmissionDetailBtn) {
+        closeMySubmissionDetailBtn.addEventListener('click', () => {
+            mySubmissionDetailModal.classList.add('hidden');
+        });
+    }
+    
+    // 下载提交记录事件
+    if (downloadSubmissionBtn) {
+        downloadSubmissionBtn.addEventListener('click', () => {
+            if (currentSubmissionDetail) {
+                window.location.href = `/download_submission?course=${encodeURIComponent(currentSubmissionDetail.course)}&assignment=${encodeURIComponent(currentSubmissionDetail.assignmentName)}`;
+            }
+        });
+    }
+    
+    // 替换提交记录事件（此处仅做提示，替换逻辑可根据需要扩展）
+    if (replaceSubmissionBtn) {
+        replaceSubmissionBtn.addEventListener('click', () => {
+            showToast('暂未实现替换提交功能', 'error');
+        });
+    }
+    
+    // 删除提交记录函数
+    function deleteSubmission(course, assignment) {
+        if (!confirm(`确定要删除 ${course} - ${assignment} 的提交记录吗？`)) {
+            return;
+        }
+        fetch(`/delete_submission?course=${encodeURIComponent(course)}&assignment=${encodeURIComponent(assignment)}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast('提交记录删除成功', 'success');
+                loadMySubmissions();
+            } else {
+                showToast(data.message || '删除失败', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('删除提交记录失败:', error);
+            showToast('删除提交记录失败', 'error');
+        });
+    }
+    
+    // 监听“我的提交”课程筛选器变化，刷新提交列表
+    if (mySubmissionCourseFilter) {
+        mySubmissionCourseFilter.addEventListener('change', loadMySubmissions);
+    }
+    
+    // 个人设置表单提交事件
+    if (profileForm) {
+        profileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = profileName.value;
+            const currentPassword = profileCurrentPassword.value;
+            const newPassword = profileNewPassword.value;
+            const confirmPassword = profileConfirmPassword.value;
+            
+            if (newPassword !== confirmPassword) {
+                showToast('新密码与确认密码不一致', 'error');
+                return;
+            }
+            
+            fetch('/update_profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    currentPassword: currentPassword,
+                    newPassword: newPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast('个人设置更新成功', 'success');
+                } else {
+                    showToast(data.message || '更新失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('更新个人设置失败:', error);
+                showToast('更新个人设置失败', 'error');
+            });
+        });
+    }
+    
 });

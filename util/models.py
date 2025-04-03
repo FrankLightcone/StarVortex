@@ -96,3 +96,26 @@ def validate_user(username, password):
         return check_password_hash(users[username]['password'], password)
     
     return False
+
+# 在User类中添加一个方法
+def update_profile(self, new_username=None, new_password=None):
+    """更新用户资料"""
+    users = load_users()
+    if new_username and new_username != self.id:
+        # 检查用户名是否已存在
+        if new_username in users:
+            return False, "用户名已存在"
+            
+        # 复制用户数据到新用户名
+        users[new_username] = users[self.id].copy()
+        # 删除旧用户数据
+        del users[self.id]
+        # 更新当前对象的ID
+        self.id = new_username
+    
+    if new_password:
+        # 更新密码
+        users[self.id]['password'] = generate_password_hash(new_password)
+    
+    save_users(users)
+    return True, "更新成功"
