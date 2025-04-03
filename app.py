@@ -279,7 +279,7 @@ def admin_dashboard():
 # Get all assignments
 @app.route('/admin/assignments', methods=['GET'])
 @admin_required
-def get_assignments():
+def get_assignments_admin():
     assignments = load_assignments()
     
     # Calculate submission count for each assignment
