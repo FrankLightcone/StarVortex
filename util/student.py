@@ -25,6 +25,7 @@
 import os
 import logging
 import threading
+import zipfile
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -442,3 +443,50 @@ def download_file(course, assignment, filename):
     
     # 提供文件下载
     return send_from_directory(os.path.join(assignment_path, student_folder), filename, as_attachment=True)
+
+@student_bp.route('/download_all/<course>/<assignment>')
+@login_required
+def download_all_files(course, assignment):
+    """下载该学生提交的所有文件"""
+    # 获取用户信息
+    users = load_users()
+    student_id = users[current_user.id]['student_id']
+    
+    # 构建作业文件夹路径
+    student_folder_pattern = f"{student_id}_{current_user.id}"
+    assignment_path = os.path.join(UPLOAD_FOLDER, course, assignment)
+    
+    # 查找该用户的文件夹
+    student_folders = [f for f in os.listdir(assignment_path) 
+                     if os.path.isdir(os.path.join(assignment_path, f)) 
+                     and f.startswith(student_folder_pattern)]
+    
+    if not student_folders:
+        return "提交记录不存在", 404
+    
+    student_folder = student_folders[0]
+    student_folder_path = os.path.join(assignment_path, student_folder)
+    
+    # 创建临时目录用于准备下载
+    temp_dir = os.path.join(UPLOAD_FOLDER, 'temp')
+    os.makedirs(temp_dir, exist_ok=True)
+    
+    # 创建zip文件名
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    zip_filename = f"{course}_{assignment}_{student_id}_{timestamp}.zip"
+    zip_path = os.path.join(temp_dir, zip_filename)
+    
+    # 创建zip文件
+    try:
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, _, files in os.walk(student_folder_path):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, student_folder_path)
+                    zipf.write(file_path, arcname=arcname)
+        
+        # 提供zip文件下载
+        return send_from_directory(temp_dir, zip_filename, as_attachment=True)
+    except Exception as e:
+        logging.error(f'Error creating zip file: {str(e)}')
+        return f"创建压缩文件失败: {str(e)}", 500

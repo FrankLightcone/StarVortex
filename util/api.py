@@ -78,12 +78,19 @@ def delete_submission(course, assignment):
     from util.student import delete_submission
     return delete_submission(course, assignment)
 
-@api_bp.route('/download_my_file/<course>/<assignment>/<filename>', methods=['GET'])
+@api_bp.route('/download/<course>/<assignment>/<filename>', methods=['GET'])
 @login_required
 def download_my_file(course, assignment, filename):
     """下载自己提交的文件"""
     from util.student import download_file
     return download_file(course, assignment, filename)
+
+@api_bp.route('/download_all/<course>/<assignment>', methods=['GET'])
+@login_required
+def download_all_files(course, assignment):
+    """下载所有提交文件"""
+    from util.student import download_all_files
+    return download_all_files(course, assignment)
 
 # 在util/api.py文件中添加此API端点
 @api_bp.route('/get_all_assignments', methods=['GET'])

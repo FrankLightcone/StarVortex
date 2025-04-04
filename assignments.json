@@ -46,5 +46,13 @@
     "dueDate": "2025-04-17T11:50",
     "description": "提交pdf",
     "createdAt": "2025-04-04T11:50:42.688749"
+  },
+  {
+    "id": "7",
+    "course": "GNSS",
+    "name": "已过期的作业",
+    "dueDate": "2025-04-01T00:05",
+    "description": "已过期了",
+    "createdAt": "2025-04-05T00:05:47.034747"
   }
 ]

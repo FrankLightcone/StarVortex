@@ -1042,6 +1042,8 @@ document.addEventListener('DOMContentLoaded', function() {
             submission.files.forEach(file => {
                 const row = document.createElement('tr');
                 const uploadTime = new Date(file.uploadTime);
+                
+                // 修复下载路径 - 使用正确的API路由
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         ${file.name}
@@ -1054,7 +1056,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <a 
-                            href="${file.path}" 
+                            href="/download/${encodeURIComponent(submission.course)}/${encodeURIComponent(submission.assignmentName)}/${encodeURIComponent(file.name)}" 
                             class="text-blue-600 hover:text-blue-900 download-file" 
                             download
                         >
@@ -1080,16 +1082,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 关闭提交详情弹窗
     if (closeMySubmissionDetailBtn) {
-        closeMySubmissionDetailBtn.addEventListener('click', () => {
-            mySubmissionDetailModal.classList.add('hidden');
-        });
+        closeMySubmissionDetailBtn.addEventListener('click', closeSubmissionDetailModal);
     }
     
     // 下载提交记录事件
     if (downloadSubmissionBtn) {
         downloadSubmissionBtn.addEventListener('click', () => {
             if (currentSubmissionDetail) {
-                window.location.href = `/download_submission?course=${encodeURIComponent(currentSubmissionDetail.course)}&assignment=${encodeURIComponent(currentSubmissionDetail.assignmentName)}`;
+                // 修复下载所有文件的URL路径
+                window.location.href = `/download_all/${encodeURIComponent(currentSubmissionDetail.course)}/${encodeURIComponent(currentSubmissionDetail.assignmentName)}`;
             }
         });
     }
@@ -1097,31 +1098,165 @@ document.addEventListener('DOMContentLoaded', function() {
     // 替换提交记录事件（此处仅做提示，替换逻辑可根据需要扩展）
     if (replaceSubmissionBtn) {
         replaceSubmissionBtn.addEventListener('click', () => {
-            showToast('暂未实现替换提交功能', 'error');
+            if (currentSubmissionDetail) {
+                // 设置上传表单的课程和作业
+                if (courseSelect && assignmentSelect) {
+                    // 切换到上传标签页
+                    document.getElementById('tabUpload').click();
+                    
+                    // 设置课程选择
+                    courseSelect.value = currentSubmissionDetail.course;
+                    // 触发change事件来加载作业
+                    const event = new Event('change');
+                    courseSelect.dispatchEvent(event);
+                    
+                    // 需要等待作业列表加载完成后再选择
+                    setTimeout(() => {
+                        assignmentSelect.value = currentSubmissionDetail.assignmentName;
+                        // 触发change事件来加载作业信息
+                        assignmentSelect.dispatchEvent(event);
+                        
+                        // 滚动到顶部
+                        window.scrollTo(0, 0);
+                        
+                        // 提示用户
+                        showToast('请选择文件重新上传以替换提交', 'success');
+                    }, 500);
+                } else {
+                    showToast('无法替换提交，请手动选择课程和作业', 'error');
+                }
+            }
         });
+    }
+    function showConfirmDialog(title, message, confirmCallback) {
+        // 检查是否已存在确认框，如果存在则先移除
+        let existingDialog = document.getElementById('confirmDialog');
+        if (existingDialog) {
+            document.body.removeChild(existingDialog);
+        }
+        
+        // 创建确认对话框元素
+        const dialog = document.createElement('div');
+        dialog.id = 'confirmDialog';
+        dialog.className = 'fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50';
+        dialog.innerHTML = `
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 transform transition-all duration-300 ease-in-out" 
+                 style="animation: dialogFadeIn 0.3s;">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                        <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">${title}</h3>
+                    <p class="text-sm text-gray-500 mb-6">${message}</p>
+                    <div class="flex justify-center space-x-4">
+                        <button id="cancelBtn" class="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            取消
+                        </button>
+                        <button id="confirmBtn" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            确认删除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes dialogFadeIn {
+                from { opacity: 0; transform: translateY(-20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 添加到页面
+        document.body.appendChild(dialog);
+        
+        // 添加事件监听
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            closeConfirmDialog();
+        });
+        
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            closeConfirmDialog();
+            if (confirmCallback) confirmCallback();
+        });
+        
+        // 点击背景关闭
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                closeConfirmDialog();
+            }
+        });
+        
+        // 添加ESC键关闭
+        document.addEventListener('keydown', handleEscKey);
+        
+        function handleEscKey(e) {
+            if (e.key === 'Escape') {
+                closeConfirmDialog();
+                document.removeEventListener('keydown', handleEscKey);
+            }
+        }
+        
+        // 关闭对话框函数
+        function closeConfirmDialog() {
+            dialog.style.opacity = '0';
+            dialog.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                if (dialog.parentNode) {
+                    document.body.removeChild(dialog);
+                }
+                document.removeEventListener('keydown', handleEscKey);
+            }, 300);
+        }
+    }
+    
+    // 关闭提交详情弹窗
+    function closeSubmissionDetailModal() {
+        mySubmissionDetailModal.classList.add('hidden');
+        currentSubmissionDetail = null;
     }
     
     // 删除提交记录函数
     function deleteSubmission(course, assignment) {
-        if (!confirm(`确定要删除 ${course} - ${assignment} 的提交记录吗？`)) {
-            return;
-        }
-        fetch(`/delete_submission?course=${encodeURIComponent(course)}&assignment=${encodeURIComponent(assignment)}`, {
-            method: 'DELETE'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                showToast('提交记录删除成功', 'success');
-                loadMySubmissions();
-            } else {
-                showToast(data.message || '删除失败', 'error');
+        // 创建并显示自定义确认对话框
+        showConfirmDialog(
+            `确定要删除 ${course} - ${assignment} 的提交记录吗？`, 
+            "此操作不可恢复",
+            () => {
+                // 用户确认后执行删除
+                fetch(`/delete_submission/${encodeURIComponent(course)}/${encodeURIComponent(assignment)}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast('提交记录删除成功', 'success');
+                        loadMySubmissions();
+                        // 如果当前正在查看被删除的提交的详情，则关闭详情弹窗
+                        if (
+                            currentSubmissionDetail && 
+                            currentSubmissionDetail.course === course && 
+                            currentSubmissionDetail.assignmentName === assignment
+                        ) {
+                            closeSubmissionDetailModal();
+                        }
+                    } else {
+                        showToast(data.message || '删除失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('删除提交记录失败:', error);
+                    showToast('删除提交记录失败', 'error');
+                });
             }
-        })
-        .catch(error => {
-            console.error('删除提交记录失败:', error);
-            showToast('删除提交记录失败', 'error');
-        });
+        );
     }
     
     // 监听“我的提交”课程筛选器变化，刷新提交列表
