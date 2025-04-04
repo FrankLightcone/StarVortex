@@ -17,11 +17,16 @@
 日期: 2025-04-04
 """
 
+import os
+from datetime import datetime, timedelta
+
 from flask import Blueprint, request, jsonify, send_from_directory, current_app
 from flask_login import login_required, current_user
 
-from util.utils import load_course_config
 from util.config import UPLOAD_FOLDER
+from util.utils import load_course_config, load_assignments
+
+from util.models import load_users
 
 api_bp = Blueprint('api', __name__)
 
@@ -79,3 +84,82 @@ def download_my_file(course, assignment, filename):
     """下载自己提交的文件"""
     from util.student import download_file
     return download_file(course, assignment, filename)
+
+# 在util/api.py文件中添加此API端点
+@api_bp.route('/get_all_assignments', methods=['GET'])
+@login_required
+def get_all_assignments():
+    """获取所有课程作业及其提交状态"""
+    # 获取当前用户的学号信息
+    users = load_users()
+    student_id = users[current_user.id]['student_id']
+    
+    # 获取所有作业信息
+    assignments = load_assignments()
+    
+    # 获取课程配置，确保包括所有课程和作业
+    config = load_course_config()
+    
+    # 用于存储完整的作业列表
+    all_assignments = []
+    
+    # 遍历课程配置中的所有课程和作业
+    for course in config['courses']:
+        course_name = course['name']
+        for assignment_name in course['assignments']:
+            # 从assignments.json中查找匹配的作业详情
+            assignment_detail = next((a for a in assignments if a['course'] == course_name and a['name'] == assignment_name), None)
+            
+            # 如果没有找到，创建默认详情
+            if not assignment_detail:
+                # 默认截止日期为一周后
+                default_due_date = (datetime.now() + timedelta(days=7)).isoformat()
+                assignment_detail = {
+                    'course': course_name,
+                    'name': assignment_name,
+                    'dueDate': default_due_date,
+                    'description': ''
+                }
+            
+            # 检查截止状态
+            due_date = datetime.fromisoformat(assignment_detail['dueDate'])
+            is_expired = due_date < datetime.now()
+            
+            # 构建作业目录路径
+            assignment_path = os.path.join(UPLOAD_FOLDER, course_name, assignment_name)
+            
+            # 检查当前用户是否已提交
+            has_submitted = False
+            
+            if os.path.exists(assignment_path):
+                # 查找匹配学生ID的文件夹
+                student_folder_pattern = f"{student_id}_{current_user.id}"
+                has_submitted = any(
+                    os.path.isdir(os.path.join(assignment_path, f)) and 
+                    f.startswith(student_folder_pattern) 
+                    for f in os.listdir(assignment_path) 
+                    if os.path.isdir(os.path.join(assignment_path, f))
+                )
+            
+            # 获取提交人数
+            submission_count = 0
+            if os.path.exists(assignment_path):
+                submission_count = len([
+                    f for f in os.listdir(assignment_path) 
+                    if os.path.isdir(os.path.join(assignment_path, f)) and 
+                    not f.endswith('.zip')
+                ])
+            
+            # 添加到完整列表
+            all_assignments.append({
+                'id': assignment_detail.get('id', f"{course_name}_{assignment_name}"),
+                'course': course_name,
+                'name': assignment_name,
+                'dueDate': assignment_detail['dueDate'],
+                'description': assignment_detail.get('description', ''),
+                'isExpired': is_expired,
+                'hasSubmitted': has_submitted,
+                'submissionCount': submission_count
+            })
+    
+    return jsonify({'assignments': all_assignments})

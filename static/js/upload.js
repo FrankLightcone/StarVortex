@@ -107,18 +107,286 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 当前查看的提交详情
     let currentSubmissionDetail = null;
+
+    //region 加载课程和作业信息
+    // ===== 作业列表相关事件处理 =====
+    const refreshAssignmentsBtn = document.getElementById('refreshAssignmentsBtn');
+    const assignmentStatusFilter = document.getElementById('assignmentStatusFilter');
+
+    if (refreshAssignmentsBtn) {
+        console.log("添加刷新按钮点击事件");
+        refreshAssignmentsBtn.addEventListener('click', loadAllAssignments);
+    } else {
+        console.error("找不到刷新按钮元素");
+    }
+    
+    if (assignmentStatusFilter) {
+        console.log("添加状态筛选器变化事件");
+        assignmentStatusFilter.addEventListener('change', loadAllAssignments);
+    } else {
+        console.error("找不到状态筛选器元素");
+    }
+    /**
+     * 加载所有作业列表
+     * 获取所有课程的作业，并按照截止日期、提交状态等进行展示
+     */
+    function loadAllAssignments() {
+        const statusFilter = document.getElementById('assignmentStatusFilter').value;
+        
+        // 显示加载中状态
+        const assignmentsListBody = document.getElementById('assignmentsListBody');
+        if (!assignmentsListBody) {
+            console.error("找不到 assignmentsListBody 元素");
+            return;
+        }
+        
+        assignmentsListBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <svg class="animate-spin h-5 w-5 mx-auto text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="mt-2 block">加载中...</span>
+                </td>
+            </tr>
+        `;
+        
+        console.log("开始加载作业列表...");
+        
+        // 从服务器获取所有作业数据
+        fetch('/get_all_assignments')
+            .then(response => {
+                console.log("API响应状态:", response.status);
+                if (!response.ok) {
+                    throw new Error(`API返回错误状态: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("获取到作业数据:", data);
+                
+                if (!data.assignments || data.assignments.length === 0) {
+                    assignmentsListBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                暂无作业数据
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // 过滤作业
+                let filteredAssignments = data.assignments;
+                if (statusFilter !== 'all') {
+                    filteredAssignments = filteredAssignments.filter(assignment => {
+                        if (statusFilter === 'pending' && !assignment.isExpired) {
+                            return true;
+                        } else if (statusFilter === 'expired' && assignment.isExpired) {
+                            return true;
+                        } else if (statusFilter === 'submitted' && assignment.hasSubmitted) {
+                            return true;
+                        } else if (statusFilter === 'unsubmitted' && !assignment.hasSubmitted) {
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+                
+                console.log("过滤后的作业数:", filteredAssignments.length);
+                
+                // 按截止日期排序，未截止的排在前面，相同情况下截止日期近的排前面
+                filteredAssignments.sort((a, b) => {
+                    // 首先按照是否截止排序
+                    if (a.isExpired !== b.isExpired) {
+                        return a.isExpired ? 1 : -1;
+                    }
+                    
+                    // 其次按照截止日期排序
+                    const dateA = new Date(a.dueDate);
+                    const dateB = new Date(b.dueDate);
+                    return dateA - dateB;
+                });
+                
+                // 清空列表并添加作业
+                assignmentsListBody.innerHTML = '';
+                
+                filteredAssignments.forEach(assignment => {
+                    const row = document.createElement('tr');
+                    row.className = 'assignment-row hover:bg-gray-50';
+                    
+                    // 格式化截止日期
+                    const dueDate = new Date(assignment.dueDate);
+                    const formattedDueDate = dueDate.toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    // 计算剩余时间或已过期时间
+                    const now = new Date();
+                    const timeDiff = dueDate - now;
+                    let timeStatus = '';
+                    
+                    if (timeDiff > 0) {
+                        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        if (days > 0) {
+                            timeStatus = `剩余 ${days} 天 ${hours} 小时`;
+                        } else {
+                            timeStatus = `剩余 ${hours} 小时`;
+                        }
+                    } else {
+                        const days = Math.floor(Math.abs(timeDiff) / (1000 * 60 * 60 * 24));
+                        if (days > 0) {
+                            timeStatus = `已过期 ${days} 天`;
+                        } else {
+                            timeStatus = `已过期`;
+                        }
+                    }
+                    
+                    // 设置状态样式和文本
+                    let statusClass, statusText;
+                    if (assignment.isExpired) {
+                        statusClass = 'bg-red-100 text-red-800';
+                        statusText = '已截止';
+                    } else {
+                        statusClass = 'bg-blue-100 text-blue-800';
+                        statusText = '进行中';
+                    }
+                    
+                    // 设置提交情况样式和文本
+                    let submissionClass, submissionText;
+                    if (assignment.hasSubmitted) {
+                        submissionClass = 'bg-green-100 text-green-800';
+                        submissionText = '已提交';
+                    } else {
+                        submissionClass = 'bg-red-100 text-red-800';
+                        submissionText = '未提交';
+                    }
+
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${assignment.course}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${assignment.name}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${formattedDueDate}
+                            <div class="text-xs ${assignment.isExpired ? 'text-red-500' : 'text-green-500'}">
+                                ${timeStatus}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${submissionClass}">
+                                ${submissionText}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button 
+                                class="text-blue-600 hover:text-blue-900 go-to-submit"
+                                data-course="${assignment.course}"
+                                data-assignment="${assignment.name}"
+                            >
+                                ${assignment.hasSubmitted ? '查看提交' : '立即提交'}
+                            </button>
+                        </td>
+                    `;
+                    
+                    assignmentsListBody.appendChild(row);
+                    
+                    // 添加提交按钮点击事件
+                    const submitBtn = row.querySelector('.go-to-submit');
+                    submitBtn.addEventListener('click', () => {
+                        goToSubmitAssignment(assignment.course, assignment.name);
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('加载作业列表失败:', error);
+                assignmentsListBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-sm text-red-500">
+                            加载作业列表失败: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            });
+    }
+
+    /**
+     * 跳转到作业提交页面
+     * @param {string} course - 课程名称
+     * @param {string} assignmentName - 作业名称
+     */
+    function goToSubmitAssignment(course, assignmentName) {
+        const row = document.querySelector(`button[data-course="${course}"][data-assignment="${assignmentName}"]`);
+        const hasSubmitted = row && row.textContent.includes('查看提交');
+    
+        if (hasSubmitted) {
+            // 1. 切换到“我的提交”tab
+            document.getElementById('tabSubmissions').click();
+    
+            // 2. 等待提交记录加载完成后自动展开对应的提交
+            setTimeout(() => {
+                loadMySubmissions(); // 先刷新列表（确保包含最新提交）
+                setTimeout(() => {
+                    const matchRow = Array.from(document.querySelectorAll('.view-submission'))
+                        .find(btn => btn.dataset.course === course && btn.dataset.assignment === assignmentName);
+                    if (matchRow) {
+                        matchRow.click();
+                    }
+                }, 500); // 给渲染一些缓冲时间
+            }, 300);
+        } else {
+            // 原来的上传逻辑
+            switchToUploadTab(course, assignmentName);
+        }
+    }
+    
+    function switchToUploadTab(course, assignmentName) {
+        // 切换到上传tab
+        document.getElementById('tabUpload').click();
+    
+        // 设置课程和作业选择
+        const courseSelect = document.getElementById('course');
+        const assignmentSelect = document.getElementById('assignment_name');
+    
+        courseSelect.value = course;
+        courseSelect.dispatchEvent(new Event('change'));
+    
+        setTimeout(() => {
+            assignmentSelect.value = assignmentName;
+            assignmentSelect.dispatchEvent(new Event('change'));
+        }, 500);
+    }
+    
     
     // ===== 标签页切换逻辑 =====
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
+            console.log(`点击标签按钮: ${button.id}`);
+            
             // 使用直接映射而不是字符串替换，以确保准确匹配
             const tabMapping = {
                 'tabUpload': 'uploadTab',
+                'tabAssignmentsList': 'assignmentsListTab',
                 'tabSubmissions': 'submissionsTab',
                 'tabProfile': 'profileTab'
             };
             
             const tabContentId = tabMapping[button.id];
+            console.log(`映射到的内容ID: ${tabContentId}`);
             
             // 安全检查
             if (!tabContentId) {
@@ -146,7 +414,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 如果切换到"我的提交"标签页，加载提交记录
                 if (tabContentId === 'submissionsTab') {
+                    console.log("切换到我的提交标签页，加载提交记录");
                     loadMySubmissions();
+                }
+                
+                // 如果切换到"作业列表"标签页，加载所有作业
+                if (tabContentId === 'assignmentsListTab') {
+                    console.log("切换到作业列表标签页，加载所有作业");
+                    loadAllAssignments();
                 }
             } else {
                 console.error(`找不到ID为 "${tabContentId}" 的标签页内容元素`);
@@ -1290,4 +1565,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fileList) {
       fileListObserver.observe(fileList, { childList: true });
     }
+
+    
   });
