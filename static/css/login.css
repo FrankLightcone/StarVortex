@@ -58,17 +58,28 @@ body, html {
     transform: translateY(-2px);
 }
 
-/* 输入框样式 */
+/* 输入框样式 - 磨砂效果 */
 .form-input {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgb(19, 45, 102);
     transition: all 0.3s ease;
 }
 
+.form-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
 .form-input:focus {
-    background: rgba(255, 255, 255, 1);
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(5px);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
+    color: white;
 }
 
 /* Logo样式 */

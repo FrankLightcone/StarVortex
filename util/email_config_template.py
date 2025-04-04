@@ -37,3 +37,6 @@ SMTP_USERNAME = 'your_email@example.com'
 # SMTP登录密码
 # 注意: 对于Gmail等服务，可能需要使用应用专用密码
 SMTP_PASSWORD = 'your_email_password'
+
+# SMTP测试注册邮箱（可多次注册）
+SMTP_TEST_USERNAME = [SMTP_USERNAME]

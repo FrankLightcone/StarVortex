@@ -15,7 +15,7 @@ module包含以下主要组件：
 - 配置文件处理函数
 
 作者: Frank
-版本: 1.0
+版本: 1.1
 日期: 2025-04-04
 """
 
@@ -36,6 +36,8 @@ from util.config import (
 
 # 验证码存储 (内存字典，重启后会清空)
 verification_codes = {}
+# 新增：用于密码重置的验证码存储（键为邮箱，值为包含验证码和过期时间的字典）
+reset_codes = {}
 
 def send_verification_email(email, code):
     """发送验证码邮件"""
@@ -58,6 +60,52 @@ def send_verification_email(email, code):
         return True
     except Exception as e:
         logging.error(f'Email sending error: {e}')
+        return False
+
+def send_reset_password_email(email, code):
+    """
+    发送密码重置验证码邮件
+    
+    Args:
+        email (str): 接收邮件的地址
+        code (str): 重置密码验证码
+        
+    Returns:
+        bool: 邮件发送是否成功
+    """
+    try:
+        # 创建邮件
+        msg = MIMEMultipart()
+        msg['From'] = SMTP_USERNAME
+        msg['To'] = email
+        msg['Subject'] = '作业提交系统 - 密码重置验证码'
+
+        # 邮件正文
+        email_body = f"""
+        您好，
+        
+        您正在重置作业提交系统的账户密码。
+        
+        您的验证码是: {code}
+        
+        该验证码将在5分钟后失效。如果不是您本人操作，请忽略此邮件。
+        
+        此致，
+        作业提交系统团队
+        """
+        
+        msg.attach(MIMEText(email_body, 'plain', 'utf-8'))
+
+        # 发送邮件
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.sendmail(SMTP_USERNAME, [email], msg.as_string())
+        
+        logging.info(f'Reset password email sent to {email}')
+        return True
+    except Exception as e:
+        logging.error(f'Error sending reset password email to {email}: {e}')
         return False
 
 def generate_verification_code():

@@ -16,7 +16,7 @@
 - /admin: 管理员登录
 
 作者: Frank
-版本: 1.0
+版本: 1.1
 日期: 2025-04-04
 """
 
@@ -26,11 +26,15 @@ from flask_login import login_user, logout_user, login_required, current_user
 from functools import wraps
 
 from util.models import User, validate_user, load_users, save_users
-from util.utils import verification_codes, send_verification_email, generate_verification_code
+from util.utils import verification_codes, send_verification_email, generate_verification_code, reset_codes, send_reset_password_email
 from util.config import ADMIN_USERNAME, ADMIN_PASSWORD_HASH
 
 from werkzeug.security import generate_password_hash, check_password_hash
-from util.email_config import SMTP_USERNAME
+from util.email_config import SMTP_TEST_USERNAME
+
+import random
+import string
+from datetime import datetime, timedelta
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -132,14 +136,17 @@ def send_verify_code():
         return jsonify({'status': 'error', 'message': '信息不完整'})
 
     # 将发送邮箱号定位测试邮箱白名单，可多次注册
-    test_emails = [SMTP_USERNAME]
+    test_emails = SMTP_TEST_USERNAME
     
-    # 如果不是测试邮箱，则检查是否已被注册
+    # 如果不是测试邮箱，则检查是否已被注册、是否符合邮箱格式
     if email not in test_emails:
         # 检查用户是否已存在
         users = load_users()
         if any(user.get('email') == email or user.get('student_id') == student_id for user in users.values()):
             return jsonify({'status': 'error', 'message': '邮箱或学号已被注册'})
+    
+        if not (email.endswith('@mail2.sysu.edu.cn') or email.endswith('@mail.sysu.edu.cn')):
+            return jsonify({'status': 'error', 'message': '请使用 mail2.sysu.edu.cn 或 mail.sysu.edu.cn 邮箱进行注册'})
 
     # 生成6位数字验证码
     code = generate_verification_code()
@@ -175,3 +182,123 @@ def admin_login():
         return render_template('admin_login.html', error='用户名或密码错误')
     
     return render_template('admin_login.html')
+
+@auth_bp.route('/reset_password', methods=['GET'])
+def show_reset_password():
+    """显示重置密码页面"""
+    return render_template('reset_password.html')
+
+@auth_bp.route('/send_reset_code', methods=['POST'])
+def send_reset_code():
+    """发送密码重置验证码"""
+    data = request.json
+    email = data.get('email')
+    
+    if not email:
+        return jsonify({'status': 'error', 'message': '邮箱地址不能为空'})
+    
+    # 检查邮箱是否存在
+    users = load_users()
+    user_found = False
+    for username, user_info in users.items():
+        if user_info.get('email') == email:
+            user_found = True
+            break
+    
+    if not user_found:
+        return jsonify({'status': 'error', 'message': '该邮箱未注册'})
+    
+    # 生成8位随机验证码（数字和大写字母组合）
+    code_characters = string.ascii_uppercase + string.digits
+    reset_code = ''.join(random.choice(code_characters) for _ in range(8))
+    
+    # 存储验证码，5分钟有效期
+    expiry_time = datetime.now() + timedelta(minutes=5)
+    reset_codes[email] = {
+        'code': reset_code,
+        'expiry': expiry_time
+    }
+    
+    # 使用工具函数发送验证码邮件
+    if send_reset_password_email(email, reset_code):
+        return jsonify({'status': 'success', 'message': '验证码已发送'})
+    else:
+        return jsonify({'status': 'error', 'message': '发送验证码失败，请稍后重试'})
+
+@auth_bp.route('/verify_reset_code', methods=['POST'])
+def verify_reset_code():
+    """验证密码重置验证码"""
+    data = request.json
+    email = data.get('email')
+    code = data.get('code')
+    
+    if not email or not code:
+        return jsonify({'status': 'error', 'message': '参数不完整'})
+    
+    # 检查验证码是否存在
+    if email not in reset_codes:
+        return jsonify({'status': 'error', 'message': '验证码已过期或不存在'})
+    
+    reset_info = reset_codes[email]
+    
+    # 检查验证码是否过期
+    if datetime.now() > reset_info['expiry']:
+        # 删除过期验证码
+        del reset_codes[email]
+        return jsonify({'status': 'error', 'message': '验证码已过期'})
+    
+    # 检查验证码是否正确
+    if reset_info['code'] != code:
+        return jsonify({'status': 'error', 'message': '验证码错误'})
+    
+    # 验证通过
+    return jsonify({'status': 'success', 'message': '验证成功'})
+
+@auth_bp.route('/reset_password', methods=['POST'])
+def reset_password():
+    """重置密码"""
+    data = request.json
+    email = data.get('email')
+    code = data.get('code')
+    password = data.get('password')
+    
+    if not email or not code or not password:
+        return jsonify({'status': 'error', 'message': '参数不完整'})
+    
+    # 检查验证码是否存在
+    if email not in reset_codes:
+        return jsonify({'status': 'error', 'message': '验证码已过期或不存在'})
+    
+    reset_info = reset_codes[email]
+    
+    # 检查验证码是否过期
+    if datetime.now() > reset_info['expiry']:
+        # 删除过期验证码
+        del reset_codes[email]
+        return jsonify({'status': 'error', 'message': '验证码已过期'})
+    
+    # 检查验证码是否正确
+    if reset_info['code'] != code:
+        return jsonify({'status': 'error', 'message': '验证码错误'})
+    
+    # 查找对应邮箱的用户
+    users = load_users()
+    user_updated = False
+    
+    for username, user_info in users.items():
+        if user_info.get('email') == email:
+            # 更新用户密码
+            users[username]['password'] = generate_password_hash(password)
+            user_updated = True
+            break
+    
+    if not user_updated:
+        return jsonify({'status': 'error', 'message': '用户不存在'})
+    
+    # 保存更新后的用户信息
+    save_users(users)
+    
+    # 删除验证码
+    del reset_codes[email]
+    
+    return jsonify({'status': 'success', 'message': '密码重置成功'})
