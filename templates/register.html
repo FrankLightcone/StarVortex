@@ -2,149 +2,163 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>文件传输 - 注册</title>
+    <title>作业提交系统 - 注册</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="/static/css/toast.css" rel="stylesheet">
-    <link href="/static/css/forms.css" rel="stylesheet">
+    <link href="/static/css/login.css" rel="stylesheet">
     <link href="/static/css/register.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <!-- Toast Notification -->
+<body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+    <!-- 随机背景图 -->
+    <div id="bgContainer" class="bg-container"></div>
+    <div class="bg-overlay"></div>
+    
+    <!-- Toast通知 -->
     <div 
         id="toast" 
-        class="fixed top-4 left-1/2 z-50 px-4 py-2 bg-red-500 text-white rounded-lg shadow-lg text-center"
+        class="fixed top-4 left-1/2 z-50 px-4 py-3 bg-red-500 text-white rounded-lg shadow-lg text-center flex items-center"
     >
-        提示信息
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span id="toastMessage">提示信息</span>
     </div>
-
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <!-- Logo 图片 -->
-        <div class="flex justify-center">
-            <img src="/static/img/logo.png" alt="Logo" class="h-20 w-auto">
+    
+    <div class="w-full max-w-md z-10">
+        <!-- Logo -->
+        <div class="flex justify-center mb-8">
+            <div class="logo-container">
+                <img src="/static/img/logo.png" alt="Logo" class="h-14 w-auto">
+            </div>
         </div>
         
-        <h2 class="mt-4 text-center text-3xl font-extrabold text-gray-900">
+        <!-- 标题 -->
+        <h1 class="text-center text-3xl font-bold text-white mb-6 text-shadow">
             学生注册
-        </h2>
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <form id="registerForm" class="space-y-6" method="POST">
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">
-                            姓名
-                        </label>
-                        <div class="mt-1">
-                            <input 
-                                id="name" 
-                                name="name" 
-                                type="text" 
-                                required 
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            >
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="student_id" class="block text-sm font-medium text-gray-700">
-                            学号
-                        </label>
-                        <div class="mt-1">
-                            <input 
-                                id="student_id" 
-                                name="student_id" 
-                                type="text" 
-                                required 
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            >
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">
-                            邮箱
-                        </label>
-                        <div class="mt-1">
-                            <input 
-                                id="email" 
-                                name="email" 
-                                type="email" 
-                                required 
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            >
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700">
-                            密码
-                        </label>
-                        <div class="mt-1">
-                            <input 
-                                id="password" 
-                                name="password" 
-                                type="password" 
-                                required 
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            >
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="verify_code" class="block text-sm font-medium text-gray-700">
-                            邮箱验证码
-                        </label>
-                        <div class="mt-1 flex">
-                            <input 
-                                id="verify_code" 
-                                name="verify_code" 
-                                type="text" 
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm mr-2"
-                                placeholder="请输入验证码"
-                            >
-                            <button 
-                                type="button" 
-                                id="sendVerifyCodeBtn"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
-                            >
-                                发送验证码
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="mt-6">
-                        <button 
-                            type="button" 
-                            id="registerBtn"
-                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition"
+        </h1>
+        
+        <!-- 磨砂注册面板 -->
+        <div id="registerPanel" class="glass-panel p-8">
+            <form id="registerForm" class="space-y-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-white">
+                        姓名
+                    </label>
+                    <div class="mt-1">
+                        <input 
+                            id="name" 
+                            name="name" 
+                            type="text" 
+                            required 
+                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
+                            placeholder="请输入姓名"
                         >
-                            注册
-                        </button>
-                    </div>
-                </form>
-
-                <div class="mt-6">
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-gray-300"></div>
-                        </div>
-                        <div class="relative flex justify-center text-sm">
-                            <span class="px-2 bg-white text-gray-500">
-                                已有账号？
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <a 
-                            href="/login" 
-                            class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition"
-                        >
-                            返回登录
-                        </a>
                     </div>
                 </div>
+
+                <div>
+                    <label for="student_id" class="block text-sm font-medium text-white">
+                        学号
+                    </label>
+                    <div class="mt-1">
+                        <input 
+                            id="student_id" 
+                            name="student_id" 
+                            type="text" 
+                            required 
+                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
+                            placeholder="请输入学号"
+                        >
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-white">
+                        邮箱
+                    </label>
+                    <div class="mt-1">
+                        <input 
+                            id="email" 
+                            name="email" 
+                            type="email" 
+                            required 
+                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
+                            placeholder="请输入邮箱（推荐使用校园邮箱）"
+                        >
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-white">
+                        密码
+                    </label>
+                    <div class="mt-1">
+                        <input 
+                            id="password" 
+                            name="password" 
+                            type="password" 
+                            required 
+                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
+                            placeholder="请设置密码（至少6位）"
+                        >
+                    </div>
+                </div>
+
+                <div>
+                    <label for="verify_code" class="block text-sm font-medium text-white">
+                        邮箱验证码
+                    </label>
+                    <div class="verification-container mt-1 flex">
+                        <input 
+                            id="verify_code" 
+                            name="verify_code" 
+                            type="text" 
+                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm mr-2"
+                            placeholder="请输入验证码"
+                        >
+                        <button 
+                            type="button" 
+                            id="sendVerifyCodeBtn"
+                            class="verify-code-btn px-4 py-2 text-white rounded-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
+                        >
+                            发送验证码
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <button 
+                        type="button" 
+                        id="registerBtn"
+                        class="btn-register w-full flex justify-center py-3 px-4 rounded-lg shadow-sm text-sm font-medium focus:outline-none"
+                    >
+                        注册
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6">
+                <div class="flex items-center w-full text-sm text-white mb-6">
+                    <div class="flex-grow border-t border-gray-300 opacity-50"></div>
+                    <span class="px-4">已有账号?</span>
+                    <div class="flex-grow border-t border-gray-300 opacity-50"></div>
+                </div>
+                
+                <div>
+                    <a 
+                        href="/login" 
+                        class="w-full flex justify-center py-3 px-4 border border-white border-opacity-30 rounded-lg shadow-sm text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10"
+                    >
+                        返回登录
+                    </a>
+                </div>
             </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <div class="mt-8 text-center text-white text-sm opacity-80">
+            &copy; 2025 作业提交系统 | 遥感科学与技术 | 中山大学
         </div>
     </div>
 

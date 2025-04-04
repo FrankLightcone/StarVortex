@@ -1,16 +1,33 @@
-/* 输入框样式优化 */
+/* 注册页面样式 */
+
+/* 输入框容器样式 */
 .input-group {
     position: relative;
     margin-bottom: 1.5rem;
 }
 
-.input-group input:focus {
+/* 输入框焦点样式优化 */
+.form-input:focus {
     border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    transform: translateY(-1px);
 }
 
-.input-group input.error {
-    border-color: #ef4444;
+/* 输入框悬停效果 */
+.form-input:hover {
+    border-color: #93C5FD;
+}
+
+/* 错误样式 */
+.input-error {
+    border-color: #ef4444 !important;
+    background-color: rgba(254, 226, 226, 0.4);
+}
+
+/* 成功样式 */
+.input-success {
+    border-color: #10B981 !important;
+    background-color: rgba(209, 250, 229, 0.4);
 }
 
 .error-message {
@@ -19,8 +36,108 @@
     margin-top: 0.25rem;
 }
 
+/* 验证码按钮样式 */
+.verification-container {
+    position: relative;
+}
+
+.verify-code-btn {
+    background-image: linear-gradient(to right, #3b82f6, #2563eb);
+    transition: all 0.3s ease;
+}
+
+.verify-code-btn:hover:not(:disabled) {
+    background-image: linear-gradient(to right, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+}
+
+.verify-code-btn:active {
+    transform: translateY(0);
+}
+
 /* 按钮禁用状态 */
 button:disabled {
-    opacity: 0.6;
+    opacity: 0.7;
     cursor: not-allowed;
+}
+
+/* 注册按钮样式 */
+.btn-register {
+    background-image: linear-gradient(to right, #4f46e5, #3b82f6);
+    transition: all 0.3s ease;
+    border: none;
+    color: white;
+    font-weight: 500;
+}
+
+.btn-register:hover {
+    background-image: linear-gradient(to right, #4338ca, #2563eb);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.btn-register:active {
+    transform: translateY(0);
+}
+
+/* 按钮加载动画 */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* 注册成功动画 */
+@keyframes success-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.success-animation {
+    animation: success-pulse 0.5s ease-in-out;
+}
+
+/* 面板抖动动画（验证失败时） */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.shake {
+    animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* 页面淡出效果 */
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.fade-out {
+    animation: fadeOut 1s forwards;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+    .glass-panel {
+        padding: 1.5rem !important;
+    }
+    
+    .verification-container {
+        flex-direction: column;
+    }
+    
+    .verification-container input {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .verify-code-btn {
+        width: 100%;
+    }
 }
