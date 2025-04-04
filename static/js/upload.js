@@ -840,3 +840,398 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化自定义下拉菜单
+    initCustomDropdowns();
+    
+    // 处理课程选择变化
+    const courseDropdown = document.getElementById('courseDropdown');
+    const courseInput = document.getElementById('course');
+    const assignmentDropdown = document.getElementById('assignmentDropdown');
+    const assignmentInput = document.getElementById('assignment_name');
+    
+    // 监听课程选择变化
+    courseDropdown.addEventListener('valueChanged', function(e) {
+      const selectedCourse = e.detail.value;
+      courseInput.value = selectedCourse;
+      
+      // 重置作业下拉菜单
+      resetAssignmentDropdown();
+      
+      if (selectedCourse) {
+        // 启用作业下拉菜单
+        enableDropdown(assignmentDropdown);
+        
+        // 从服务器获取课程对应的作业列表
+        fetch(`/get_assignments?course=${encodeURIComponent(selectedCourse)}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.assignments && data.assignments.length > 0) {
+              // 更新作业下拉选项
+              updateDropdownOptions(assignmentDropdown, [
+                { value: '', text: '请选择作业' },
+                ...data.assignments.map(assignment => ({ value: assignment, text: assignment }))
+              ]);
+            } else {
+              updateDropdownOptions(assignmentDropdown, [
+                { value: '', text: '该课程暂无作业' }
+              ]);
+            }
+          })
+          .catch(error => {
+            console.error('获取作业列表失败:', error);
+            updateDropdownOptions(assignmentDropdown, [
+              { value: '', text: '加载作业失败' }
+            ]);
+          });
+      } else {
+        // 禁用作业下拉菜单
+        disableDropdown(assignmentDropdown);
+        updateDropdownOptions(assignmentDropdown, [
+          { value: '', text: '请先选择课程' }
+        ]);
+      }
+      
+      // 更新作业信息
+      updateAssignmentInfo('', '');
+    });
+    
+    // 监听作业选择变化
+    assignmentDropdown.addEventListener('valueChanged', function(e) {
+      const selectedAssignment = e.detail.value;
+      assignmentInput.value = selectedAssignment;
+      
+      // 更新作业信息
+      updateAssignmentInfo(courseInput.value, selectedAssignment);
+    });
+    
+    // 函数：初始化所有自定义下拉菜单
+    function initCustomDropdowns() {
+      // 获取所有自定义下拉菜单
+      const dropdowns = document.querySelectorAll('.custom-dropdown');
+      
+      dropdowns.forEach(dropdown => {
+        const selected = dropdown.querySelector('.dropdown-selected');
+        const options = dropdown.querySelector('.dropdown-options');
+        const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+        const optionItems = dropdown.querySelectorAll('.dropdown-option');
+        const dropdownText = selected.querySelector('.dropdown-text');
+        const dropdownArrow = selected.querySelector('.dropdown-arrow');
+        
+        // 点击选择框显示/隐藏选项
+        selected.addEventListener('click', function() {
+          if (selected.classList.contains('disabled')) return;
+          
+          toggleDropdown(dropdown);
+          
+          // 如果打开了选项，滚动到选中项
+          if (options.classList.contains('show')) {
+            const selectedOption = dropdown.querySelector('.dropdown-option.selected');
+            if (selectedOption) {
+              selectedOption.scrollIntoView({ block: 'nearest' });
+            }
+          }
+        });
+        
+        // 聚焦时添加样式
+        selected.addEventListener('focus', function() {
+          if (!selected.classList.contains('disabled')) {
+            selected.classList.add('focused');
+          }
+        });
+        
+        // 失焦时移除样式并关闭下拉菜单
+        selected.addEventListener('blur', function(e) {
+          // 如果点击的是当前下拉菜单的选项，不关闭
+          if (e.relatedTarget && options.contains(e.relatedTarget)) {
+            return;
+          }
+          
+          selected.classList.remove('focused');
+          options.classList.remove('show');
+          dropdownArrow.classList.remove('open');
+        });
+        
+        // 处理键盘操作
+        selected.addEventListener('keydown', function(e) {
+          if (selected.classList.contains('disabled')) return;
+          
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleDropdown(dropdown);
+          } else if (e.key === 'Escape') {
+            options.classList.remove('show');
+            dropdownArrow.classList.remove('open');
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (!options.classList.contains('show')) {
+              toggleDropdown(dropdown);
+            }
+            const firstOption = dropdown.querySelector('.dropdown-option:not(.disabled)');
+            if (firstOption) {
+              firstOption.focus();
+            }
+          }
+        });
+        
+        // 为每个选项添加点击事件
+        optionItems.forEach(option => {
+          // 为选项设置tabindex使其可以获取焦点
+          option.setAttribute('tabindex', '0');
+          
+          option.addEventListener('click', function() {
+            if (option.classList.contains('disabled')) return;
+            
+            const value = option.getAttribute('data-value');
+            const text = option.textContent;
+            
+            // 更新隐藏输入的值
+            hiddenInput.value = value;
+            
+            // 更新显示文本
+            dropdownText.textContent = text;
+            
+            // 移除所有选中状态并给当前选项添加选中状态
+            optionItems.forEach(item => item.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            // 关闭下拉菜单
+            options.classList.remove('show');
+            dropdownArrow.classList.remove('open');
+            
+            // 触发自定义事件
+            const event = new CustomEvent('valueChanged', {
+              detail: { value: value, text: text }
+            });
+            dropdown.dispatchEvent(event);
+          });
+          
+          // 键盘导航
+          option.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              option.click();
+              selected.focus();
+            } else if (e.key === 'Escape') {
+              options.classList.remove('show');
+              dropdownArrow.classList.remove('open');
+              selected.focus();
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              const nextOption = option.nextElementSibling;
+              if (nextOption) {
+                nextOption.focus();
+              }
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              const prevOption = option.previousElementSibling;
+              if (prevOption) {
+                prevOption.focus();
+              } else {
+                selected.focus();
+              }
+            }
+          });
+        });
+        
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(e) {
+          if (!dropdown.contains(e.target)) {
+            options.classList.remove('show');
+            dropdownArrow.classList.remove('open');
+          }
+        });
+      });
+    }
+    
+    // 切换下拉菜单的显示状态
+    function toggleDropdown(dropdown) {
+      const options = dropdown.querySelector('.dropdown-options');
+      const dropdownArrow = dropdown.querySelector('.dropdown-arrow');
+      
+      options.classList.toggle('show');
+      dropdownArrow.classList.toggle('open');
+    }
+    
+    // 重置作业下拉菜单
+    function resetAssignmentDropdown() {
+      const dropdownText = assignmentDropdown.querySelector('.dropdown-text');
+      const options = assignmentDropdown.querySelector('.dropdown-options');
+      
+      // 清空选择
+      dropdownText.textContent = '请先选择课程';
+      assignmentInput.value = '';
+      
+      // 清空选项
+      while (options.firstChild) {
+        options.removeChild(options.firstChild);
+      }
+      
+      // 添加默认选项
+      const defaultOption = document.createElement('div');
+      defaultOption.className = 'dropdown-option';
+      defaultOption.setAttribute('data-value', '');
+      defaultOption.textContent = '请先选择课程';
+      options.appendChild(defaultOption);
+    }
+    
+    // 更新下拉菜单选项
+    function updateDropdownOptions(dropdown, optionsData) {
+      const optionsContainer = dropdown.querySelector('.dropdown-options');
+      
+      // 清空现有选项
+      while (optionsContainer.firstChild) {
+        optionsContainer.removeChild(optionsContainer.firstChild);
+      }
+      
+      // 添加新选项
+      optionsData.forEach(optionData => {
+        const option = document.createElement('div');
+        option.className = 'dropdown-option';
+        option.setAttribute('data-value', optionData.value);
+        option.textContent = optionData.text;
+        option.setAttribute('tabindex', '0');
+        
+        // 添加点击事件
+        option.addEventListener('click', function() {
+          if (option.classList.contains('disabled')) return;
+          
+          const value = option.getAttribute('data-value');
+          const text = option.textContent;
+          
+          // 更新隐藏输入的值
+          dropdown.querySelector('input[type="hidden"]').value = value;
+          
+          // 更新显示文本
+          dropdown.querySelector('.dropdown-text').textContent = text;
+          
+          // 移除所有选中状态并给当前选项添加选中状态
+          dropdown.querySelectorAll('.dropdown-option').forEach(item => item.classList.remove('selected'));
+          option.classList.add('selected');
+          
+          // 关闭下拉菜单
+          dropdown.querySelector('.dropdown-options').classList.remove('show');
+          dropdown.querySelector('.dropdown-arrow').classList.remove('open');
+          
+          // 触发自定义事件
+          const event = new CustomEvent('valueChanged', {
+            detail: { value: value, text: text }
+          });
+          dropdown.dispatchEvent(event);
+        });
+        
+        // 键盘导航
+        option.addEventListener('keydown', function(e) {
+          const selected = dropdown.querySelector('.dropdown-selected');
+          
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            option.click();
+            selected.focus();
+          } else if (e.key === 'Escape') {
+            dropdown.querySelector('.dropdown-options').classList.remove('show');
+            dropdown.querySelector('.dropdown-arrow').classList.remove('open');
+            selected.focus();
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextOption = option.nextElementSibling;
+            if (nextOption) {
+              nextOption.focus();
+            }
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevOption = option.previousElementSibling;
+            if (prevOption) {
+              prevOption.focus();
+            } else {
+              selected.focus();
+            }
+          }
+        });
+        
+        optionsContainer.appendChild(option);
+      });
+    }
+    
+    // 启用下拉菜单
+    function enableDropdown(dropdown) {
+      const selected = dropdown.querySelector('.dropdown-selected');
+      selected.classList.remove('disabled');
+    }
+    
+    // 禁用下拉菜单
+    function disableDropdown(dropdown) {
+      const selected = dropdown.querySelector('.dropdown-selected');
+      selected.classList.add('disabled');
+    }
+    
+    // 更新作业信息显示
+    function updateAssignmentInfo(course, assignment) {
+      const assignmentInfo = document.getElementById('assignmentInfo');
+      
+      if (!course || !assignment) {
+        assignmentInfo.classList.add('hidden');
+        return;
+      }
+      
+      // 获取作业信息
+      fetch(`/get_assignment_stats?course=${encodeURIComponent(course)}&assignment=${encodeURIComponent(assignment)}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.stats) {
+            // 更新信息
+            document.getElementById('assignmentDueDate').textContent = data.stats.dueDate;
+            document.getElementById('assignmentSubmissionCount').textContent = data.stats.submissionCount;
+            document.getElementById('assignmentStatus').textContent = data.stats.status;
+            document.getElementById('mySubmissionStatus').textContent = data.stats.mySubmission;
+            
+            // 状态颜色
+            const statusElement = document.getElementById('assignmentStatus');
+            const myStatusElement = document.getElementById('mySubmissionStatus');
+            
+            if (data.stats.status === "已截止") {
+              statusElement.classList.add('text-red-600');
+              statusElement.classList.remove('text-green-600');
+            } else {
+              statusElement.classList.add('text-green-600');
+              statusElement.classList.remove('text-red-600');
+            }
+            
+            if (data.stats.hasSubmitted) {
+              myStatusElement.classList.add('text-green-600');
+              myStatusElement.classList.remove('text-red-600');
+            } else {
+              myStatusElement.classList.add('text-red-600');
+              myStatusElement.classList.remove('text-green-600');
+            }
+            
+            // 显示信息区域
+            assignmentInfo.classList.remove('hidden');
+          }
+        })
+        .catch(error => {
+          console.error('获取作业信息失败:', error);
+          assignmentInfo.classList.add('hidden');
+        });
+    }
+    
+    // 更新上传按钮状态
+    function updateUploadButtonState() {
+      const course = document.getElementById('course').value;
+      const assignment = document.getElementById('assignment_name').value;
+      const uploadBtn = document.getElementById('uploadBtn');
+      const filesExist = document.querySelectorAll('.file-item').length > 0;
+      
+      if (uploadBtn) {
+        uploadBtn.disabled = !course || !assignment || !filesExist;
+      }
+    }
+    
+    // 监听文件列表变化以更新上传按钮状态
+    const fileListObserver = new MutationObserver(updateUploadButtonState);
+    const fileList = document.getElementById('fileList');
+    if (fileList) {
+      fileListObserver.observe(fileList, { childList: true });
+    }
+  });

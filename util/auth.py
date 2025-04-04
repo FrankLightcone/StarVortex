@@ -8,6 +8,7 @@ from util.utils import verification_codes, send_verification_email, generate_ver
 from util.config import ADMIN_USERNAME, ADMIN_PASSWORD_HASH
 
 from werkzeug.security import generate_password_hash, check_password_hash
+from util.email_config import SMTP_USERNAME
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -108,10 +109,15 @@ def send_verify_code():
     if not all([email, name, student_id]):
         return jsonify({'status': 'error', 'message': '信息不完整'})
 
-    # 检查用户是否已存在
-    users = load_users()
-    if any(user.get('email') == email or user.get('student_id') == student_id for user in users.values()):
-        return jsonify({'status': 'error', 'message': '邮箱或学号已被注册'})
+    # 将发送邮箱号定位测试邮箱白名单，可多次注册
+    test_emails = [SMTP_USERNAME]
+    
+    # 如果不是测试邮箱，则检查是否已被注册
+    if email not in test_emails:
+        # 检查用户是否已存在
+        users = load_users()
+        if any(user.get('email') == email or user.get('student_id') == student_id for user in users.values()):
+            return jsonify({'status': 'error', 'message': '邮箱或学号已被注册'})
 
     # 生成6位数字验证码
     code = generate_verification_code()

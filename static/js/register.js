@@ -79,6 +79,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // 立即开始倒计时和禁用按钮，提供即时反馈
+            startCountdown();
+            sendVerifyCodeBtn.textContent = '发送中...';
+            
             try {
                 const response = await fetch('/send_verify_code', {
                     method: 'POST',
@@ -94,13 +98,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const result = await response.json();
                 if (result.status === 'success') {
-                    startCountdown();
                     showToast('验证码已发送', 'success');
                 } else {
+                    // 如果发送失败，重置倒计时
+                    clearInterval(countdownInterval);
+                    countdown = 0;
+                    sendVerifyCodeBtn.disabled = false;
+                    sendVerifyCodeBtn.textContent = '发送验证码';
                     showToast(result.message || '发送失败');
                 }
             } catch (error) {
                 console.error('Error:', error);
+                // 如果发生错误，重置倒计时
+                clearInterval(countdownInterval);
+                countdown = 0;
+                sendVerifyCodeBtn.disabled = false;
+                sendVerifyCodeBtn.textContent = '发送验证码';
                 showToast('发送验证码出错');
             }
         });

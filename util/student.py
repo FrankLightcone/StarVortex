@@ -25,6 +25,17 @@ def upload_file():
     config = load_course_config()
     courses = [course['name'] for course in config['courses']]
     
+    # 获取用户信息
+    users = load_users()
+    user_data = users.get(current_user.id, {})
+    
+    # 用户信息字典
+    user_info = {
+        'user_name': current_user.id,
+        'user_email': user_data.get('email', ''),
+        'user_student_id': user_data.get('student_id', '')
+    }
+    
     if request.method == 'POST':
         # 获取课程和作业名称
         course = request.form.get('course')
@@ -111,7 +122,7 @@ def upload_file():
                 'message': f'文件上传失败: {str(e)}'
             }), 500
     
-    return render_template('upload.html', courses=courses, course_config=config)
+    return render_template('upload.html', courses=courses, course_config=config, **user_info)
 
 @student_bp.route('/my_submissions', methods=['GET'])
 @login_required
