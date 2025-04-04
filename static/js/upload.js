@@ -1,3 +1,59 @@
+/**
+ * upload.js - 文件上传模块
+ * 
+ * 提供作业文件的上传功能，包括文件选择、拖拽上传、进度展示，
+ * 以及我的提交记录管理和个人设置页面的交互逻辑。
+ * 
+ * @module upload
+ * @requires toast.js
+ * @requires utils.js
+ * 
+ * 主要功能：
+ * - 标签页切换（上传作业、我的提交、个人设置）
+ * - 课程和作业选择与统计信息展示
+ * - 文件选择与拖拽上传
+ * - 上传进度实时显示
+ * - 提交记录管理（查看、删除）
+ * - 个人资料修改
+ * 
+ * 文件操作相关函数：
+ * @function preventDefaults - 阻止拖拽事件的默认行为
+ * @function highlight - 拖拽区域高亮显示
+ * @function unhighlight - 取消拖拽区域高亮
+ * @function handleDrop - 处理文件拖放事件
+ * @function handleFiles - 处理选择的文件
+ * @function addFileToList - 将文件添加到上传列表
+ * @function updateFileListView - 更新文件列表视图
+ * @function removeFile - 从列表中删除文件
+ * @function updateUploadButtonState - 更新上传按钮状态
+ * 
+ * 上传相关函数：
+ * @function uploadFiles - 开始上传文件队列
+ * @function uploadFile - 上传单个文件
+ * @function handleUploadError - 处理上传错误
+ * @function refreshAssignmentStats - 刷新作业统计信息
+ * 
+ * 提交记录相关函数：
+ * @function loadMySubmissions - 加载我的提交记录
+ * @function renderMySubmissions - 渲染提交记录列表
+ * @function viewSubmissionDetail - 查看提交详情
+ * @function deleteSubmission - 删除提交记录
+ * 
+ * 事件监听器：
+ * - DOMContentLoaded：初始化界面和组件
+ * - 多个标签页和表单元素的事件监听处理
+ * 
+ * XHR请求：
+ * - 文件上传进度监控和显示
+ * 
+ * Fetch请求：
+ * - GET /get_assignments：获取课程的作业列表
+ * - GET /get_assignment_stats：获取作业统计信息
+ * - GET /get_my_submissions：获取我的提交记录
+ * - DELETE /delete_submission：删除提交记录
+ * - POST /update_profile：更新个人资料
+ */
+
 document.addEventListener('DOMContentLoaded', function() {
     // ===== DOM 元素 =====
     // 标签页

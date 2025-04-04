@@ -1,3 +1,25 @@
+"""
+作业传输系统 - 用户认证模块
+
+本模块负责处理用户认证相关的所有功能，包括：
+- 学生登录与注销
+- 管理员登录验证
+- 新用户注册及邮箱验证
+- 生成和验证验证码
+- 权限控制装饰器(admin_required)
+
+该模块定义了以下路由：
+- /login: 学生登录页面
+- /logout: 用户注销
+- /register: 学生注册
+- /send_verify_code: 发送验证码
+- /admin: 管理员登录
+
+作者: Frank
+版本: 1.0
+日期: 2025-04-04
+"""
+
 import logging
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from flask_login import login_user, logout_user, login_required, current_user

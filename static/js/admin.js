@@ -1,6 +1,53 @@
 /**
- * 作业传输系统 - 管理员页面JavaScript
+ * admin.js - 管理员界面模块
+ * 
+ * 管理员控制面板的主要功能实现，包括作业管理、提交情况查看、
+ * 文件下载等管理功能的前端交互逻辑。
+ * 
+ * @module admin
+ * @requires toast.js
+ * 
+ * 主要功能：
+ * - 标签页切换（作业管理、提交情况）
+ * - 作业列表显示与筛选
+ * - 作业添加、编辑、删除
+ * - 提交情况查看与筛选
+ * - 学生提交详情查看
+ * - 文件下载管理
+ * 
+ * 日期时间处理函数：
+ * @function formatDateTimeLocal - 格式化日期时间为input[type=datetime-local]所需格式
+ * 
+ * 消息通知函数：
+ * @function showToast - 显示提示消息
+ * 
+ * 作业管理相关函数：
+ * @function loadAssignments - 加载作业列表
+ * @function renderAssignmentsList - 渲染作业列表
+ * @function openAddAssignmentModal - 打开添加作业弹窗
+ * @function openEditAssignmentModal - 打开编辑作业弹窗
+ * @function closeAssignmentModal - 关闭作业弹窗
+ * @function deleteAssignment - 删除作业
+ * @function submitAssignmentForm - 提交作业表单
+ * 
+ * 提交情况相关函数：
+ * @function loadSubmissions - 加载提交情况
+ * @function renderSubmissionsList - 渲染提交列表
+ * @function openSubmissionDetailModal - 打开提交详情弹窗
+ * @function closeSubmissionDetailModal - 关闭提交详情弹窗
+ * 
+ * 事件监听器：
+ * - DOMContentLoaded：初始化页面组件和数据
+ * - 标签页切换、表单操作、数据筛选等多个事件监听
+ * 
+ * Fetch请求：
+ * - GET /admin/assignments：获取所有作业信息
+ * - POST /admin/assignments：创建新作业
+ * - PUT /admin/assignments/:id：更新作业
+ * - DELETE /admin/assignments/:id：删除作业
+ * - GET /admin/submissions：获取作业提交情况
  */
+
 document.addEventListener('DOMContentLoaded', function() {
     // DOM 元素
     const toast = document.getElementById('toast');

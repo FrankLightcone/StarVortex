@@ -1,5 +1,28 @@
 /**
- * 管理员登录页面脚本
+ * admin_login.js - 管理员登录模块
+ * 
+ * 处理管理员登录表单和登录逻辑，包括登录请求的发送和响应处理。
+ * 提供登录失败时的错误提示和动画效果。
+ * 
+ * @module admin_login
+ * @requires toast.js
+ * 
+ * 主要功能：
+ * - 管理员登录表单提交处理
+ * - 登录成功后重定向到管理面板
+ * - 登录失败时显示错误信息并添加震动效果
+ * - 自动显示后端返回的错误信息
+ * 
+ * 事件监听器：
+ * - DOMContentLoaded：初始化登录表单和错误提示
+ * - submit：拦截表单提交，通过fetch API发送登录请求
+ * 
+ * 特殊效果：
+ * - 登录失败时表单震动动画
+ * - 自动显示错误提示toast
+ * 
+ * Fetch请求：
+ * - POST /admin：发送管理员登录凭据
  */
 document.addEventListener('DOMContentLoaded', function() {
     // 获取DOM元素

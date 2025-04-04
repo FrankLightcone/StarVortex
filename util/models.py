@@ -1,3 +1,22 @@
+"""
+作业传输系统 - 数据模型模块
+
+本模块定义系统的数据模型和数据持久化操作，主要功能包括：
+- 定义用户类(User)以支持Flask-Login
+- 用户数据的加载和保存
+- 用户创建与验证
+- 用户资料更新
+
+User类提供以下功能：
+- 支持Flask-Login的用户认证接口
+- 区分普通用户和管理员
+- 提供用户资料加载与更新方法
+
+作者: Frank
+版本: 1.0
+日期: 2025-04-04
+"""
+
 import json
 import logging
 from flask_login import UserMixin

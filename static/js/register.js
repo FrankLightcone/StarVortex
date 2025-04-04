@@ -1,3 +1,40 @@
+/**
+ * register.js - 用户注册模块
+ * 
+ * 处理用户注册流程，包括表单验证、验证码发送与验证，以及注册请求的提交。
+ * 
+ * @module register
+ * @requires toast.js
+ * 
+ * 主要功能：
+ * - 注册表单字段验证
+ * - 邮箱验证码发送和倒计时处理
+ * - 用户注册请求处理
+ * - 注册成功后重定向
+ * 
+ * @function validateEmail
+ *   验证邮箱格式是否正确
+ *   @param {string} email - 待验证的邮箱地址
+ *   @returns {boolean} - 返回邮箱是否有效
+ * 
+ * @function startCountdown
+ *   开始验证码发送后的倒计时
+ *   @returns {void}
+ * 
+ * @function updateSendButtonText
+ *   更新发送验证码按钮的文本显示
+ *   @returns {void}
+ * 
+ * 事件监听器：
+ * - DOMContentLoaded: 初始化注册表单和相关组件
+ * - click (sendVerifyCodeBtn): 发送验证码
+ * - click (registerBtn): 提交注册表单
+ * 
+ * Fetch请求：
+ * - POST /send_verify_code: 发送验证码到指定邮箱
+ * - POST /register: 提交注册信息
+ */
+
 document.addEventListener('DOMContentLoaded', function() {
     // 获取页面元素
     const nameInput = document.getElementById('name');

@@ -1,6 +1,25 @@
 /**
- * 改进的登录页面交互脚本
+ * login.js - 用户登录模块
+ * 
+ * 处理用户登录表单和登录逻辑，管理登录请求和响应处理。
+ * 使用fetch API发送异步请求，处理登录成功和失败的情况。
+ * 
+ * @module login
+ * @requires toast.js
+ * 
+ * 主要功能：
+ * - 用户登录表单提交处理
+ * - 登录验证和错误提示
+ * - 登录成功后的页面跳转
+ * 
+ * 事件监听器：
+ * - DOMContentLoaded: 页面加载完成后初始化登录表单
+ * - submit: 监听登录表单提交事件，拦截默认行为，实现AJAX登录
+ * 
+ * Fetch请求：
+ * - POST /login: 发送用户名和密码进行登录验证
  */
+
 document.addEventListener('DOMContentLoaded', function() {
     // 随机背景图
     const campusImages = [

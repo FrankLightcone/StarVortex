@@ -1,4 +1,24 @@
-# ----------------- 管理员功能模块 -----------------
+"""
+作业传输系统 - 管理员功能模块
+
+本模块处理管理员相关的功能，包括：
+- 作业管理（创建、编辑、删除）
+- 查看学生提交情况
+- 下载学生提交的文件
+- 查看系统统计信息
+
+该模块定义了以下路由：
+- /dashboard: 管理员控制面板
+- /assignments: 获取/创建作业
+- /assignments/<assignment_id>: 更新/删除作业
+- /submissions: 获取作业提交情况
+- /file/<course>/<assignment>/<folder>/<filename>: 提供文件下载
+- /download: 下载单个学生提交或整个作业的所有提交
+
+作者: Frank
+版本: 1.0
+日期: 2025-04-04
+"""
 
 import os
 import shutil

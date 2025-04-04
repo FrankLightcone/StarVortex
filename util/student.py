@@ -1,3 +1,27 @@
+"""
+作业传输系统 - 学生功能模块
+
+本模块处理学生相关的功能，主要包括：
+- 文件上传与管理
+- 查看个人提交记录
+- 获取作业统计信息
+- 删除已提交作业
+- 更新个人资料
+- 下载已提交文件
+
+该模块定义了以下路由：
+- /: 学生文件上传页面
+- /my_submissions: 获取当前用户提交记录
+- /assignment_stats: 获取作业统计信息
+- /submission/<course>/<assignment>: 删除提交记录
+- /update_profile: 更新用户个人资料
+- /download/<course>/<assignment>/<filename>: 下载文件
+
+作者: Frank
+版本: 1.0
+日期: 2025-04-04
+"""
+
 import os
 import logging
 import threading

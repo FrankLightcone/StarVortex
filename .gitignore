@@ -10,3 +10,4 @@ util/__pycache__/config.cpython-311.pyc
 /.gitignore
 util/email_config.py
 util/__pycache__
+/.VSCodeCounter/

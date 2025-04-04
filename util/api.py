@@ -1,3 +1,22 @@
+"""
+作业传输系统 - API接口模块
+
+本模块提供系统的REST API接口，用于客户端与服务器间的数据交互。
+主要功能包括：
+- 获取课程作业列表
+- 文件下载API
+- 作业统计信息API
+- 学生提交记录API
+- 用户资料更新API
+- 删除提交记录API
+
+这些API接口主要供前端JavaScript调用，实现无刷新的用户体验。
+
+作者: Frank
+版本: 1.0
+日期: 2025-04-04
+"""
+
 from flask import Blueprint, request, jsonify, send_from_directory, current_app
 from flask_login import login_required, current_user
 
