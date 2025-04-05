@@ -40,16 +40,43 @@ verification_codes = {}
 reset_codes = {}
 
 def send_verification_email(email, code):
-    """发送验证码邮件"""
+    """
+    发送注册验证码邮件
+    
+    Args:
+        email (str): 接收邮件的地址
+        code (str): 注册验证码
+        
+    Returns:
+        bool: 邮件发送是否成功
+    """
     try:
         # 创建邮件
-        msg = MIMEMultipart()
+        msg = MIMEMultipart('alternative')
         msg['From'] = SMTP_USERNAME
         msg['To'] = email
-        msg['Subject'] = '学生作业系统 - 注册验证码'
+        msg['Subject'] = '作业提交系统 - 注册验证码'
 
-        body = f'您的验证码是：{code}\n请在5分钟内完成注册。'
-        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+        # 纯文本邮件内容（兼容不支持HTML的邮件客户端）
+        with open(r'util\email_content\verification_txt.txt', 'r', encoding='utf-8') as f:
+            text_content = f.read()
+        # 替换验证码占位符
+        text_content = text_content.format(code=code)
+        
+        # HTML邮件内容
+        with open(r'util\email_content\verification_html.html', 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        # 替换验证码占位符
+        html_content = html_content.format(code=code, year=datetime.datetime.now().year)
+        
+        # 添加两种格式的内容
+        part1 = MIMEText(text_content, 'plain', 'utf-8')
+        part2 = MIMEText(html_content, 'html', 'utf-8')
+        
+        # 先添加纯文本格式，再添加HTML格式
+        # （邮件客户端会优先显示后添加的HTML格式，不支持HTML的客户端则显示纯文本）
+        msg.attach(part1)
+        msg.attach(part2)
 
         # 发送邮件
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
@@ -57,6 +84,7 @@ def send_verification_email(email, code):
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
             server.sendmail(SMTP_USERNAME, [email], msg.as_string())
         
+        logging.info(f'Verification email sent to {email}')
         return True
     except Exception as e:
         logging.error(f'Email sending error: {e}')
@@ -75,26 +103,30 @@ def send_reset_password_email(email, code):
     """
     try:
         # 创建邮件
-        msg = MIMEMultipart()
+        msg = MIMEMultipart('alternative')
         msg['From'] = SMTP_USERNAME
         msg['To'] = email
         msg['Subject'] = '作业提交系统 - 密码重置验证码'
 
-        # 邮件正文
-        email_body = f"""
-        您好，
+        # 纯文本邮件内容（兼容不支持HTML的邮件客户端）
+        with open(r'util\email_content\reset_password_txt.txt', 'r', encoding='utf-8') as f:
+            text_content = f.read()
+        text_content = text_content.format(code=code)
         
-        您正在重置作业提交系统的账户密码。
+        # HTML邮件内容
+        with open(r'util\email_content\reset_password_html.html', 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        # 替换验证码占位符
+        html_content = html_content.format(code=code, year=datetime.datetime.now().year)
         
-        您的验证码是: {code}
+        # 添加两种格式的内容
+        part1 = MIMEText(text_content, 'plain', 'utf-8')
+        part2 = MIMEText(html_content, 'html', 'utf-8')
         
-        该验证码将在5分钟后失效。如果不是您本人操作，请忽略此邮件。
-        
-        此致，
-        作业提交系统团队
-        """
-        
-        msg.attach(MIMEText(email_body, 'plain', 'utf-8'))
+        # 先添加纯文本格式，再添加HTML格式
+        # （邮件客户端会优先显示后添加的HTML格式，不支持HTML的客户端则显示纯文本）
+        msg.attach(part1)
+        msg.attach(part2)
 
         # 发送邮件
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:

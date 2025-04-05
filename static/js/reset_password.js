@@ -2,6 +2,7 @@
  * reset_password.js - 密码重置模块
  * 
  * 处理用户密码重置流程，包括邮箱验证、验证码输入和密码重置。
+ * 修复了验证码验证成功后切换到密码重置步骤时的抖动问题。
  * 
  * @module reset_password
  * 
@@ -11,32 +12,6 @@
  * - 验证码分离输入框控制
  * - 验证码有效期倒计时显示
  * - 密码重置请求处理
- * 
- * @function showToast
- *   显示提示消息
- *   @param {string} message - 通知消息内容
- *   @param {string} type - 通知类型，'error'或'success'
- *   @param {number} duration - 显示时长（毫秒）
- * 
- * @function showStep
- *   显示指定步骤并隐藏其他步骤
- *   @param {number} stepNumber - 步骤序号
- * 
- * @function startCodeTimer
- *   开始验证码有效期倒计时
- *   @param {number} duration - 倒计时时长（秒）
- * 
- * 事件监听器：
- * - DOMContentLoaded: 初始化页面组件和事件监听
- * - submit (emailForm): 处理邮箱验证和验证码发送
- * - click (verifyCodeBtn): 验证输入的验证码
- * - submit (passwordForm): 提交新密码并重置
- * - input, keydown, focus, paste (验证码输入框): 处理验证码输入体验
- * 
- * Fetch请求：
- * - POST /send_reset_code: 发送重置密码验证码
- * - POST /verify_reset_code: 验证重置密码验证码
- * - POST /reset_password: 提交新密码重置
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -120,31 +95,48 @@ document.addEventListener('DOMContentLoaded', function() {
         }, duration);
     }
     
-    // 显示指定步骤
+    // 显示指定步骤（修复版本）
     function showStep(stepNumber) {
         const steps = document.querySelectorAll('.step');
         
-        steps.forEach((step, index) => {
-            if (index + 1 === stepNumber) {
-                step.classList.remove('hidden');
+        // 首先，给当前要隐藏的步骤添加淡出动画
+        if (currentStep !== stepNumber) {
+            const currentStepElement = steps[currentStep - 1];
+            currentStepElement.classList.add('fade-out');
+            
+            // 等待淡出动画完成后，再显示新步骤
+            setTimeout(() => {
+                // 隐藏所有步骤
+                steps.forEach(step => {
+                    step.classList.add('hidden');
+                    step.classList.remove('fade-in', 'fade-out');
+                });
+                
+                // 显示目标步骤
+                const targetStep = steps[stepNumber - 1];
+                targetStep.classList.remove('hidden');
+                
                 // 添加淡入动画
-                step.classList.add('fade-in');
-                setTimeout(() => {
-                    step.classList.remove('fade-in');
-                }, 500);
-            } else {
-                // 添加淡出动画
-                if (!step.classList.contains('hidden')) {
-                    step.classList.add('fade-out');
+                targetStep.classList.add('fade-in');
+                
+                // 更新当前步骤
+                currentStep = stepNumber;
+                
+                // 如果是步骤3，聚焦到新密码输入框
+                if (stepNumber === 3 && newPasswordInput) {
                     setTimeout(() => {
-                        step.classList.add('hidden');
-                        step.classList.remove('fade-out');
-                    }, 500);
+                        newPasswordInput.focus();
+                    }, 100);
                 }
-            }
-        });
-        
-        currentStep = stepNumber;
+                
+                // 如果是步骤2，聚焦到第一个验证码输入框
+                if (stepNumber === 2 && codeInputs.length > 0) {
+                    setTimeout(() => {
+                        codeInputs[0].focus();
+                    }, 100);
+                }
+            }, 300); // 等待300ms，与CSS中的动画时间匹配
+        }
     }
     
     // 格式化时间 (将秒转为 MM:SS 格式)
@@ -366,11 +358,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     // 进入第二步
                     showStep(2);
                     
-                    // 聚焦第一个验证码输入框
-                    setTimeout(() => {
-                        codeInputs[0].focus();
-                    }, 500);
-                    
                     // 开始计时器
                     startCodeTimer(300); // 5分钟
                     
@@ -478,15 +465,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         clearInterval(timerInterval);
                     }
                     
-                    // 进入第三步
-                    showStep(3);
-                    
-                    // 聚焦密码输入框
-                    setTimeout(() => {
-                        newPasswordInput.focus();
-                    }, 500);
-                    
+                    // 显示成功提示
                     showToast('验证成功，请设置新密码', 'success');
+                    
+                    // 进入第三步（先允许验证按钮复位，再切换步骤）
+                    setTimeout(() => {
+                        showStep(3);
+                    }, 50);
                 } else {
                     showToast(data.message || '验证码错误或已过期', 'error');
                     showCodeError();
