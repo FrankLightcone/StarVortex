@@ -170,3 +170,37 @@ def get_all_assignments():
             })
     
     return jsonify({'assignments': all_assignments})
+
+@api_bp.route('/get_assignment_settings')
+@login_required
+def get_assignment_settings():
+    """获取作业的高级设置"""
+    course = request.args.get('course')
+    assignment = request.args.get('assignment')
+    
+    if not course or not assignment:
+        return jsonify({'settings': get_default_settings()})
+    
+    # 获取作业信息
+    assignments = load_assignments()
+    assignment_obj = next((a for a in assignments if a['course'] == course and a['name'] == assignment), None)
+    
+    if not assignment_obj:
+        return jsonify({'settings': get_default_settings()})
+    
+    # 获取高级设置，如果不存在则使用默认设置
+    settings = assignment_obj.get('advancedSettings', get_default_settings())
+    
+    return jsonify({'settings': settings})
+
+def get_default_settings():
+    """获取默认的高级设置"""
+    return {
+        'maxFileCount': 10,
+        'maxFileSize': 256,
+        'fileSizeUnit': 'MB',
+        'dailyQuota': 1,
+        'allowedTypes': ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'gif', 'zip', 'rar', 'txt', 'csv'],
+        'enableGrading': False,
+        'enableFeedback': False
+    }

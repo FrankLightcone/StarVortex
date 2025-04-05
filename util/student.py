@@ -31,8 +31,9 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
 from util.config import UPLOAD_FOLDER, allowed_file
-from util.utils import load_course_config, compress_folder, format_file_size
+from util.utils import load_course_config, compress_folder, format_file_size, load_assignments
 from util.models import load_users, save_users
+from util.api import get_default_settings
 
 import json
 from datetime import datetime
@@ -82,10 +83,64 @@ def upload_file():
             logging.warning('No selected file')
             return jsonify({'status': 'error', 'message': '没有选择文件'}), 400
         
-        # 检查文件类型
-        if not allowed_file(file.filename):
-            logging.warning(f'File type not allowed: {file.filename}')
-            return jsonify({'status': 'error', 'message': '不支持的文件类型'}), 400
+        # 获取作业设置
+        assignments = load_assignments()
+        assignment_obj = next((a for a in assignments if a['course'] == course and a['name'] == assignment_name), None)
+        
+        # 使用默认或自定义设置
+        settings = assignment_obj.get('advancedSettings', get_default_settings()) if assignment_obj else get_default_settings()
+        
+        # 检查文件扩展名是否在允许列表中
+        file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+        
+        if settings['allowedTypes'] and file_extension not in settings['allowedTypes']:
+            allowed_types = ', '.join(settings['allowedTypes'])
+            return jsonify({'status': 'error', 'message': f'不支持的文件类型，允许的类型: {allowed_types}'}), 400
+        
+        # 检查文件大小
+        max_size_bytes = settings['maxFileSize'] * (1024 * 1024 * 1024 if settings['fileSizeUnit'] == 'GB' else 1024 * 1024)
+        
+        # 获取文件大小（不读取整个文件）
+        file.seek(0, os.SEEK_END)
+        file_size = file.tell()
+        file.seek(0)  # 重置文件指针
+        
+        if file_size > max_size_bytes:
+            size_limit = f"{settings['maxFileSize']} {settings['fileSizeUnit']}"
+            return jsonify({'status': 'error', 'message': f'文件超过大小限制 ({size_limit})'}), 400
+        
+        # 检查每日上传限额
+        student_id = users[current_user.id]['student_id']
+        
+        if settings['dailyQuota']:
+            daily_quota_bytes = settings['dailyQuota'] * 1024 * 1024 * 1024  # GB to bytes
+            
+            # 获取今日上传总量
+            today = datetime.date.today()
+            today_uploads = get_today_upload_size(student_id, today)
+            
+            # 检查是否超过限额
+            if today_uploads + file_size > daily_quota_bytes:
+                return jsonify({'status': 'error', 'message': f'超过每日上传限额 ({settings["dailyQuota"]} GB)'}), 400
+        
+        # 检查文件数量限制
+        if settings['maxFileCount']:
+            # 创建课程和作业文件夹结构
+            course_folder = os.path.join(UPLOAD_FOLDER, course)
+            assignment_folder = os.path.join(course_folder, assignment_name)
+            
+            # 确保文件夹存在
+            os.makedirs(assignment_folder, exist_ok=True)
+            
+            # 创建以学生信息命名的子文件夹
+            student_folder_name = f"{student_id}_{current_user.id}"
+            student_folder = os.path.join(assignment_folder, student_folder_name)
+            
+            # 检查文件数量
+            if os.path.exists(student_folder):
+                existing_files = [f for f in os.listdir(student_folder) if os.path.isfile(os.path.join(student_folder, f))]
+                if len(existing_files) >= settings['maxFileCount']:
+                    return jsonify({'status': 'error', 'message': f'已达到最大文件数量限制 ({settings["maxFileCount"]} 个文件)'}), 400
         
         try:
             # 安全处理原始文件名
@@ -133,6 +188,9 @@ def upload_file():
             )
             t.start()
             
+            # 记录今日上传量
+            update_daily_upload_record(student_id, file_size)
+            
             return jsonify({
                 'status': 'success', 
                 'message': '文件上传成功', 
@@ -148,6 +206,55 @@ def upload_file():
             }), 500
     
     return render_template('upload.html', courses=courses, course_config=config, **user_info)
+
+# 添加用于跟踪每日上传量的函数
+def get_today_upload_size(student_id, date):
+    """获取学生当天的上传总量"""
+    upload_record_file = 'daily_uploads.json'
+    date_str = date.strftime('%Y-%m-%d')
+    
+    try:
+        # 加载记录
+        if os.path.exists(upload_record_file):
+            with open(upload_record_file, 'r', encoding='utf-8') as f:
+                records = json.load(f)
+        else:
+            records = {}
+        
+        # 获取学生记录
+        student_records = records.get(student_id, {})
+        return student_records.get(date_str, 0)
+    except Exception as e:
+        logging.error(f'Error getting upload record: {str(e)}')
+        return 0
+
+def update_daily_upload_record(student_id, file_size):
+    """更新学生当天的上传记录"""
+    upload_record_file = 'daily_uploads.json'
+    date_str = datetime.date.today().strftime('%Y-%m-%d')
+    
+    try:
+        # 加载记录
+        if os.path.exists(upload_record_file):
+            with open(upload_record_file, 'r', encoding='utf-8') as f:
+                records = json.load(f)
+        else:
+            records = {}
+        
+        # 更新学生记录
+        if student_id not in records:
+            records[student_id] = {}
+        
+        if date_str not in records[student_id]:
+            records[student_id][date_str] = 0
+        
+        records[student_id][date_str] += file_size
+        
+        # 保存记录
+        with open(upload_record_file, 'w', encoding='utf-8') as f:
+            json.dump(records, f)
+    except Exception as e:
+        logging.error(f'Error updating upload record: {str(e)}')
 
 @student_bp.route('/my_submissions', methods=['GET'])
 @login_required

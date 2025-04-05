@@ -21,10 +21,12 @@
 """
 
 import os
+import io
+import xlsxwriter
 import shutil
 import datetime
 import zipfile
-from flask import Blueprint, render_template, request, jsonify, send_from_directory
+from flask import Blueprint, render_template, request, jsonify, send_from_directory, send_file
 from flask_login import current_user
 
 from util.auth import admin_required
@@ -96,6 +98,7 @@ def create_assignment():
         'name': data['name'],
         'dueDate': data['dueDate'],
         'description': data.get('description', ''),
+        'advancedSettings': data.get('advancedSettings', None),  # 保存高级设置
         'createdAt': datetime.datetime.now().isoformat()
     }
     
@@ -131,6 +134,7 @@ def update_assignment(assignment_id):
             assignments[i]['name'] = data['name']
             assignments[i]['dueDate'] = data['dueDate']
             assignments[i]['description'] = data.get('description', '')
+            assignments[i]['advancedSettings'] = data.get('advancedSettings', None)  # 更新高级设置
             assignments[i]['updatedAt'] = datetime.datetime.now().isoformat()
             
             # 保存更改
@@ -385,3 +389,215 @@ def download_submissions():
         
         # 提供zip文件下载
         return send_from_directory(assignment_path, zip_filename, as_attachment=True)
+
+#region 导出作业提交统计为Excel文件
+@admin_bp.route('/export-stats')
+@admin_required
+def export_stats():
+    """导出作业提交统计为Excel文件"""
+    course = request.args.get('course')
+    assignment = request.args.get('assignment')
+    
+    if not course or not assignment:
+        return jsonify({'status': 'error', 'message': '缺少课程或作业名称参数'}), 400
+    
+    # 获取作业详情
+    assignment_obj = next((a for a in load_assignments() if a['course'] == course and a['name'] == assignment), None)
+    if not assignment_obj:
+        return jsonify({'status': 'error', 'message': '作业不存在'}), 404
+    
+    # 获取所有学生信息
+    users = load_users()
+    students = [
+        {'username': username, 'name': info.get('name', ''), 'student_id': info.get('student_id', ''), 'email': info.get('email', '')} 
+        for username, info in users.items() 
+        if not info.get('is_admin', False)
+    ]
+    
+    # 创建内存中的Excel文件
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet("提交统计")
+    
+    # 添加标题样式
+    header_format = workbook.add_format({
+        'bold': True,
+        'bg_color': '#4B5563',
+        'color': 'white',
+        'border': 1,
+        'align': 'center',
+        'valign': 'vcenter',
+        'text_wrap': True
+    })
+    
+    # 添加单元格样式
+    cell_format = workbook.add_format({
+        'border': 1,
+        'align': 'center',
+        'valign': 'vcenter'
+    })
+    
+    # 添加日期格式
+    date_format = workbook.add_format({
+        'border': 1,
+        'align': 'center',
+        'valign': 'vcenter',
+        'num_format': 'yyyy-mm-dd hh:mm:ss'
+    })
+    
+    # 添加未提交样式(红色)
+    not_submitted_format = workbook.add_format({
+        'border': 1,
+        'align': 'center',
+        'valign': 'vcenter',
+        'color': 'red',
+        'bold': True
+    })
+    
+    # 添加提交样式(绿色)
+    submitted_format = workbook.add_format({
+        'border': 1,
+        'align': 'center',
+        'valign': 'vcenter',
+        'color': 'green',
+        'bold': True
+    })
+    
+    # 添加逾期提交样式(橙色)
+    late_format = workbook.add_format({
+        'border': 1,
+        'align': 'center',
+        'valign': 'vcenter',
+        'color': 'orange',
+        'bold': True
+    })
+
+    # 表头
+    headers = ['序号', '学号', '姓名', '邮箱', '提交时间', '提交状态', '文件数量', '文件大小(总计)']
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header, header_format)
+    
+    # 设置列宽
+    worksheet.set_column(0, 0, 5)  # 序号
+    worksheet.set_column(1, 1, 12)  # 学号
+    worksheet.set_column(2, 2, 12)  # 姓名
+    worksheet.set_column(3, 3, 25)  # 邮箱
+    worksheet.set_column(4, 4, 18)  # 提交时间
+    worksheet.set_column(5, 5, 10)  # 提交状态
+    worksheet.set_column(6, 6, 10)  # 文件数量
+    worksheet.set_column(7, 7, 15)  # 文件大小
+    
+    # 获取提交情况
+    assignment_path = os.path.join(UPLOAD_FOLDER, course, assignment)
+    submissions = {}
+    
+    if os.path.exists(assignment_path):
+        for folder in os.listdir(assignment_path):
+            folder_path = os.path.join(assignment_path, folder)
+            if os.path.isdir(folder_path) and not folder.endswith('.zip'):
+                # 文件夹名称格式: student_id_username
+                parts = folder.split('_', 1)
+                if len(parts) < 2:
+                    continue
+                    
+                student_id = parts[0]
+                username = parts[1]
+                
+                # 获取文件列表和总大小
+                files = []
+                total_size = 0
+                latest_time = None
+                
+                for file in os.listdir(folder_path):
+                    file_path = os.path.join(folder_path, file)
+                    if os.path.isfile(file_path):
+                        file_size = os.path.getsize(file_path)
+                        file_time = os.path.getmtime(file_path)
+                        
+                        if latest_time is None or file_time > latest_time:
+                            latest_time = file_time
+                        
+                        total_size += file_size
+                        files.append({
+                            'name': file,
+                            'size': file_size,
+                            'time': file_time
+                        })
+                
+                # 记录提交信息
+                submissions[username] = {
+                    'student_id': student_id,
+                    'files': files,
+                    'file_count': len(files),
+                    'total_size': total_size,
+                    'latest_time': latest_time
+                }
+    
+    # 获取截止时间
+    due_date = datetime.datetime.fromisoformat(assignment_obj['dueDate'])
+    
+    # 填充数据
+    for row, student in enumerate(students, 1):
+        username = student['username']
+        submission = submissions.get(username)
+        
+        worksheet.write(row, 0, row, cell_format)  # 序号
+        worksheet.write(row, 1, student['student_id'], cell_format)  # 学号
+        worksheet.write(row, 2, student['name'], cell_format)  # 姓名
+        worksheet.write(row, 3, student['email'], cell_format)  # 邮箱
+        
+        if submission:
+            # 有提交记录
+            submission_time = datetime.datetime.fromtimestamp(submission['latest_time'])
+            worksheet.write_datetime(row, 4, submission_time, date_format)  # 提交时间
+            
+            # 判断是否逾期提交
+            if submission_time > due_date:
+                worksheet.write(row, 5, "逾期提交", late_format)  # 提交状态
+            else:
+                worksheet.write(row, 5, "已提交", submitted_format)  # 提交状态
+                
+            worksheet.write(row, 6, submission['file_count'], cell_format)  # 文件数量
+            worksheet.write(row, 7, format_file_size(submission['total_size']), cell_format)  # 文件大小
+        else:
+            # 无提交记录
+            worksheet.write(row, 4, "未提交", cell_format)  # 提交时间
+            worksheet.write(row, 5, "未提交", not_submitted_format)  # 提交状态
+            worksheet.write(row, 6, 0, cell_format)  # 文件数量
+            worksheet.write(row, 7, "0 B", cell_format)  # 文件大小
+    
+    # 添加统计信息
+    summary_row = len(students) + 2
+    bold_format = workbook.add_format({'bold': True, 'align': 'right'})
+    
+    worksheet.write(summary_row, 0, "统计信息:", bold_format)
+    worksheet.write(summary_row, 1, "总人数:", bold_format)
+    worksheet.write(summary_row, 2, len(students), cell_format)
+    
+    worksheet.write(summary_row + 1, 1, "已提交:", bold_format)
+    worksheet.write(summary_row + 1, 2, len(submissions), cell_format)
+    
+    worksheet.write(summary_row + 2, 1, "提交率:", bold_format)
+    submission_rate = f"{(len(submissions) / len(students) * 100) if len(students) > 0 else 0:.1f}%"
+    worksheet.write(summary_row + 2, 2, submission_rate, cell_format)
+    
+    worksheet.write(summary_row + 3, 1, "逾期提交:", bold_format)
+    late_count = sum(1 for username, data in submissions.items() 
+                   if datetime.datetime.fromtimestamp(data['latest_time']) > due_date)
+    worksheet.write(summary_row + 3, 2, late_count, cell_format)
+    
+    # 关闭工作簿并获取输出
+    workbook.close()
+    output.seek(0)
+    
+    # 生成文件名
+    filename = f"{course}_{assignment}_提交统计_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+    
+    # 发送文件
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+

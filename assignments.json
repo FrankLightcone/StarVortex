@@ -3,9 +3,11 @@
     "id": "1",
     "course": "GNSS",
     "name": "卫星星历误差计算",
-    "dueDate": "2025-04-10T23:05",
+    "dueDate": "2025-04-19T23:05",
     "description": "提交代码和图表",
-    "createdAt": "2025-04-03T23:05:35.862771"
+    "createdAt": "2025-04-03T23:05:35.862771",
+    "advancedSettings": null,
+    "updatedAt": "2025-04-05T20:40:39.418716"
   },
   {
     "id": "2",

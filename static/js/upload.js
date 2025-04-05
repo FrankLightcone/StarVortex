@@ -520,19 +520,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             assignmentSubmissionCount.textContent = data.stats.submissionCount;
                             assignmentStatus.textContent = data.stats.status;
                             mySubmissionStatus.textContent = data.stats.mySubmission;
-
-                            // 清除所有可能存在的颜色类
-                            console.log(assignmentStatus.classList);
                             
                             // 根据状态修改颜色
                             if (data.stats.status === "已截止") {
-                                assignmentStatus.classList.remove('text-blue-600');
                                 assignmentStatus.classList.add('text-red-600');
+                                assignmentStatus.classList.remove('text-blue-600');
                             } else {
-                                assignmentStatus.classList.remove('text-red-600');
                                 assignmentStatus.classList.add('text-blue-600');
+                                assignmentStatus.classList.remove('text-red-600');
                             }
-                            
                             
                             // 根据提交状态修改颜色
                             if (data.stats.hasSubmitted) {
@@ -542,13 +538,39 @@ document.addEventListener('DOMContentLoaded', function() {
                                 mySubmissionStatus.classList.add('text-red-600');
                                 mySubmissionStatus.classList.remove('text-green-600');
                             }
-
-                            console.log('assignmentStatus:', assignmentStatus);
-                            console.log('innerText:', assignmentStatus.textContent);
-
                             
                             // 显示作业信息
                             assignmentInfo.classList.remove('hidden');
+                            
+                            // 获取并显示文件限制信息
+                            fetchAssignmentSettings(selectedCourse, selectedAssignment)
+                                .then(settings => {
+                                    // 找到或创建文件限制信息区域
+                                    let fileLimitsElement = document.getElementById('fileLimitsInfo');
+                                    if (!fileLimitsElement) {
+                                        fileLimitsElement = document.createElement('div');
+                                        fileLimitsElement.id = 'fileLimitsInfo';
+                                        fileLimitsElement.className = 'flex flex-wrap mt-2 text-xs text-gray-500';
+                                        assignmentInfo.appendChild(fileLimitsElement);
+                                    }
+                                    
+                                    // 显示文件限制信息
+                                    const maxFileSize = `${settings.maxFileSize} ${settings.fileSizeUnit}`;
+                                    fileLimitsElement.innerHTML = `
+                                        <div class="file-limit-badge mr-2 mb-1">
+                                            <i class="fas fa-file"></i> 最多 ${settings.maxFileCount} 个文件
+                                        </div>
+                                        <div class="file-limit-badge mr-2 mb-1">
+                                            <i class="fas fa-hdd"></i> 单文件限制 ${maxFileSize}
+                                        </div>
+                                        <div class="file-limit-badge mb-1">
+                                            <i class="fas fa-file-alt"></i> 允许的类型: ${settings.allowedTypes.join(', ')}
+                                        </div>
+                                    `;
+                                })
+                                .catch(error => {
+                                    console.error('获取文件限制信息失败:', error);
+                                });
                         }
                     })
                     .catch(error => {
@@ -559,8 +581,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 更新上传按钮状态
             updateUploadButtonState();
-        });
-    }
+        });    }
 
     // 拖拽事件处理
     if (dropZone) {
@@ -612,16 +633,103 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (files.length === 0) return;
         
-        // 添加文件到列表
-        for (let i = 0; i < files.length; i++) {
-            addFileToList(files[i]);
+        // 获取当前选择的作业信息
+        const course = courseSelect.value;
+        const assignment = assignmentSelect.value;
+        
+        if (!course || !assignment) {
+            showToast('请先选择课程和作业', 'error');
+            return;
         }
         
-        // 重置文件输入框，以便可以再次选择相同的文件
-        fileInput.value = '';
-        
-        // 更新上传按钮状态
-        updateUploadButtonState();
+        // 获取作业的高级设置
+        fetchAssignmentSettings(course, assignment)
+            .then(settings => {
+                // 验证文件数量限制
+                if (settings.maxFileCount && (selectedFiles.length + files.length) > settings.maxFileCount) {
+                    showToast(`此作业最多允许上传 ${settings.maxFileCount} 个文件`, 'error');
+                    return;
+                }
+                
+                // 验证文件类型和大小
+                const invalidFiles = [];
+                const oversizedFiles = [];
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    
+                    // 验证文件类型
+                    const fileExtension = file.name.split('.').pop().toLowerCase();
+                    if (settings.allowedTypes && settings.allowedTypes.length > 0 && 
+                        !settings.allowedTypes.includes(fileExtension)) {
+                        invalidFiles.push(file.name);
+                        continue;
+                    }
+                    
+                    // 验证文件大小
+                    const maxSizeBytes = settings.maxFileSize * 
+                        (settings.fileSizeUnit === 'GB' ? 1024 * 1024 * 1024 : 1024 * 1024);
+                    if (file.size > maxSizeBytes) {
+                        oversizedFiles.push(file.name);
+                        continue;
+                    }
+                    
+                    // 文件验证通过，添加到上传列表
+                    addFileToList(file);
+                }
+                
+                // 显示错误信息
+                if (invalidFiles.length > 0) {
+                    showToast(`以下文件类型不被允许: ${invalidFiles.join(', ')}`, 'error');
+                }
+                
+                if (oversizedFiles.length > 0) {
+                    const sizeLimit = `${settings.maxFileSize} ${settings.fileSizeUnit}`;
+                    showToast(`以下文件超过大小限制(${sizeLimit}): ${oversizedFiles.join(', ')}`, 'error');
+                }
+                
+                // 更新上传按钮状态
+                updateUploadButtonState();
+            })
+            .catch(error => {
+                console.error('获取作业设置失败:', error);
+                
+                // 如果无法获取设置，使用默认验证
+                for (let i = 0; i < files.length; i++) {
+                    addFileToList(files[i]);
+                }
+                
+                // 更新上传按钮状态
+                updateUploadButtonState();
+            });
+    }
+
+    // 获取作业高级设置
+    async function fetchAssignmentSettings(course, assignment) {
+        try {
+            const response = await fetch(`/get_assignment_settings?course=${encodeURIComponent(course)}&assignment=${encodeURIComponent(assignment)}`);
+            if (!response.ok) {
+                throw new Error('获取作业设置失败');
+            }
+            const data = await response.json();
+            return data.settings || getDefaultSettings();
+        } catch (error) {
+            console.error('Error fetching assignment settings:', error);
+            return getDefaultSettings();
+        }
+    }
+
+    // 默认设置
+    function getDefaultSettings() {
+        return {
+            maxFileCount: 10,
+            maxFileSize: 256,
+            fileSizeUnit: 'MB',
+            dailyQuota: 1,
+            allowedTypes: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'jpg', 'jpeg', 'png', 'gif', 'zip', 'rar', 'txt', 'csv'],
+            enableGrading: false,
+            enableFeedback: false
+        };
     }
 
     // 添加文件到列表
