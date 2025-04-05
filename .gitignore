@@ -11,3 +11,4 @@ util/__pycache__/config.cpython-311.pyc
 util/email_config.py
 util/__pycache__
 /.VSCodeCounter/
+/logs

@@ -2,30 +2,19 @@
   "courses": [
     {
       "name": "GNSS",
-      "assignments": [
-        "卫星星历误差计算",
-        "已过期的作业"
-      ]
+      "assignments": []
     },
     {
       "name": "DIP",
-      "assignments": [
-        "进行频率域滤波"
-      ]
+      "assignments": []
     },
     {
       "name": "地理学原理",
-      "assignments": [
-        "计算路网",
-        "地图标记"
-      ]
+      "assignments": []
     },
     {
       "name": "误差理论",
-      "assignments": [
-        "条件误差",
-        "条件平差"
-      ]
+      "assignments": []
     }
   ]
 }

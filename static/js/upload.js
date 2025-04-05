@@ -1474,66 +1474,73 @@ document.addEventListener('DOMContentLoaded', function() {
     const courseInput = document.getElementById('course');
     const assignmentDropdown = document.getElementById('assignmentDropdown');
     const assignmentInput = document.getElementById('assignment_name');
-    
+
+    // 添加空值检查
+    if (courseDropdown && courseInput && assignmentDropdown && assignmentInput) {
     // 监听课程选择变化
     courseDropdown.addEventListener('valueChanged', function(e) {
-      const selectedCourse = e.detail.value;
-      courseInput.value = selectedCourse;
-      
-      // 重置作业下拉菜单
-      resetAssignmentDropdown();
-      
-      if (selectedCourse) {
+        const selectedCourse = e.detail.value;
+        courseInput.value = selectedCourse;
+        
+        // 重置作业下拉菜单
+        resetAssignmentDropdown();
+        
+        if (selectedCourse) {
         // 启用作业下拉菜单
         enableDropdown(assignmentDropdown);
         
         // 从服务器获取课程对应的作业列表
         fetch(`/get_assignments?course=${encodeURIComponent(selectedCourse)}`)
-          .then(response => response.json())
-          .then(data => {
+            .then(response => response.json())
+            .then(data => {
             if (data.assignments && data.assignments.length > 0) {
-              // 更新作业下拉选项
-              updateDropdownOptions(assignmentDropdown, [
+                // 更新作业下拉选项
+                updateDropdownOptions(assignmentDropdown, [
                 { value: '', text: '请选择作业' },
                 ...data.assignments.map(assignment => ({ value: assignment, text: assignment }))
-              ]);
+                ]);
             } else {
-              updateDropdownOptions(assignmentDropdown, [
+                updateDropdownOptions(assignmentDropdown, [
                 { value: '', text: '该课程暂无作业' }
-              ]);
+                ]);
             }
-          })
-          .catch(error => {
+            })
+            .catch(error => {
             console.error('获取作业列表失败:', error);
             updateDropdownOptions(assignmentDropdown, [
-              { value: '', text: '加载作业失败' }
+                { value: '', text: '加载作业失败' }
             ]);
-          });
-      } else {
+            });
+        } else {
         // 禁用作业下拉菜单
         disableDropdown(assignmentDropdown);
         updateDropdownOptions(assignmentDropdown, [
-          { value: '', text: '请先选择课程' }
+            { value: '', text: '请先选择课程' }
         ]);
-      }
-      
-      // 更新作业信息
-      updateAssignmentInfo('', '');
+        }
+        
+        // 更新作业信息
+        updateAssignmentInfo('', '');
     });
     
     // 监听作业选择变化
     assignmentDropdown.addEventListener('valueChanged', function(e) {
-      const selectedAssignment = e.detail.value;
-      assignmentInput.value = selectedAssignment;
-      
-      // 更新作业信息
-      updateAssignmentInfo(courseInput.value, selectedAssignment);
+        const selectedAssignment = e.detail.value;
+        assignmentInput.value = selectedAssignment;
+        
+        // 更新作业信息
+        updateAssignmentInfo(courseInput.value, selectedAssignment);
     });
-    
-    // 函数：初始化所有自定义下拉菜单
+    }
+
+    // 初始化自定义下拉菜单函数
     function initCustomDropdowns() {
-      // 获取所有自定义下拉菜单
-      const dropdowns = document.querySelectorAll('.custom-dropdown');
+    // 获取所有自定义下拉菜单
+    const dropdowns = document.querySelectorAll('.custom-dropdown');
+    if (!dropdowns || dropdowns.length === 0) {
+        console.log('页面上没有找到自定义下拉菜单元素');
+        return; // 如果没有找到元素，提前退出函数
+    }
       
       dropdowns.forEach(dropdown => {
         const selected = dropdown.querySelector('.dropdown-selected');

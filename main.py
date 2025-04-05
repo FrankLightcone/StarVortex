@@ -10,13 +10,13 @@
 - 启动Web服务器
 
 作者: Frank
-版本: 1.0
-日期: 2025-04-04
+版本: 1.1
+日期: 2025-04-05
 """
 
 import os
 import logging
-from flask import Flask
+from flask import Flask, request
 from flask_login import LoginManager
 
 # 导入模块
@@ -26,15 +26,7 @@ from util.auth import auth_bp
 from util.student import student_bp
 from util.admin import admin_bp
 from util.api import api_bp
-
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO, 
-    format='%(asctime)s - %(levelname)s: %(message)s',
-    filename='file_upload.log',  # 将日志写入文件
-    filemode='a',  # 追加模式
-    encoding="utf-8"
-)
+from util.logging_config import setup_logging  # 导入我们的增强日志配置
 
 def create_app():
     app = Flask(__name__)
@@ -44,6 +36,9 @@ def create_app():
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
     app.config['APP_ALREADY_STARTED'] = False  # 用于标记应用是否已经启动
+    
+    # 设置增强的日志配置
+    setup_logging(app, log_level=logging.DEBUG)  # 开发时使用DEBUG级别
     
     # 确保上传目录存在
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -62,6 +57,26 @@ def create_app():
     app.register_blueprint(student_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(api_bp)
+    
+    # 添加请求日志中间件
+    @app.before_request
+    def log_request_info():
+        app.logger.debug('Headers: %s', dict(request.headers))
+        # 优雅之处理请求体日志，避免二进制文件内容污染日志
+        raw_data = request.get_data()
+        if raw_data:
+            try:
+                text = raw_data.decode('utf-8')
+                # 只截取前 500 个字符
+                snippet = text[:500] + ('...' if len(text) > 500 else '')
+                app.logger.debug('Body: (text, %d bytes): %s', len(raw_data), snippet)
+            except UnicodeDecodeError:
+                app.logger.debug('Body: <binary data: %d bytes>', len(raw_data))
+        app.logger.debug('Request: %s %s', request.method, request.path)
+        if request.form:
+            app.logger.debug('Form data: %s', dict(request.form))
+        if request.files:
+            app.logger.debug('Files: %s', request.files.keys())
     
     # 应用启动前，确保配置文件存在
     @app.before_request
@@ -82,6 +97,19 @@ def create_app():
             # 确保用户数据文件存在
             if not os.path.exists('users.json'):
                 save_users({})
+            
+            app.logger.info("应用程序初始化完成")
+    
+    # 全局错误处理
+    @app.errorhandler(500)
+    def internal_error(error):
+        app.logger.error('Server Error: %s', error)
+        return '服务器内部错误，请查看日志文件了解详情', 500
+    
+    @app.errorhandler(404)
+    def not_found_error(error):
+        app.logger.warning('Page not found: %s', request.path)
+        return '页面未找到', 404
     
     return app
 
