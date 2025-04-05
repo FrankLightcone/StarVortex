@@ -735,13 +735,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // 添加文件到列表
     function addFileToList(file) {
         // 检查文件类型
-        const fileExtension = file.name.split('.').pop().toLowerCase();
-        const allowedExtensions = ['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'xls', 'xlsx', 'zip', 'rar', 'mp3', 'mp4', 'csv', 'ppt', 'pptx'];
-        
-        if (!allowedExtensions.includes(fileExtension)) {
-            showToast(`不支持的文件类型: ${file.name}`, 'error');
-            return;
-        }
+        // 默认允许所有类型，但在作业配置中会有限制
+        // const fileExtension = file.name.split('.').pop().toLowerCase();
+        // const allowedExtensions = ['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx', 'xls', 'xlsx', 'zip', 'rar', 'mp3', 'mp4', 'csv', 'ppt', 'pptx'];
+
+        // if (!allowedExtensions.includes(fileExtension)) {
+        //     showToast(`不支持的文件类型: ${file.name}`, 'error');
+        //     return;
+        // }
         
         // 生成唯一ID
         const fileId = Date.now().toString(36) + Math.random().toString(36).substr(2);

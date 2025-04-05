@@ -66,7 +66,7 @@ def setup_logging(app, log_level=logging.INFO):
     werkzeug_logger.addHandler(console_handler)
     werkzeug_logger.setLevel(log_level)
     
-    # 配置SQLAlchemy日志记录器（如果使用）
+    # 配置SQLAlchemy日志记录器
     # sqlalchemy_logger = logging.getLogger('sqlalchemy.engine')
     # sqlalchemy_logger.addHandler(file_handler)
     # sqlalchemy_logger.setLevel(logging.WARNING)
