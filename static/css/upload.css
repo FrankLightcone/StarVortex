@@ -167,7 +167,7 @@
     font-weight: 500;
     font-size: 1rem;
     margin-top: 0.25rem;
-    color: var(--gray-800);
+    /* color: var(--gray-800); */
   }
   
   /* ===== 文件上传区域 ===== */

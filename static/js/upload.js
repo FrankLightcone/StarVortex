@@ -324,8 +324,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+    //region跳转到作业提交页面
     /**
-     * 跳转到作业提交页面
      * @param {string} course - 课程名称
      * @param {string} assignmentName - 作业名称
      */
@@ -398,11 +398,13 @@ document.addEventListener('DOMContentLoaded', function() {
             tabButtons.forEach(btn => {
                 btn.classList.remove('text-blue-600', 'border-blue-500');
                 btn.classList.add('text-gray-500', 'border-transparent');
+                btn.classList.remove('active');
             });
             
             button.classList.remove('text-gray-500', 'border-transparent');
             button.classList.add('text-blue-600', 'border-blue-500');
-            
+            button.classList.add('active');
+
             // 切换标签页内容
             tabContents.forEach(content => {
                 content.classList.remove('active');
@@ -518,15 +520,19 @@ document.addEventListener('DOMContentLoaded', function() {
                             assignmentSubmissionCount.textContent = data.stats.submissionCount;
                             assignmentStatus.textContent = data.stats.status;
                             mySubmissionStatus.textContent = data.stats.mySubmission;
+
+                            // 清除所有可能存在的颜色类
+                            console.log(assignmentStatus.classList);
                             
                             // 根据状态修改颜色
                             if (data.stats.status === "已截止") {
+                                assignmentStatus.classList.remove('text-blue-600');
                                 assignmentStatus.classList.add('text-red-600');
-                                assignmentStatus.classList.remove('text-green-600');
                             } else {
-                                assignmentStatus.classList.add('text-green-600');
                                 assignmentStatus.classList.remove('text-red-600');
+                                assignmentStatus.classList.add('text-blue-600');
                             }
+                            
                             
                             // 根据提交状态修改颜色
                             if (data.stats.hasSubmitted) {
@@ -536,6 +542,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                 mySubmissionStatus.classList.add('text-red-600');
                                 mySubmissionStatus.classList.remove('text-green-600');
                             }
+
+                            console.log('assignmentStatus:', assignmentStatus);
+                            console.log('innerText:', assignmentStatus.textContent);
+
                             
                             // 显示作业信息
                             assignmentInfo.classList.remove('hidden');
@@ -1265,6 +1275,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 个人设置表单提交事件
+    // 在个人设置表单提交事件中添加更好的错误处理
     if (profileForm) {
         profileForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1274,10 +1285,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const newPassword = profileNewPassword.value;
             const confirmPassword = profileConfirmPassword.value;
             
+            // 添加基本验证
+            if (newPassword && !currentPassword) {
+                showToast('更改密码时必须输入当前密码', 'error');
+                return;
+            }
+            
             if (newPassword !== confirmPassword) {
                 showToast('新密码与确认密码不一致', 'error');
                 return;
             }
+            
+            // 显示加载状态
+            const submitBtn = profileForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <svg class="animate-spin h-4 w-4 mr-2 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                更新中...
+            `;
             
             fetch('/update_profile', {
                 method: 'POST',
@@ -1292,15 +1321,36 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
+                // 恢复按钮状态
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                
                 if (data.status === 'success') {
-                    showToast('个人设置更新成功', 'success');
+                    // 清空密码字段
+                    profileCurrentPassword.value = '';
+                    profileNewPassword.value = '';
+                    profileConfirmPassword.value = '';
+                    
+                    showToast(data.message || '个人设置更新成功', 'success');
+                    
+                    // 检查是否需要重新登录
+                    if (data.requireRelogin) {
+                        setTimeout(() => {
+                            showToast('用户名已更改，3秒后将跳转到登录页面', 'success');
+                            setTimeout(() => {
+                                window.location.href = '/logout';
+                            }, 3000);
+                        }, 1000);
+                    }
                 } else {
                     showToast(data.message || '更新失败', 'error');
                 }
             })
             .catch(error => {
                 console.error('更新个人设置失败:', error);
-                showToast('更新个人设置失败', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                showToast('网络错误，请稍后重试', 'error');
             });
         });
     }

@@ -5,6 +5,8 @@
     <title>作业提交系统</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="/static/css/upload.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -352,16 +354,16 @@
                                     姓名 <span class="text-xs text-red-500">(姓名将用于作业文件夹命名，请使用真实姓名)</span>
                                 </label>
                                 <div class="mt-1 relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class="fas fa-user text-gray-400"></i>
-                                    </div>
                                     <input 
                                         type="text" 
                                         id="profile_name" 
                                         name="profile_name" 
-                                        class="form-input block w-full pl-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                        class="form-input block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                                         value="{{ user_name }}"
                                     >
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-user text-gray-400"></i>
+                                    </div>
                                 </div>
                             </div>
 
@@ -370,7 +372,7 @@
                                     邮箱
                                 </label>
                                 <div class="mt-1 relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                         <i class="fas fa-envelope text-gray-400"></i>
                                     </div>
                                     <input 
@@ -389,7 +391,7 @@
                                     学号
                                 </label>
                                 <div class="mt-1 relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                         <i class="fas fa-id-card text-gray-400"></i>
                                     </div>
                                     <input 
@@ -412,7 +414,7 @@
                                         当前密码
                                     </label>
                                     <div class="mt-1 relative">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                             <i class="fas fa-lock text-gray-400"></i>
                                         </div>
                                         <input 
@@ -429,7 +431,7 @@
                                         新密码
                                     </label>
                                     <div class="mt-1 relative">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                             <i class="fas fa-key text-gray-400"></i>
                                         </div>
                                         <input 
@@ -446,7 +448,7 @@
                                         确认新密码
                                     </label>
                                     <div class="mt-1 relative">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                             <i class="fas fa-check-circle text-gray-400"></i>
                                         </div>
                                         <input 
