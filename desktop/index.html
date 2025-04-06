@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>作业提交系统</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 浮动按钮，用于显示/隐藏面板 -->
+    <button id="toggleBtn" class="toggle-button" title="显示/隐藏控制面板">≡</button>
+    
+    <!-- 主要网页视图 -->
+    <div id="webviewContainer">
+      <webview id="webview" src="loading.html" allowpopups webpreferences="allowRunningInsecureContent=yes, javascript=yes" useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"></webview>
+    </div>
+    
+    <!-- 控制面板 -->
+    <div id="controlPanel" class="panel">
+      <div class="panel-content">
+        <label for="serverUrl">服务器地址:</label>
+        <input type="text" id="serverUrl" placeholder="输入服务器URL" spellcheck="false" autocomplete="url">
+        <button id="refreshBtn">刷新连接</button>
+      </div>
+    </div>
+
+    <!-- 状态面板 -->
+    <div id="statusPanel" class="panel">
+      <div class="panel-content">
+        <span id="statusLabel">正在连接服务器...</span>
+        <span class="spacer"></span>
+        <span id="contactLabel">需要帮助? 联系管理员: <a href="mailto:fanrj3@mail2.sysu.edu.cn">fanrj3@mail2.sysu.edu.cn</a></span>
+      </div>
+    </div>
+  </div>
+  
+  <script src="renderer.js"></script>
+</body>
+</html>

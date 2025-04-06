@@ -1,0 +1,248 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body, html {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    overflow: hidden;
+    background-color: #f8f9fa;
+  }
+  
+  #app {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+ /* 面板样式 */
+ .panel {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(10px);
+    overflow: hidden;
+    margin: 8px;
+    z-index: 50;
+    width: calc(100% - 16px);
+  }
+  .panel-content {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  
+ /* 控制面板 */
+ #controlPanel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform-origin: top;
+  }
+  
+  #controlPanel label {
+    margin-right: 12px;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+  }
+  
+  #serverUrl {
+    flex: 1;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-right: 12px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    min-width: 200px;
+  }
+  
+  /* 状态面板 */
+  #statusPanel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform-origin: bottom;
+  }
+  
+  /* 确保状态面板内容正确对齐 */
+  #statusLabel {
+    color: #1fd46b;
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  
+  /* 联系信息 */
+  #contactLabel {
+    color: #a1d466;
+    font-size: 13px;
+    white-space: nowrap;
+    text-align: right;
+  }
+  
+  .spacer {
+    flex: 1;
+  }
+  
+  /* 刷新按钮 */
+  #refreshBtn {
+    background-color: #4dabf7;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    padding: 8px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  #refreshBtn:hover {
+    background-color: #339af0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  #refreshBtn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+ /* 增强浮动按钮 */
+ .toggle-button {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2); /* 提高透明度 */
+    color: rgba(51, 51, 51, 0.3); /* 提高文字透明度 */
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px); /* 添加模糊效果使按钮更好辨识 */
+  }
+  
+  .toggle-button:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #333;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
+  }
+  
+  .toggle-button:active {
+    transform: scale(0.98);
+  }
+  
+  /* 网页视图容器 */
+ #webviewContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    border-radius: 8px;
+    margin: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    width: calc(100% - 16px);
+    height: calc(100vh - 16px);
+  }
+  
+  webview {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: white;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+  }
+  
+  webview.ready {
+    opacity: 1;
+  }
+  
+  /* 链接样式 */
+  a {
+    color: #4dabf7;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  a:hover {
+    color: #339af0;
+    text-decoration: underline;
+  }
+  
+  /* 动画类 */
+ .hidden {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+    box-shadow: none;
+  }
+  
+  #statusPanel.hidden {
+    transform: translateY(100%);
+  }
+  
+  .visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* 确保面板完全隐藏时不占用空间 */
+  .panel.hidden {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  
+  /* 优化响应式布局 */
+  @media (max-width: 768px) {
+    .panel-content {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    #serverUrl {
+      margin-right: 0;
+      margin-bottom: 8px;
+    }
+    
+    #refreshBtn {
+      width: 100%;
+    }
+    
+    #statusPanel .panel-content {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .spacer {
+      display: none;
+    }
+    
+    #contactLabel {
+      margin-top: 8px;
+    }
+  }
