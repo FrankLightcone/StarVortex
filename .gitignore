@@ -12,3 +12,4 @@ util/email_config.py
 util/__pycache__
 /.VSCodeCounter/
 /logs
+flask.log

@@ -6,8 +6,54 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="/static/css/login.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        #loading-screen {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: linear-gradient(135deg, #ffffff, #f0f0f0);
+          z-index: 9999;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          transition: opacity 0.6s ease;
+        }
+      
+        #loading-screen.fade-out {
+          opacity: 0;
+          pointer-events: none;
+        }
+      
+        .spinner {
+          width: 60px;
+          height: 60px;
+          border: 6px solid rgba(0,0,0,0.1);
+          border-top: 6px solid #3498db;
+          border-radius: 50%;
+          animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+        }
+      
+        @keyframes spin {
+          0%   { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      
+        .loading-text {
+          margin-top: 15px;
+          font-size: 1.2em;
+          color: #333;
+          font-family: 'Segoe UI', sans-serif;
+        }
+      </style>
 </head>
 <body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <div class="loading-text">加载中，请稍候...</div>
+    </div>
     <!-- 随机背景图 -->
     <div id="bgContainer" class="bg-container"></div>
     <div class="bg-overlay"></div>
@@ -120,7 +166,13 @@
             &copy; 2025 作业提交系统 | 遥感科学与技术 | 中山大学
         </div>
     </div>
-
+    <script>
+        window.addEventListener('load', function () {
+          const loading = document.getElementById('loading-screen');
+          loading.classList.add('fade-out');
+          setTimeout(() => loading.remove(), 800); // 过渡后移除节点，防止影响页面交互
+        });
+    </script>
     <script src="/static/js/login.js"></script>
 </body>
 </html>

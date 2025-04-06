@@ -38,7 +38,7 @@ def create_app():
     app.config['APP_ALREADY_STARTED'] = False  # 用于标记应用是否已经启动
     
     # 设置增强的日志配置
-    setup_logging(app, log_level=logging.DEBUG)  # 开发时使用DEBUG级别
+    setup_logging(app, log_level=logging.INFO)  # 开发时使用DEBUG级别
     
     # 确保上传目录存在
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -116,4 +116,4 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     # 注意：为局域网访问，host设置为'0.0.0.0'
-    app.run(host='0.0.0.0', port=10099, debug=True)
+    app.run(host='0.0.0.0', port=10099)

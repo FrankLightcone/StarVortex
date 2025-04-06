@@ -58,13 +58,13 @@ def send_verification_email(email, code):
         msg['Subject'] = '作业提交系统 - 注册验证码'
 
         # 纯文本邮件内容（兼容不支持HTML的邮件客户端）
-        with open(r'util\email_content\verification_txt.txt', 'r', encoding='utf-8') as f:
+        with open(r'util/email_content/verification_txt.txt', 'r', encoding='utf-8') as f:
             text_content = f.read()
         # 替换验证码占位符
         text_content = text_content.format(code=code)
         
         # HTML邮件内容
-        with open(r'util\email_content\verification_html.html', 'r', encoding='utf-8') as f:
+        with open(r'util/email_content/verification_html.html', 'r', encoding='utf-8') as f:
             html_content = f.read()
         # 替换验证码占位符
         html_content = html_content.format(code=code, year=datetime.datetime.now().year)
@@ -109,12 +109,12 @@ def send_reset_password_email(email, code):
         msg['Subject'] = '作业提交系统 - 密码重置验证码'
 
         # 纯文本邮件内容（兼容不支持HTML的邮件客户端）
-        with open(r'util\email_content\reset_password_txt.txt', 'r', encoding='utf-8') as f:
+        with open(r'util/email_content/reset_password_txt.txt', 'r', encoding='utf-8') as f:
             text_content = f.read()
         text_content = text_content.format(code=code)
         
         # HTML邮件内容
-        with open(r'util\email_content\reset_password_html.html', 'r', encoding='utf-8') as f:
+        with open(r'util/email_content/reset_password_html.html', 'r', encoding='utf-8') as f:
             html_content = f.read()
         # 替换验证码占位符
         html_content = html_content.format(code=code, year=datetime.datetime.now().year)
