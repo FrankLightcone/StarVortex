@@ -10,7 +10,11 @@
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux"
   },
-  "author": "",
+  "author": {
+    "name": "Frank",
+    "email": "fanrj3@mail2.sysu.edu.cn"
+  },
+  "homepage": "https://github.com/FrankLightcone/hw_transfer_app",
   "license": "ISC",
   "devDependencies": {
     "electron": "^29.4.6",
@@ -42,7 +46,9 @@
         "AppImage",
         "deb"
       ],
-      "category": "Education"
+      "category": "Education",
+      "maintainer": "Frank <fanrj3@mail2.sysu.edu.cn>",
+      "icon": "resource/icon.png"
     },
     "publish": [
       {
