@@ -1,5 +1,5 @@
 // main.js - 修改以集成更新功能
-const { app, BrowserWindow, ipcMain, Menu, session } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, session, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const Store = require('electron-store');
@@ -121,6 +121,9 @@ app.whenReady().then(() => {
       }
     });
   });
+  globalShortcut.register('CommandOrControl+Shift+i', function () {
+    mainWindow.webContents.openDevTools()
+  })
   
   createWindow();
 });

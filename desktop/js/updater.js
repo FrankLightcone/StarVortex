@@ -1,4 +1,5 @@
 // updater.js - 桌面客户端自动更新模块
+/* eslint-disable no-console */
 
 const { app, dialog, BrowserWindow, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
@@ -153,16 +154,16 @@ async function checkForUpdates(force = false) {
   }
   
   // 如果不是强制检查且最近检查时间在间隔内，跳过检查
-  if (!force && updateConfig.lastCheck) {
-    const lastCheck = new Date(updateConfig.lastCheck);
-    const now = new Date();
-    const hoursSinceLastCheck = (now - lastCheck) / (1000 * 60 * 60);
+  // if (!force && updateConfig.lastCheck) {
+  //   const lastCheck = new Date(updateConfig.lastCheck);
+  //   const now = new Date();
+  //   const hoursSinceLastCheck = (now - lastCheck) / (1000 * 60 * 60);
     
-    if (hoursSinceLastCheck < updateConfig.checkInterval) {
-      console.log(`距上次检查仅 ${hoursSinceLastCheck.toFixed(1)} 小时，跳过检查`);
-      return { skipped: true };
-    }
-  }
+  //   if (hoursSinceLastCheck < updateConfig.checkInterval) {
+  //     console.log(`距上次检查仅 ${hoursSinceLastCheck.toFixed(1)} 小时，跳过检查`);
+  //     return { skipped: true };
+  //   }
+  // }
   
   // 更新检查状态
   updateStatus.checking = true;

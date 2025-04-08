@@ -74,6 +74,30 @@
     right: 0;
     transform-origin: bottom;
   }
+
+  /* 更新检查按钮 */
+ .update-check-button {
+  background-color: #10b981;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left: 8px;
+}
+
+ .update-check-button:hover {
+  background-color: #059669;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+ .update-check-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
   
   /* 确保状态面板内容正确对齐 */
   #statusLabel {

@@ -26,10 +26,10 @@ async function initApp() {
     // 确保webview初始加载正确的loading页面
     try {
       const loadingPath = await window.electronAPI.getLoadingPath();
-      console.log('加载页面路径:', loadingPath);
+      console.log('Loading page path:', loadingPath);
       webview.src = loadingPath;
     } catch (e) {
-      console.warn('无法获取loading路径，使用相对路径:', e);
+      console.log('Configuration loaded successfully:', config);
       webview.src = 'loading.html';
     }
     
@@ -37,7 +37,7 @@ async function initApp() {
     const savedConfig = await window.electronAPI.getConfig();
     if (savedConfig) {
       config = savedConfig;
-      console.log('成功加载配置:', config);
+      console.log('Configuration loaded successfully::', config);
     }
     
     // 设置服务器地址输入框
@@ -46,7 +46,7 @@ async function initApp() {
     // 开始检查连接
     startConnectionCheck();
   } catch (error) {
-    console.error('初始化应用时出错:', error);
+    console.error('Init Error:', error);
     statusLabel.textContent = '加载配置时出错，使用默认配置';
     
     // 使用默认配置继续
@@ -72,7 +72,7 @@ function startConnectionCheck() {
 // 验证远程服务器
 function checkRemoteServer() {
   checkCount++;
-  console.log(`第${checkCount}次尝试连接服务器: ${config.remoteUrl}`);
+  console.log(`Attempt ${checkCount} to connect to server: ${config.remoteUrl}`);
   
   if (checkCount > config.maxAttempts) {
     clearInterval(checkTimer);
@@ -89,7 +89,7 @@ function checkRemoteServer() {
     clearInterval(checkTimer);
     statusLabel.textContent = '连接成功';
     
-    console.log('服务器连接成功，加载页面:', config.remoteUrl);
+    console.log('Server connected successfully, loading page:', config.remoteUrl);
     
     // 确保WebView已正确设置了权限
     webview.classList.add('ready');
@@ -109,7 +109,7 @@ function checkRemoteServer() {
   };
   
   testImg.onerror = (error) => {
-    console.log(`第${checkCount}次尝试失败:`, error);
+    console.log(`Attempt ${checkCount} fallback failed:`, error);
     
     // 备用方法: 使用fetch尝试连接
     fetch(config.remoteUrl, { 
@@ -122,7 +122,7 @@ function checkRemoteServer() {
         clearInterval(checkTimer);
         statusLabel.textContent = '连接成功';
         
-        console.log('使用备用方法连接成功，加载页面:', config.remoteUrl);
+        console.log('Other Ways, Page loaded:', config.remoteUrl);
         
         // 加载远程URL
         webview.classList.add('ready');
@@ -136,7 +136,7 @@ function checkRemoteServer() {
         }, 1000);
       })
       .catch(fetchError => {
-        console.log(`第${checkCount}次备用尝试失败:`, fetchError.message);
+        console.log(`Attempt ${checkCount} fallback failed:`, fetchError.message);
       });
   };
   
@@ -268,7 +268,7 @@ async function refreshConnection() {
   const newUrl = serverUrlInput.value.trim();
   
   if (newUrl) {
-    console.log('刷新连接到:', newUrl);
+    console.log('Refreshing connection to:', newUrl);
     config.remoteUrl = newUrl;
     
     // 清除之前的定时器
@@ -281,12 +281,12 @@ async function refreshConnection() {
     try {
       const result = await window.electronAPI.saveConfig({ remoteUrl: newUrl });
       if (result && result.success) {
-        console.log('配置保存成功');
+        console.log('Configuration saved successfully');
       } else {
-        console.warn('配置保存失败:', result ? result.error : '未知错误');
+        console.warn('Configuration saved successfully', result ? result.error : 'Unknown error');
       }
     } catch (error) {
-      console.error('保存配置时出错:', error);
+      console.error('Error saving configuration:', error);
     }
     
     // 重置状态
@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentUrl = webview.src;
     if (currentUrl && !currentUrl.includes('loading.html') && !currentUrl.startsWith('data:')) {
       pageLoaded = true;
-      console.log('页面加载完成:', currentUrl);
+      console.log('Page loaded:', currentUrl);
       
       // 更新状态信息为加载成功
       statusLabel.textContent = '加载成功';
@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 页面加载失败事件
   webview.addEventListener('did-fail-load', (event) => {
     if (event.errorCode !== -3) { // 忽略 -3 错误，这通常是由于页面重定向导致的
-      console.error('加载失败:', event.errorDescription);
+      console.error('Page load failed:', event.errorDescription);
       statusLabel.textContent = `加载失败: ${event.errorDescription}`;
     }
   });
@@ -368,6 +368,36 @@ document.addEventListener('DOMContentLoaded', () => {
         statusLabel.textContent = `就绪 - ${timeStr}`;
       }, 1000);
     }
+  }
+
+  // 检查更新按钮
+  const checkUpdateBtn = document.getElementById('checkUpdateBtn');
+  if (checkUpdateBtn) {
+    checkUpdateBtn.addEventListener('click', async () => {
+      // 显示检查更新状态
+      statusLabel.textContent = '正在检查更新...';
+      
+      try {
+        // 调用更新检查API
+        const result = await window.electronAPI.checkUpdatesManually();
+        console.log('Update check result:', result);
+        
+        if (result && result.hasUpdate) {
+          statusLabel.textContent = '发现新版本! 正在准备更新...';
+          // 显示更新对话框
+          if (window.showUpdateDialogManually) {
+            window.showUpdateDialogManually();
+          }
+        // } else if (result && result.skipped) {
+        //   statusLabel.textContent = '更新检查已跳过，最近已经检查过';
+        } else {
+          statusLabel.textContent = '您的应用已是最新版本';
+        }
+      } catch (error) {
+        console.error('Update check failed:', error);
+        statusLabel.textContent = '检查更新失败: ' + (error.message || '未知错误');
+      }
+    });
   }
 });
 

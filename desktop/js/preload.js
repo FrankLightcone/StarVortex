@@ -1,102 +1,102 @@
-// preload.js - 在加载网页前执行的脚本，用于安全地暴露主进程功能
+// preload.js - Script executed before loading the webpage, used to safely expose main process functionality
 const { contextBridge, ipcRenderer } = require('electron');
 
-// 向网页安全地暴露API
+// Safely expose API to the webpage
 contextBridge.exposeInMainWorld('electronAPI', {
-  // 获取配置
+  // Get configuration
   getConfig: async () => {
     try {
       return await ipcRenderer.invoke('get-config');
     } catch (error) {
-      console.error('预加载脚本获取配置出错:', error);
-      // 返回默认配置
+      console.error('Error getting config from preload script:', error);
+      // Return default configuration
       return {
         remoteUrl: 'http://172.16.244.156:10099',
         maxAttempts: 5
       };
     }
   },
-  // 保存配置
+  // Save configuration
   saveConfig: async (config) => {
     try {
       return await ipcRenderer.invoke('save-config', config);
     } catch (error) {
-      console.error('预加载脚本保存配置出错:', error);
+      console.error('Error saving config from preload script:', error);
       return { success: false, error: error.message };
     }
   },
-  // 获取loading.html的路径
+  // Get path to loading.html
   getLoadingPath: async () => {
     try {
       return await ipcRenderer.invoke('get-loading-path');
     } catch (error) {
-      console.error('获取loading路径出错:', error);
+      console.error('Error getting loading path:', error);
       return 'loading.html';
     }
   },
   
-  // ===== 更新相关API =====
-  // 检查更新
+  // ===== Update-related APIs =====
+  // Check for updates
   checkForUpdates: async (force = false) => {
     try {
       return await ipcRenderer.invoke('check-for-updates', force);
     } catch (error) {
-      console.error('检查更新出错:', error);
+      console.error('Error checking for updates:', error);
       return { hasUpdate: false, error: error.message };
     }
   },
   
-  // 手动检查更新
+  // Manually check for updates
   checkUpdatesManually: async () => {
     try {
       return await ipcRenderer.invoke('check-updates-manually');
     } catch (error) {
-      console.error('手动检查更新出错:', error);
+      console.error('Error manually checking for updates:', error);
       return { hasUpdate: false, error: error.message };
     }
   },
   
-  // 下载更新
+  // Download update
   downloadUpdate: async () => {
     try {
       return await ipcRenderer.invoke('download-update');
     } catch (error) {
-      console.error('下载更新出错:', error);
+      console.error('Error downloading update:', error);
       return { success: false, error: error.message };
     }
   },
   
-  // 安装更新
+  // Install update
   installUpdate: async () => {
     try {
       return await ipcRenderer.invoke('install-update');
     } catch (error) {
-      console.error('安装更新出错:', error);
+      console.error('Error installing update:', error);
       return { success: false, error: error.message };
     }
   },
   
-  // 获取更新状态
+  // Get update status
   getUpdateStatus: async () => {
     try {
       return await ipcRenderer.invoke('get-update-status');
     } catch (error) {
-      console.error('获取更新状态出错:', error);
+      console.error('Error getting update status:', error);
       return { error: error.message };
     }
   },
   
-  // 取消更新
+  // Cancel update
   cancelUpdate: async () => {
     try {
       return await ipcRenderer.invoke('cancel-update');
     } catch (error) {
-      console.error('取消更新出错:', error);
+      console.error('Error canceling update:', error);
       return { success: false, error: error.message };
     }
   },
   
-  // 事件监听器 - 更新相关
+  // Event listeners - Update related
   onUpdateStatusChanged: (callback) => {
     ipcRenderer.on('update-status-changed', (_, status) => callback(status));
     return () => ipcRenderer.removeListener('update-status-changed', callback);
