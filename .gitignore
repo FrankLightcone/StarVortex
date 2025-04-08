@@ -14,3 +14,4 @@ util/__pycache__
 /logs
 flask.log
 /desktop/node_modules
+/desktop/dist

@@ -1,6 +1,6 @@
 {
   "name": "hw_desktop",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "基于Electron的作业提交客户端",
   "main": "main.js",
   "scripts": {
