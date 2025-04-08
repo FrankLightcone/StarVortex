@@ -13,3 +13,4 @@ util/__pycache__
 /.VSCodeCounter/
 /logs
 flask.log
+/desktop/node_modules

@@ -1,8 +1,9 @@
-// main.js - Electron主进程
+// main.js - 修改以集成更新功能
 const { app, BrowserWindow, ipcMain, Menu, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const Store = require('electron-store');
+const updater = require('./js/updater'); // 导入更新模块
 
 // 配置schema以确保正确存储
 const schema = {
@@ -20,18 +21,19 @@ const schema = {
 const store = new Store({ schema });
 
 let mainWindow;
+let updaterInstance; // 存储更新器实例
 
 function createWindow() {
     // 创建浏览器窗口
     mainWindow = new BrowserWindow({
       width: 1560,
       height: 980,
-      icon: path.join(__dirname, 'icon.ico'), // 添加应用图标
+      icon: path.join(__dirname, 'resource/icon.ico'), // 添加应用图标
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
         webviewTag: true, // 确保webview标签可用
-        preload: path.join(__dirname, 'preload.js')
+        preload: path.join(__dirname, 'js/preload.js')
       },
       // 设置背景色，使加载过程更平滑
       backgroundColor: '#f8f9fa'
@@ -48,10 +50,64 @@ function createWindow() {
   // 加载HTML文件
   mainWindow.loadFile('index.html');
 
+  // 初始化更新器
+  initUpdater();
+
   // 窗口关闭事件
   mainWindow.on('closed', function () {
     mainWindow = null;
   });
+}
+
+// 初始化更新器
+function initUpdater() {
+  if (!mainWindow) return;
+  
+  // 从服务器URL提取更新服务器URL
+  const serverUrl = store.get('remoteUrl') || 'http://172.16.244.156:10099';
+  const updateServerUrl = `${serverUrl}/api/update`;
+  
+  // 初始化更新器
+  updaterInstance = updater.initialize(mainWindow, {
+    serverUrl: updateServerUrl,
+    autoDownload: true, // 自动下载更新
+    showNotification: true // 显示通知
+  });
+  
+  // 检查命令行参数，如果是从更新启动的，显示提示
+  if (process.argv.includes('--updated')) {
+    setTimeout(() => {
+      if (mainWindow) {
+        // 显示更新成功消息
+        const appVersion = app.getVersion();
+        mainWindow.webContents.send('show-update-success', appVersion);
+      }
+    }, 2000);
+  } else {
+    // 应用启动后检查更新
+    setTimeout(() => {
+      checkForUpdates();
+    }, 5000); // 延迟5秒检查，确保应用已完全加载
+  }
+}
+
+// 检查更新
+async function checkForUpdates() {
+  if (!updaterInstance) return;
+  
+  try {
+    const result = await updaterInstance.checkForUpdates();
+    
+    // 如果有强制更新，通知用户
+    if (result && result.hasUpdate && result.forceUpdate && mainWindow) {
+      mainWindow.webContents.send('force-update-available', result.versionInfo);
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('检查更新时出错:', error);
+    return { error: error.message };
+  }
 }
 
 // 应用准备就绪时创建窗口
@@ -112,4 +168,9 @@ ipcMain.handle('save-config', (event, config) => {
 // 添加获取loading.html路径的处理器
 ipcMain.handle('get-loading-path', () => {
   return path.join('file://', __dirname, 'loading.html');
+});
+
+// 手动检查更新 - 添加IPC处理器
+ipcMain.handle('check-updates-manually', async () => {
+  return await checkForUpdates();
 });

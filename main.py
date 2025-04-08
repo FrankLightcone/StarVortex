@@ -27,6 +27,7 @@ from util.student import student_bp
 from util.admin import admin_bp
 from util.api import api_bp
 from util.logging_config import setup_logging  # 导入我们的增强日志配置
+from util.update_api import update_api_bp # 导入更新API模块
 
 def create_app():
     app = Flask(__name__)
@@ -57,6 +58,7 @@ def create_app():
     app.register_blueprint(student_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(api_bp)
+    app.register_blueprint(update_api_bp, url_prefix='/api/update')
     
     # 添加请求日志中间件
     @app.before_request
