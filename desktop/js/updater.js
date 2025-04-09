@@ -225,6 +225,7 @@ async function checkForUpdates(force = false) {
       }
       
       // 如果启用了通知且非自动下载，显示更新通知
+      console.log(updateConfig.showNotification, updateConfig.autoDownload);
       if (updateConfig.showNotification && !updateConfig.autoDownload) {
         showUpdateNotification(data.latestVersion);
       }
@@ -464,21 +465,36 @@ async function installWindowsUpdate(installerPath) {
       return;
     }
     
-    // 启动安装程序
-    // 使用elevated权限运行安装程序
-    const process = spawn(installerPath, ['--updated'], {
+    // 修改启动方式，使用 execFile 而不是 spawn
+    const { execFile } = require('child_process');
+    
+    // 确保路径没有问题
+    const safePath = `"${installerPath}"`;
+    console.log('启动安装程序:', safePath);
+    
+    // 使用 shell execute 启动安装程序
+    const child = execFile(installerPath, ['--updated'], {
       detached: true,
       stdio: 'ignore',
       shell: true
     });
     
-    // 分离进程，使其独立运行
-    process.unref();
+    // 添加事件处理器以确保安装程序启动
+    child.on('error', (err) => {
+      console.error('启动安装程序失败:', err);
+      dialog.showErrorBox('更新错误', `启动安装程序失败: ${err.message}`);
+    });
     
-    // 退出应用
-    app.quit();
+    // 确保分离进程
+    child.unref();
+    
+    // 延迟退出应用，给安装程序一点时间启动
+    setTimeout(() => {
+      app.quit();
+    }, 1000);
   } catch (error) {
     console.error('安装Windows更新失败:', error);
+    dialog.showErrorBox('更新错误', `安装更新失败: ${error.message}`);
     throw error;
   }
 }
