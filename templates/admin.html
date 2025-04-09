@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>作业传输系统 - 管理员</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        #toast {
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .assignment-item:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        .student-submission:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Toast Notification -->
+    <div 
+        id="toast" 
+        class="fixed top-4 left-1/2 z-50 px-4 py-2 bg-red-500 text-white rounded-lg shadow-lg text-center"
+    >
+        提示信息
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <img src="/static/img/logo.png" alt="Logo" class="h-8 w-auto">
+                        <span class="ml-2 text-xl font-bold text-gray-800">作业传输系统管理</span>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-gray-700 mr-4">管理员: <span id="adminName">{{ admin_name }}</span></span>
+                    <a href="/logout" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                        退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 标签页头部 -->
+        <div class="border-b border-gray-200 mb-6">
+            <nav class="-mb-px flex">
+                <button id="tabAssignments" class="tab-button text-blue-600 border-blue-500 py-4 px-6 border-b-2 font-medium text-sm leading-5 focus:outline-none">
+                    作业管理
+                </button>
+                <button id="tabSubmissions" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-6 border-b-2 border-transparent font-medium text-sm leading-5 focus:outline-none">
+                    提交情况
+                </button>
+            </nav>
+        </div>
+
+        <!-- 作业管理标签页 -->
+        <div id="assignmentsTab" class="tab-content active">
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+                <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                        作业发布管理
+                    </h3>
+                    <button id="addAssignmentBtn" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        发布作业
+                    </button>
+                </div>
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="mb-4">
+                        <label for="courseFilter" class="block text-sm font-medium text-gray-700 mb-1">
+                            课程筛选
+                        </label>
+                        <select 
+                            id="courseFilter" 
+                            class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                        >
+                            <option value="">全部课程</option>
+                            {% for course in courses %}
+                            <option value="{{ course }}">{{ course }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="overflow-hidden rounded-md border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        课程
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        作业名称
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        截止日期
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        状态
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        提交数量
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        操作
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="assignmentsList" class="bg-white divide-y divide-gray-200">
+                                <!-- 动态加载作业列表 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 提交情况标签页 -->
+        <div id="submissionsTab" class="tab-content">
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="px-4 py-5 sm:px-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                        作业提交情况
+                    </h3>
+                </div>
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label for="submissionCourseFilter" class="block text-sm font-medium text-gray-700 mb-1">
+                                课程筛选
+                            </label>
+                            <select 
+                                id="submissionCourseFilter" 
+                                class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            >
+                                <option value="">请选择课程</option>
+                                {% for course in courses %}
+                                <option value="{{ course }}">{{ course }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="submissionAssignmentFilter" class="block text-sm font-medium text-gray-700 mb-1">
+                                作业筛选
+                            </label>
+                            <select 
+                                id="submissionAssignmentFilter" 
+                                class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                disabled
+                            >
+                                <option value="">请先选择课程</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-sm text-gray-600">
+                            <span id="submissionStats">请选择课程和作业名称查看提交情况</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button 
+                                id="exportSubmissionsBtn" 
+                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled
+                            >
+                                <i class="fas fa-file-excel mr-1.5"></i>导出统计
+                            </button>
+                            <button 
+                                id="downloadAllBtn" 
+                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled
+                            >
+                                下载所有提交
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-hidden rounded-md border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        学号
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        姓名
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        提交时间
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        文件数量
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        操作
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="submissionsList" class="bg-white divide-y divide-gray-200">
+                                <!-- 动态加载提交列表 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑作业弹窗 -->
+    <div id="assignmentModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-lg font-medium text-gray-900">发布作业</h3>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form id="assignmentForm">
+                <input type="hidden" id="assignmentId" value="">
+                
+                <!-- Tabs for Basic and Advanced Settings -->
+                <div class="border-b border-gray-200 mb-6">
+                    <nav class="-mb-px flex space-x-8">
+                        <button type="button" id="basicSettingsTab" class="assignment-tab text-blue-600 border-blue-500 py-4 px-1 border-b-2 font-medium text-sm leading-5 focus:outline-none">
+                            基本设置
+                        </button>
+                        <button type="button" id="advancedSettingsTab" class="assignment-tab text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 border-transparent font-medium text-sm leading-5 focus:outline-none">
+                            高级设置
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Basic Settings Panel -->
+                <div id="basicSettingsPanel" class="assignment-panel active">
+                    <div class="mb-4">
+                        <label for="courseName" class="block text-sm font-medium text-gray-700 mb-1">
+                            课程 <span class="text-red-500">*</span>
+                        </label>
+                        <select 
+                            id="courseName" 
+                            name="courseName" 
+                            required 
+                            class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                        >
+                            <option value="">请选择课程</option>
+                            {% for course in courses %}
+                            <option value="{{ course }}">{{ course }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="assignmentName" class="block text-sm font-medium text-gray-700 mb-1">
+                            作业名称 <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="assignmentName" 
+                            name="assignmentName" 
+                            required 
+                            class="form-input block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            placeholder="例如：实验1、作业2等"
+                        >
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="dueDate" class="block text-sm font-medium text-gray-700 mb-1">
+                            截止日期 <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="datetime-local" 
+                            id="dueDate" 
+                            name="dueDate" 
+                            required 
+                            class="form-input block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                        >
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="assignmentDescription" class="block text-sm font-medium text-gray-700 mb-1">
+                            作业描述 (可选)
+                        </label>
+                        <textarea 
+                            id="assignmentDescription" 
+                            name="assignmentDescription" 
+                            rows="3" 
+                            class="form-input block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            placeholder="描述作业要求..."
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Advanced Settings Panel -->
+                <div id="advancedSettingsPanel" class="assignment-panel hidden">
+                    <!-- File Count Settings -->
+                    <div class="mb-4">
+                        <label for="maxFileCount" class="block text-sm font-medium text-gray-700 mb-1">
+                            最大文件数量
+                        </label>
+                        <div class="flex items-center">
+                            <input 
+                                type="number" 
+                                id="maxFileCount" 
+                                name="maxFileCount" 
+                                min="1" 
+                                value="10" 
+                                class="form-input block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            >
+                            <span class="ml-2 text-sm text-gray-500">个文件</span>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">学生每次作业最多可提交的文件数量，默认为10个</p>
+                    </div>
+
+                    <!-- File Type Settings -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            允许的文件类型
+                        </label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="allowedTypes" value="pdf" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked>
+                                <span class="ml-2 text-sm text-gray-700">PDF</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="allowedTypes" value="doc,docx" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked>
+                                <span class="ml-2 text-sm text-gray-700">Word</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="allowedTypes" value="xls,xlsx" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked>
+                                <span class="ml-2 text-sm text-gray-700">Excel</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="allowedTypes" value="ppt,pptx" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked>
+                                <span class="ml-2 text-sm text-gray-700">PowerPoint</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="allowedTypes" value="jpg,jpeg,png,gif" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked>
+                                <span class="ml-2 text-sm text-gray-700">图片</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="allowedTypes" value="zip,rar" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked>
+                                <span class="ml-2 text-sm text-gray-700">压缩文件</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="allowedTypes" value="txt,csv" class="h-4 w-4 text-blue-600 border-gray-300 rounded" checked>
+                                <span class="ml-2 text-sm text-gray-700">文本文件</span>
+                            </label>
+                        </div>
+                        <div class="mt-2">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="customFileTypesToggle" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-700">自定义文件类型</span>
+                            </label>
+                            <div id="customFileTypesContainer" class="mt-2 hidden">
+                                <input 
+                                    type="text" 
+                                    id="customFileTypes" 
+                                    name="customFileTypes" 
+                                    class="form-input block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                    placeholder="输入文件扩展名，用逗号分隔 (例如: py,java,c)"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Size Settings -->
+                    <div class="mb-4">
+                        <label for="maxFileSize" class="block text-sm font-medium text-gray-700 mb-1">
+                            单个文件大小限制
+                        </label>
+                        <div class="flex items-center">
+                            <input 
+                                type="number" 
+                                id="maxFileSize" 
+                                name="maxFileSize" 
+                                min="1" 
+                                value="256" 
+                                class="form-input block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            >
+                            <select 
+                                id="fileSizeUnit" 
+                                name="fileSizeUnit" 
+                                class="ml-2 form-select block w-24 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            >
+                                <option value="MB">MB</option>
+                                <option value="GB">GB</option>
+                            </select>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">单个文件最大上传大小，系统默认为256MB</p>
+                    </div>
+
+                    <!-- Daily Quota Settings -->
+                    <div class="mb-4">
+                        <label for="dailyQuota" class="block text-sm font-medium text-gray-700 mb-1">
+                            每日上传配额
+                        </label>
+                        <div class="flex items-center">
+                            <input 
+                                type="number" 
+                                id="dailyQuota" 
+                                name="dailyQuota" 
+                                min="1" 
+                                value="1" 
+                                class="form-input block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            >
+                            <span class="ml-2 text-sm text-gray-700">GB / 每天</span>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">每个学生每天最大上传总量，系统默认为1GB</p>
+                    </div>
+
+                    <!-- Grading Settings -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            评分设置
+                        </label>
+                        <div class="flex flex-col space-y-2">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="enableGrading" name="enableGrading" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-700">启用成绩评分功能</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="enableFeedback" name="enableFeedback" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-700">允许学生查看评语和反馈</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end mt-6">
+                    <button
+                        type="button"
+                        id="cancelBtn"
+                        class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-2"
+                    >
+                        取消
+                    </button>
+                    <button
+                        type="submit"
+                        class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 查看提交详情弹窗 -->
+    <div id="submissionDetailModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="submissionDetailTitle" class="text-lg font-medium text-gray-900">提交详情</h3>
+                <button id="closeSubmissionDetailBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="submissionDetail" class="mt-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">学号</p>
+                        <p id="detailStudentId" class="mt-1 text-sm text-gray-900">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">姓名</p>
+                        <p id="detailStudentName" class="mt-1 text-sm text-gray-900">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">提交时间</p>
+                        <p id="detailSubmissionTime" class="mt-1 text-sm text-gray-900">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">截止日期</p>
+                        <p id="detailDueDate" class="mt-1 text-sm text-gray-900">-</p>
+                    </div>
+                </div>
+
+                <h4 class="text-md font-medium text-gray-900 mt-6 mb-2">提交的文件</h4>
+                <div class="overflow-hidden rounded-md border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    文件名
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    大小
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    提交时间
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    操作
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="filesList" class="bg-white divide-y divide-gray-200">
+                            <!-- 动态加载文件列表 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button
+                    type="button"
+                    id="downloadSubmissionBtn"
+                    class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                    下载所有文件
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>

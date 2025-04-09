@@ -1,0 +1,36 @@
+/* 管理员登录页面特定样式 */
+
+/* 输入框聚焦时的样式 */
+.form-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+/* 错误信息框动画效果 */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.error-shake {
+    animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* 管理员登录按钮渐变效果 */
+.admin-login-btn {
+    background-image: linear-gradient(to right, #9333ea, #7e22ce);
+    transition: all 0.3s ease;
+}
+
+.admin-login-btn:hover {
+    background-image: linear-gradient(to right, #7e22ce, #6b21a8);
+    transform: translateY(-1px);
+}
+
+/* 响应式布局调整 */
+@media (max-width: 640px) {
+    .h-20 {
+        height: 4rem;
+    }
+}

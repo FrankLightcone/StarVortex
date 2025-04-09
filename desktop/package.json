@@ -1,0 +1,60 @@
+{
+  "name": "star-vortex",
+  "version": "1.4.0",
+  "description": "基于Electron的作业提交客户端",
+  "main": "main.js",
+  "scripts": {
+    "start": "chcp 65001 && electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win --x64",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "author": {
+    "name": "Frank",
+    "email": "fanrj3@mail2.sysu.edu.cn"
+  },
+  "homepage": "https://github.com/FrankLightcone/hw_transfer_app",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^29.4.6",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "crypto": "^1.0.1",
+    "electron-store": "^8.2.0",
+    "electron-updater": "^6.2.1",
+    "fs-extra": "^11.2.0",
+    "semver": "^7.5.4"
+  },
+  "build": {
+    "appId": "com.frank.star-vortex",
+    "productName": "Star Vortex",
+    "mac": {
+      "category": "public.app-category.education",
+      "icon": "resource/icon.icns"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "resource/icon.ico"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Education",
+      "maintainer": "Frank <fanrj3@mail2.sysu.edu.cn>",
+      "icon": "resource/icon.png"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "http://172.16.244.156:10099/api/update"
+      }
+    ]
+  }
+}

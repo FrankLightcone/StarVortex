@@ -1,0 +1,453 @@
+/* update-ui.css - 更新UI组件样式 */
+
+/* 更新模态框 */
+.update-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .update-modal:not(.hidden) {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .update-modal-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+  }
+  
+  .update-modal:not(.hidden) .update-modal-content {
+    transform: translateY(0);
+  }
+  
+  .update-modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .update-modal-header h3 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+    color: #1e293b;
+  }
+  
+  .update-close-btn {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: #64748b;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+  }
+  
+  .update-close-btn:hover {
+    background-color: #f1f5f9;
+    color: #334155;
+  }
+  
+  .update-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  /* 更新状态容器 */
+  .update-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .update-state.hidden {
+    display: none;
+  }
+  
+  .update-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #f0f9ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  
+  .update-icon i {
+    font-size: 36px;
+    color: #0ea5e9;
+  }
+  
+  /* 加载图标动画 */
+  .update-icon.loading i {
+    animation: spin 1.5s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  /* 成功图标样式 */
+  .update-icon.success {
+    background-color: #ecfdf5;
+  }
+  
+  .update-icon.success i {
+    color: #10b981;
+  }
+  
+  /* 超级成功图标样式 (火箭) */
+  .update-icon.mega-success {
+    background-color: #eff6ff;
+  }
+  
+  .update-icon.mega-success i {
+    color: #3b82f6;
+  }
+  
+  /* 错误图标样式 */
+  .update-icon.error {
+    background-color: #fef2f2;
+  }
+  
+  .update-icon.error i {
+    color: #ef4444;
+  }
+  
+  .update-state h4 {
+    margin: 0 0 8px;
+    font-weight: 600;
+    font-size: 18px;
+    color: #1e293b;
+  }
+  
+  .update-state p {
+    margin: 0 0 16px;
+    color: #64748b;
+    font-size: 14px;
+  }
+  
+  /* 更新说明 */
+  .update-notes {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+    width: 100%;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .update-notes h5 {
+    margin: 0 0 8px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #334155;
+  }
+  
+  #releaseNotesContent {
+    font-size: 13px;
+    color: #475569;
+    white-space: pre-line;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  
+  /* 进度条 */
+  .update-progress-container {
+    width: 100%;
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  
+  .update-progress-bar {
+    height: 100%;
+    background-color: #3b82f6;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  
+  .update-progress-text {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0 0 20px;
+  }
+  
+  /* 按钮样式 */
+  .update-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .update-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+  
+  .update-button.primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .update-button.primary:hover {
+    background-color: #2563eb;
+  }
+  
+  .update-button.secondary {
+    background-color: #f1f5f9;
+    color: #475569;
+  }
+  
+  .update-button.secondary:hover {
+    background-color: #e2e8f0;
+  }
+  
+  /* 错误详情 */
+  .update-error-details {
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 12px;
+    width: 100%;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .update-error-content {
+    font-size: 12px;
+    color: #b91c1c;
+    white-space: pre-wrap;
+    max-height: 100px;
+    overflow-y: auto;
+  }
+  
+  /* 版本信息 */
+  .update-version-info {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+    width: 100%;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #475569;
+  }
+  
+  /* 右下角更新提示 */
+  .update-prompt {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    z-index: 100;
+    transform: translateY(100px);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  
+  .update-prompt:not(.hidden) {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  .update-prompt-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .update-prompt-content i {
+    color: #3b82f6;
+    font-size: 16px;
+  }
+  
+  .update-prompt-content span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+  }
+  
+  #viewUpdateBtn {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  #viewUpdateBtn:hover {
+    background-color: #2563eb;
+  }
+  
+  /* 强制更新弹窗 */
+  .force-update-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .force-update-modal:not(.hidden) {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .force-update-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px;
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+  }
+  
+  .force-update-modal:not(.hidden) .force-update-content {
+    transform: scale(1);
+  }
+  
+  .force-update-header {
+    padding: 16px 20px;
+    background-color: #ef4444;
+    border-bottom: 1px solid #fecaca;
+  }
+  
+  .force-update-header h3 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+    color: white;
+  }
+  
+  .force-update-body {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .force-update-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: #fef2f2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+  
+  .force-update-icon i {
+    font-size: 32px;
+    color: #ef4444;
+  }
+  
+  .force-update-body h4 {
+    margin: 0 0 8px;
+    font-weight: 600;
+    font-size: 18px;
+    color: #1e293b;
+  }
+  
+  .force-update-body p {
+    margin: 0 0 20px;
+    color: #64748b;
+    font-size: 14px;
+  }
+  
+  .force-update-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+  
+  .update-button.force {
+    background-color: #ef4444;
+    color: white;
+  }
+  
+  .update-button.force:hover {
+    background-color: #dc2626;
+  }
+  
+  .update-button.exit {
+    background-color: #f1f5f9;
+    color: #475569;
+  }
+  
+  .update-button.exit:hover {
+    background-color: #e2e8f0;
+  }
+  
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .update-modal-content,
+    .force-update-content {
+      width: 95%;
+    }
+    
+    .update-buttons {
+      flex-direction: column;
+    }
+    
+    .update-button {
+      width: 100%;
+    }
+  }

@@ -1,0 +1,29 @@
+{
+  "courses": [
+    {
+      "name": "GNSS",
+      "assignments": [
+        "广播星历轨道误差统计"
+      ]
+    },
+    {
+      "name": "DIP",
+      "assignments": [
+        "DIPLab2"
+      ]
+    },
+    {
+      "name": "地理学原理",
+      "assignments": [
+        "地图标记",
+        "点阵地图与路网地图制作"
+      ]
+    },
+    {
+      "name": "误差理论",
+      "assignments": [
+        "第二章"
+      ]
+    }
+  ]
+}

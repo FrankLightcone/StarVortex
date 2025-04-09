@@ -1,0 +1,17 @@
+/users.json
+/file_upload.log
+/static/upload
+/util/config.py
+/mail_demo.py
+/.idea
+/__pycache__
+util/__pycache__/config.cpython-312.pyc
+util/__pycache__/config.cpython-311.pyc
+/.gitignore
+util/email_config.py
+util/__pycache__
+/.VSCodeCounter/
+/logs
+flask.log
+/desktop/node_modules
+/desktop/dist
