@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设置</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+  <div class="settings-container">
+    <div class="settings-header">
+      <h2>应用设置</h2>
+      <button id="closeSettingsBtn" class="close-btn">&times;</button>
+    </div>
+    
+    <div class="settings-content">
+      <!-- 更新设置部分 -->
+      <div class="settings-section">
+        <h3>更新设置</h3>
+        <div class="setting-item">
+          <div class="setting-label">
+            <span>自动检查更新</span>
+            <span class="setting-description">应用启动时自动检查是否有新版本</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="autoCheckUpdates" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-label">
+            <span>自动下载更新</span>
+            <span class="setting-description">发现新版本时自动下载更新文件</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="autoDownloadUpdates" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-label">
+            <span>显示更新通知</span>
+            <span class="setting-description">发现新版本时在右下角显示通知</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="showUpdateNotifications" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+        
+        <div class="setting-buttons">
+          <button id="manualCheckUpdatesBtn" class="settings-button primary">
+            <i class="fas fa-sync-alt"></i> 立即检查更新
+          </button>
+        </div>
+      </div>
+      
+      <!-- 版本信息部分 -->
+      <div class="settings-section">
+        <h3>版本信息</h3>
+        <div class="version-info">
+          <div class="current-version">
+            <span class="version-label">当前版本:</span>
+            <span id="currentVersionDisplay" class="version-number">v1.3.8</span>
+          </div>
+          
+          <div class="update-info hidden" id="updateInfoSection">
+            <div class="update-available">
+              <span class="version-label">最新版本:</span>
+              <span id="latestVersionDisplay" class="version-number latest">-</span>
+            </div>
+            
+            <div class="release-notes-container">
+              <h4>更新内容</h4>
+              <div id="releaseNotesDisplay" class="release-notes">
+                加载中...
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 关于部分 -->
+      <div class="settings-section">
+        <h3>关于</h3>
+        <div class="about-links">
+          <a href="#" id="githubLink" class="about-link">
+            <i class="fab fa-github"></i>
+            <span>GitHub 项目</span>
+          </a>
+          
+          <a href="#" id="issueLink" class="about-link">
+            <i class="fas fa-bug"></i>
+            <span>报告问题</span>
+          </a>
+          
+          <a href="#" id="helpLink" class="about-link">
+            <i class="fas fa-question-circle"></i>
+            <span>使用帮助</span>
+          </a>
+        </div>
+        
+        <div class="about-info">
+          <p>开发者: Frank</p>
+          <p>联系邮箱: <a href="mailto:fanrj3@mail2.sysu.edu.cn">fanrj3@mail2.sysu.edu.cn</a></p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="settings-footer">
+      <button id="saveSettingsBtn" class="settings-button primary">保存设置</button>
+      <button id="resetSettingsBtn" class="settings-button secondary">重置默认</button>
+    </div>
+  </div>
+  
+  <script src="js/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,347 @@
+/* settings.css - 设置窗口样式 */
+
+/* 主容器 */
+.settings-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: #333;
+  }
+  
+  /* 标题栏 */
+  .settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid #e1e4e8;
+    background-color: #fff;
+  }
+  
+  .settings-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: #64748b;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+  }
+  
+  .close-btn:hover {
+    background-color: #f1f5f9;
+    color: #334155;
+  }
+  
+  /* 内容区域 */
+  .settings-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  /* 设置分区 */
+  .settings-section {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .settings-section h3 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #334155;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  /* 设置项 */
+  .setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  .setting-item:last-child {
+    border-bottom: none;
+  }
+  
+  .setting-label {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .setting-label span:first-child {
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  
+  .setting-description {
+    font-size: 12px;
+    color: #64748b;
+  }
+  
+  /* 开关按钮 */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+  
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+  }
+  
+  input:checked + .slider {
+    background-color: #3b82f6;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #3b82f6;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+  
+  .slider.round {
+    border-radius: 24px;
+  }
+  
+  .slider.round:before {
+    border-radius: 50%;
+  }
+  
+  /* 设置按钮组 */
+  .setting-buttons {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 16px;
+    gap: 12px;
+  }
+  
+  /* 版本信息 */
+  .version-info {
+    padding: 8px 0;
+  }
+  
+  .current-version, .update-available {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .version-label {
+    font-weight: 500;
+    margin-right: 8px;
+    min-width: 80px;
+  }
+  
+  .version-number {
+    font-family: monospace;
+    padding: 4px 8px;
+    background-color: #f8fafc;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .version-number.latest {
+    background-color: #ecfdf5;
+    border-color: #d1fae5;
+    color: #059669;
+  }
+  
+  .release-notes-container {
+    margin-top: 16px;
+  }
+  
+  .release-notes-container h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+  }
+  
+  .release-notes {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 13px;
+    color: #475569;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-line;
+  }
+  
+  /* 关于部分 */
+  .about-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .about-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #3b82f6;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: #eff6ff;
+    transition: background-color 0.2s, transform 0.1s;
+  }
+  
+  .about-link:hover {
+    background-color: #dbeafe;
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+  
+  .about-link i {
+    font-size: 16px;
+  }
+  
+  .about-info {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  
+  .about-info p {
+    margin: 0 0 8px 0;
+  }
+  
+  .about-info a {
+    color: #3b82f6;
+    text-decoration: none;
+  }
+  
+  .about-info a:hover {
+    text-decoration: underline;
+  }
+  
+  /* 页脚 */
+  .settings-footer {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid #e1e4e8;
+    background-color: #fff;
+  }
+  
+  /* 按钮 */
+  .settings-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .settings-button i {
+    font-size: 14px;
+  }
+  
+  .settings-button.primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .settings-button.primary:hover {
+    background-color: #2563eb;
+  }
+  
+  .settings-button.secondary {
+    background-color: #f1f5f9;
+    color: #475569;
+  }
+  
+  .settings-button.secondary:hover {
+    background-color: #e2e8f0;
+  }
+  
+  /* 辅助类 */
+  .hidden {
+    display: none;
+  }
+  
+  /* 响应式适配 */
+  @media (max-width: 640px) {
+    .settings-header {
+      padding: 10px 16px;
+    }
+    
+    .settings-content {
+      padding: 16px;
+    }
+    
+    .settings-footer {
+      padding: 12px 16px;
+      flex-direction: column;
+    }
+    
+    .settings-button {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .about-links {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
