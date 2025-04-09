@@ -2,12 +2,12 @@
   {
     "id": "1",
     "course": "GNSS",
-    "name": "广播星历轨道误差统计",
-    "dueDate": "2025-04-12T22:05",
+    "name": "lab3：广播星历精度评估",
+    "dueDate": "2025-04-17T00:00",
     "description": "请提交实验报告一份（PDF）、精度对比图、随时间序列图（如有）",
     "advancedSettings": {
       "maxFileCount": 10,
-      "maxFileSize": 100,
+      "maxFileSize": 256,
       "fileSizeUnit": "MB",
       "dailyQuota": 1,
       "allowedTypes": [
@@ -19,86 +19,21 @@
         "png",
         "gif",
         "zip",
-        "rar"
+        "rar",
+        "txt",
+        "csv"
       ],
       "enableGrading": false,
       "enableFeedback": false
     },
-    "createdAt": "2025-04-05T22:07:31.915682"
+    "createdAt": "2025-04-09T13:57:51.064123",
+    "updatedAt": "2025-04-09T19:18:34.497008"
   },
   {
     "id": "2",
-    "course": "DIP",
-    "name": "DIPLab2",
-    "dueDate": "2025-04-12T22:07",
-    "description": "实验2：灰度变换与空间滤波；请提交Matlab代码和相应处理的图像",
-    "advancedSettings": {
-      "maxFileCount": 20,
-      "maxFileSize": 256,
-      "fileSizeUnit": "MB",
-      "dailyQuota": 1,
-      "allowedTypes": [
-        "pdf",
-        "jpg",
-        "jpeg",
-        "png",
-        "gif",
-        "zip",
-        "rar",
-        "m",
-        "tif"
-      ],
-      "enableGrading": false,
-      "enableFeedback": false
-    },
-    "createdAt": "2025-04-05T22:09:14.005705"
-  },
-  {
-    "id": "3",
-    "course": "地理学原理",
-    "name": "地图标记",
-    "dueDate": "2025-04-07T18:00",
-    "description": "提交实验报告和Style文件",
-    "advancedSettings": {
-      "maxFileCount": 10,
-      "maxFileSize": 256,
-      "fileSizeUnit": "MB",
-      "dailyQuota": 1,
-      "allowedTypes": [
-        "pdf",
-        "zip",
-        "rar",
-        "style"
-      ],
-      "enableGrading": false,
-      "enableFeedback": false
-    },
-    "createdAt": "2025-04-05T22:10:19.833114"
-  },
-  {
-    "id": "4",
-    "course": "地理学原理",
-    "name": "点阵地图与路网地图制作",
-    "dueDate": "2025-04-07T22:10",
-    "description": "请提交实验报告",
-    "advancedSettings": {
-      "maxFileCount": 1,
-      "maxFileSize": 256,
-      "fileSizeUnit": "MB",
-      "dailyQuota": 1,
-      "allowedTypes": [
-        "pdf"
-      ],
-      "enableGrading": false,
-      "enableFeedback": false
-    },
-    "createdAt": "2025-04-05T22:12:10.536365"
-  },
-  {
-    "id": "5",
-    "course": "误差理论",
-    "name": "第二章",
-    "dueDate": "2025-03-20T00:00",
+    "course": "地图学原理",
+    "name": "lab3：点阵地图与路网地图制作",
+    "dueDate": "2025-04-13T17:00",
     "description": "",
     "advancedSettings": {
       "maxFileCount": 10,
@@ -125,6 +60,40 @@
       "enableGrading": false,
       "enableFeedback": false
     },
-    "createdAt": "2025-04-05T22:23:07.336589"
+    "createdAt": "2025-04-09T13:58:17.179958",
+    "updatedAt": "2025-04-09T16:11:14.037476"
+  },
+  {
+    "id": "3",
+    "course": "DIP",
+    "name": "lab3：频率域滤波",
+    "dueDate": "2025-04-21T00:00",
+    "description": "",
+    "advancedSettings": {
+      "maxFileCount": 10,
+      "maxFileSize": 256,
+      "fileSizeUnit": "MB",
+      "dailyQuota": 1,
+      "allowedTypes": [
+        "pdf",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+        "ppt",
+        "pptx",
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "zip",
+        "rar",
+        "txt",
+        "csv"
+      ],
+      "enableGrading": false,
+      "enableFeedback": false
+    },
+    "createdAt": "2025-04-09T16:14:20.911800"
   }
 ]

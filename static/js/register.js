@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (studentIdInput) {
         studentIdInput.addEventListener('blur', function() {
-            validateField(this, value => value.length >= 5, '请输入有效的学号');
+            validateField(this, value => /^\d{8}$/.test(value), '学号必须是8位数字');
         });
     }
     

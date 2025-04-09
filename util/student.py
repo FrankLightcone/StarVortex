@@ -26,7 +26,7 @@ import os
 import logging
 import threading
 import zipfile
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
@@ -43,8 +43,22 @@ from flask import jsonify, request, redirect, url_for, send_from_directory
 
 student_bp = Blueprint('student', __name__)
 
+# 学生权限检查装饰器
+def student_required(f):
+    """确保只有学生用户可以访问特定路由"""
+    from functools import wraps
+    
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.is_admin:
+            # 管理员用户重定向到管理员界面
+            return redirect(url_for('admin.dashboard'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @student_bp.route('/', methods=['GET', 'POST'])
 @login_required
+@student_required
 def upload_file():
     """学生文件上传页面"""
     # 获取课程配置
@@ -275,6 +289,7 @@ def update_daily_upload_record(student_id, file_size):
 
 @student_bp.route('/my_submissions', methods=['GET'])
 @login_required
+@student_required
 def get_my_submissions():
     """获取当前用户的所有提交记录"""
     course_filter = request.args.get('course', '')
@@ -369,6 +384,7 @@ def get_my_submissions():
 
 @student_bp.route('/assignment_stats', methods=['GET'])
 @login_required
+@student_required
 def get_assignment_stats():
     """获取作业的统计信息"""
     course = request.args.get('course')
@@ -433,6 +449,7 @@ def get_assignment_stats():
 
 @student_bp.route('/submission/<course>/<assignment>', methods=['DELETE'])
 @login_required
+@student_required
 def delete_submission(course, assignment):
     """删除提交的作业"""
     # 获取用户信息
@@ -471,6 +488,7 @@ def delete_submission(course, assignment):
     
 @student_bp.route('/update_profile', methods=['POST'])
 @login_required
+@student_required
 def update_profile():
     """更新用户个人资料"""
     try:
@@ -541,6 +559,7 @@ def update_profile():
     
 @student_bp.route('/download/<course>/<assignment>/<filename>')
 @login_required
+@student_required
 def download_file(course, assignment, filename):
     """下载自己提交的文件"""
     # 获取用户信息
@@ -570,6 +589,7 @@ def download_file(course, assignment, filename):
 
 @student_bp.route('/download_all/<course>/<assignment>')
 @login_required
+@student_required
 def download_all_files(course, assignment):
     """下载该学生提交的所有文件"""
     # 获取用户信息

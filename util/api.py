@@ -20,7 +20,7 @@
 import os
 from datetime import datetime, timedelta
 
-from flask import Blueprint, request, jsonify, send_from_directory, current_app
+from flask import Blueprint, request, jsonify, send_from_directory, current_app, redirect, url_for
 from flask_login import login_required, current_user
 
 from util.config import UPLOAD_FOLDER
@@ -54,6 +54,10 @@ def download_file(filename):
 @login_required
 def get_assignment_stats():
     """获取作业统计信息"""
+    # 检查当前用户是否为管理员
+    if current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Admin users cannot access student API endpoints'}), 403
+        
     from util.student import get_assignment_stats
     return get_assignment_stats()
 
@@ -61,6 +65,10 @@ def get_assignment_stats():
 @login_required
 def get_my_submissions():
     """获取当前用户的提交记录"""
+    # 检查当前用户是否为管理员
+    if current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Admin users cannot access student API endpoints'}), 403
+        
     from util.student import get_my_submissions
     return get_my_submissions()
 
@@ -68,6 +76,10 @@ def get_my_submissions():
 @login_required
 def update_profile():
     """更新用户个人资料"""
+    # 检查当前用户是否为管理员
+    if current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Admin users cannot update student profiles'}), 403
+        
     from util.student import update_profile
     return update_profile()
 
@@ -75,6 +87,10 @@ def update_profile():
 @login_required
 def delete_submission(course, assignment):
     """删除提交的作业"""
+    # 检查当前用户是否为管理员
+    if current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Admin users cannot delete student submissions'}), 403
+        
     from util.student import delete_submission
     return delete_submission(course, assignment)
 
@@ -82,6 +98,10 @@ def delete_submission(course, assignment):
 @login_required
 def download_my_file(course, assignment, filename):
     """下载自己提交的文件"""
+    # 检查当前用户是否为管理员
+    if current_user.is_admin:
+        return redirect(url_for('admin.dashboard'))
+        
     from util.student import download_file
     return download_file(course, assignment, filename)
 
@@ -89,14 +109,22 @@ def download_my_file(course, assignment, filename):
 @login_required
 def download_all_files(course, assignment):
     """下载所有提交文件"""
+    # 检查当前用户是否为管理员
+    if current_user.is_admin:
+        return redirect(url_for('admin.dashboard'))
+        
     from util.student import download_all_files
     return download_all_files(course, assignment)
 
-# 在util/api.py文件中添加此API端点
-@api_bp.route('/get_all_assignments', methods=['GET'])
+# 修改API端点，避免与student.py中的函数名冲突
+@api_bp.route('/all_assignments', methods=['GET'])
 @login_required
-def get_all_assignments():
+def all_assignments():
     """获取所有课程作业及其提交状态"""
+    # 检查当前用户是否为管理员，如果是则不允许访问
+    if current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Admin users cannot access student API endpoints'}), 403
+    
     # 获取当前用户的学号信息
     users = load_users()
     student_id = users[current_user.id]['student_id']
@@ -175,6 +203,10 @@ def get_all_assignments():
 @login_required
 def get_assignment_settings():
     """获取作业的高级设置"""
+    # 检查当前用户是否为管理员
+    if current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Admin users cannot access student API endpoints'}), 403
+        
     course = request.args.get('course')
     assignment = request.args.get('assignment')
     

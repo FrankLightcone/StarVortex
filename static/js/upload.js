@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
      * 加载所有作业列表
      * 获取所有课程的作业，并按照截止日期、提交状态等进行展示
      */
+    // 修改代码部分 - 在loadAllAssignments函数中的fetch调用
     function loadAllAssignments() {
         const statusFilter = document.getElementById('assignmentStatusFilter').value;
         
@@ -154,8 +155,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log("开始加载作业列表...");
         
-        // 从服务器获取所有作业数据
-        fetch('/get_all_assignments')
+        // 从服务器获取所有作业数据 - 修改API端点
+        fetch('/all_assignments')
             .then(response => {
                 console.log("API响应状态:", response.status);
                 if (!response.ok) {

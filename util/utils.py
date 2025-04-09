@@ -205,7 +205,7 @@ def load_course_config():
                     "assignments": ["实验1", "实验2", "实验3", "期末大作业"]
                 },
                 {
-                    "name": "地理学原理",
+                    "name": "地图学原理",
                     "assignments": ["作业1", "作业2", "期中论文", "期末论文"]
                 },
                 {
