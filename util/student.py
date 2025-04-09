@@ -34,6 +34,7 @@ from util.config import UPLOAD_FOLDER, allowed_file
 from util.utils import load_course_config, compress_folder, format_file_size, load_assignments
 from util.models import load_users, save_users
 from util.api import get_default_settings
+from util.submission_notification import process_submission_notification
 
 import json
 from datetime import datetime, date
@@ -55,6 +56,19 @@ def student_required(f):
             return redirect(url_for('admin.dashboard'))
         return f(*args, **kwargs)
     return decorated_function
+
+# 安全处理文件名但保留中文字符
+def safe_filename(filename):
+    """生成安全的文件名同时保留中文字符"""
+    # 替换危险字符
+    filename = filename.replace('/', '_').replace('\\', '_')
+    filename = filename.replace(':', '_').replace('*', '_')
+    filename = filename.replace('?', '_').replace('"', '_')
+    filename = filename.replace('<', '_').replace('>', '_')
+    filename = filename.replace('|', '_').replace('\0', '_')
+    
+    # 去除前后空格
+    return filename.strip()
 
 @student_bp.route('/', methods=['GET', 'POST'])
 @login_required
@@ -170,7 +184,7 @@ def upload_file():
                         return jsonify({'status': 'error', 'message': f'已达到最大文件数量限制 ({settings.get("maxFileCount", 10)} 个文件)'}), 400
             
             # 安全处理原始文件名
-            original_filename = secure_filename(file.filename)
+            original_filename = safe_filename(file.filename)
             base, ext = os.path.splitext(original_filename)
             
             # 创建课程和作业文件夹结构
@@ -217,6 +231,26 @@ def upload_file():
             
             # 记录今日上传量
             update_daily_upload_record(student_id, file_size)
+
+            try:
+                import time
+
+                def delayed_notification(user_id, course, assignment_name, student_folder):
+                    time.sleep(30)  # 等待30秒，确保文件上传完成
+                    process_submission_notification(user_id, course, assignment_name, student_folder)
+
+                # 从外部取出变量作为参数传入线程
+                user_id = current_user.id
+                notification_thread = threading.Thread(
+                    target=delayed_notification,
+                    args=(user_id, course, assignment_name, student_folder)
+                )
+                notification_thread.daemon = True
+                notification_thread.start()
+                logging.info(f'Started delayed notification thread for {user_id}')
+            except Exception as e:
+                logging.error(f'Failed to start notification thread: {str(e)}')
+
             
             return jsonify({
                 'status': 'success', 

@@ -1,19 +1,8 @@
 """
-作业传输系统 - 主程序入口
-
-本文件是整个应用程序的启动点，负责创建Flask应用实例、配置应用和注册蓝图。
-主要功能包括：
-- 初始化Flask应用及其配置
-- 设置Flask-Login用于用户认证
-- 注册各功能模块的蓝图
-- 确保必要的目录和配置文件存在
-- 启动Web服务器
-
-作者: Frank
-版本: 1.1
-日期: 2025-04-05
+Update to main.py to include the new submission notification module
 """
 
+# 现有导入部分不变
 import os
 import logging
 from flask import Flask, request
@@ -37,6 +26,7 @@ def create_app():
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
     app.config['APP_ALREADY_STARTED'] = False  # 用于标记应用是否已经启动
+    app.config['ENABLE_SUBMISSION_NOTIFICATIONS'] = True  # 添加提交通知配置选项
     
     # 设置增强的日志配置
     setup_logging(app, log_level=logging.INFO)  # 开发时使用DEBUG级别
@@ -99,6 +89,11 @@ def create_app():
             # 确保用户数据文件存在
             if not os.path.exists('users.json'):
                 save_users({})
+                
+            # 确保提交记录文件存在
+            if not os.path.exists('submissions_record.json'):
+                with open('submissions_record.json', 'w', encoding='utf-8') as f:
+                    f.write('{}')
             
             app.logger.info("应用程序初始化完成")
     
@@ -118,4 +113,4 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     # 注意：为局域网访问，host设置为'0.0.0.0'
-    app.run(host='0.0.0.0', port=10099)
+    app.run(host='0.0.0.0', port=10086, debug=False)
