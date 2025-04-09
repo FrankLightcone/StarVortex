@@ -399,24 +399,38 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-});
+  // 当用户点击网页视图时隐藏面板
+  // 由于webview的特性，需要在加载完成后通过JS注入来监听点击
+  webview.addEventListener('did-finish-load', () => {
+    if (!webview.src.startsWith('data:') && !webview.src.includes('loading.html')) {
+      // 注入点击监听代码
+      webview.executeJavaScript(`
+        document.addEventListener('click', () => {
+          window.postMessage('webview-clicked', '*');
+        });
+      `);
+    }
+  });
 
-// 当用户点击网页视图时隐藏面板
-// 由于webview的特性，需要在加载完成后通过JS注入来监听点击
-webview.addEventListener('did-finish-load', () => {
-  if (!webview.src.startsWith('data:') && !webview.src.includes('loading.html')) {
-    // 注入点击监听代码
-    webview.executeJavaScript(`
-      document.addEventListener('click', () => {
-        window.postMessage('webview-clicked', '*');
-      });
-    `);
-  }
-});
+  // 接收来自webview的消息
+  window.addEventListener('message', (event) => {
+    if (event.data === 'webview-clicked' && panelsVisible && pageLoaded) {
+      togglePanels();
+    }
+  });
 
-// 接收来自webview的消息
-window.addEventListener('message', (event) => {
-  if (event.data === 'webview-clicked' && panelsVisible && pageLoaded) {
-    togglePanels();
+  // 设置按钮
+  const settingsBtn = document.getElementById('settingsBtn');
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', async () => {
+      try {
+        // 打开设置窗口
+        console.log('Opening settings window...');
+        await window.electronAPI.openSettingsWindow();
+      } catch (error) {
+        console.error('打开设置窗口失败:', error);
+        statusLabel.textContent = '打开设置窗口失败: ' + (error.message || '未知错误');
+      }
+    });
   }
 });

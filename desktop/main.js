@@ -1,5 +1,5 @@
-// main.js - 修改以集成更新功能
-const { app, BrowserWindow, ipcMain, Menu, session, globalShortcut } = require('electron');
+// main.js - 修改以支持设置窗口
+const { app, BrowserWindow, ipcMain, Menu, session, globalShortcut, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const Store = require('electron-store');
@@ -21,6 +21,7 @@ const schema = {
 const store = new Store({ schema });
 
 let mainWindow;
+let settingsWindow;
 let updaterInstance; // 存储更新器实例
 
 function createWindow() {
@@ -56,6 +57,53 @@ function createWindow() {
   // 窗口关闭事件
   mainWindow.on('closed', function () {
     mainWindow = null;
+  });
+}
+
+// 创建设置窗口
+function createSettingsWindow() {
+  // 如果设置窗口已经存在，直接显示
+  if (settingsWindow) {
+    settingsWindow.focus();
+    return;
+  }
+
+  // 创建新的设置窗口
+  settingsWindow = new BrowserWindow({
+    width: 600,
+    height: 700,
+    parent: mainWindow,
+    modal: false,
+    resizable: true,
+    minimizable: false,
+    maximizable: false,
+    icon: path.join(__dirname, 'resource/icon.ico'),
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      webviewTag: false,
+      preload: path.join(__dirname, 'js/settings-preload.js')
+    },
+    backgroundColor: '#f8f9fa',
+    show: false // 先不显示，等加载完成再显示
+  });
+
+  // 加载设置页面
+  settingsWindow.loadFile('settings.html');
+
+  // 设置窗口准备好后显示
+  settingsWindow.once('ready-to-show', () => {
+    settingsWindow.show();
+  });
+
+  // 窗口关闭事件
+  settingsWindow.on('closed', () => {
+    settingsWindow = null;
+  });
+  
+  // 阻止导航
+  settingsWindow.webContents.on('will-navigate', (event) => {
+    event.preventDefault();
   });
 }
 
@@ -121,9 +169,11 @@ app.whenReady().then(() => {
       }
     });
   });
+  
+  // 开发环境添加开发者工具快捷键
   globalShortcut.register('CommandOrControl+Shift+i', function () {
-    mainWindow.webContents.openDevTools()
-  })
+    if (mainWindow) mainWindow.webContents.openDevTools();
+  });
   
   createWindow();
 });
@@ -176,4 +226,63 @@ ipcMain.handle('get-loading-path', () => {
 // 手动检查更新 - 添加IPC处理器
 ipcMain.handle('check-updates-manually', async () => {
   return await checkForUpdates();
+});
+
+// ===== 新增设置窗口相关的处理器 =====
+
+// 打开设置窗口
+ipcMain.handle('open-settings-window', () => {
+  createSettingsWindow();
+  return { success: true };
+});
+
+// 关闭设置窗口
+ipcMain.handle('close-settings-window', () => {
+  if (settingsWindow) {
+    settingsWindow.close();
+    return { success: true };
+  }
+  return { success: false, error: '设置窗口未打开' };
+});
+
+// 获取当前应用版本
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion();
+});
+
+// 获取更新配置
+ipcMain.handle('get-update-config', () => {
+  if (updaterInstance) {
+    return updaterInstance.getConfig();
+  }
+  return {
+    autoCheck: true,
+    autoDownload: true,
+    showNotification: true
+  };
+});
+
+// 设置更新配置
+ipcMain.handle('set-update-config', (event, config) => {
+  try {
+    if (updaterInstance) {
+      updaterInstance.setConfig(config);
+      return { success: true };
+    }
+    return { success: false, error: '更新器未初始化' };
+  } catch (error) {
+    console.error('设置更新配置出错:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// 在外部浏览器打开链接
+ipcMain.handle('open-external', (event, url) => {
+  try {
+    shell.openExternal(url);
+    return { success: true };
+  } catch (error) {
+    console.error('打开外部链接出错:', error);
+    return { success: false, error: error.message };
+  }
 });

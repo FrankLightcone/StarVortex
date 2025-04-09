@@ -125,5 +125,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onShowUpdateSuccess: (callback) => {
     ipcRenderer.on('show-update-success', (_, version) => callback(version));
     return () => ipcRenderer.removeListener('show-update-success', callback);
-  }
+  },
+  
+  // 打开设置窗口
+  openSettingsWindow: async () => {
+    try {
+      return await ipcRenderer.invoke('open-settings-window');
+    } catch (error) {
+      console.error('打开设置窗口出错:', error);
+      return { success: false, error: error.message };
+    }
+  },
 });
