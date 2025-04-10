@@ -99,7 +99,7 @@ HomeworkHub/
   </tr>
   <tr>
     <td><img src="./screenshot/admin.png" alt="Admin Interface" width="100%"></td>
-    <td><img src="./screenshot/client" alt="Desktop Client" width="100%"></td>
+    <td><img src="./screenshot/client.png" alt="Desktop Client" width="100%"></td>
   </tr>
 </table>
 
