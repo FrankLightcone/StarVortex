@@ -1,82 +1,146 @@
-# 作业传输系统
+# StarVortex
+[中文](README_zh.md) | [English](README.md)
 
-一个基于Flask的学生作业提交和管理系统，支持学生注册、文件上传和管理员审核功能。
+A modern Flask-based homework submission and management system supporting student uploads, teacher management, submission tracking, and detailed statistical analysis. The system features responsive design, a desktop client, and online updates, ensuring an excellent user experience across all devices.
 
-## 功能特点
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Version](https://img.shields.io/badge/version-1.4.2-blue)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-- 学生账户注册与登录（邮箱验证）
-- 作业文件上传与管理
-- 管理员控制面板
-- 作业截止日期设置
-- 文件批量下载
-- 响应式界面设计
+## ✨ Features
 
-## 项目结构
+- 🔒 Secure user authentication with separate student/admin logins
+- 📧 Email verification registration and password recovery
+- 📤 Drag-and-drop file uploads with progress indication
+- 📋 Detailed submission statistics and filtering
+- 📱 Responsive design for mobile and desktop
+- 🖥️ Desktop client with auto-update functionality
+- 📨 Automatic email notifications upon submission
+- 🛠️ Advanced file restriction options with customizable file types and sizes
 
-```
-作业传输系统/
-├── main.py                   # 主应用程序入口
-├── README.md                 # 项目说明文档
-├── static/                   # 静态文件目录
-│   ├── img/                  # 图片资源
-│   └── upload/               # 上传文件存储目录
-├── templates/                # HTML模板目录
-│   ├── admin.html            # 管理员界面
-│   ├── admin_login.html      # 管理员登录页面
-│   ├── login.html            # 学生登录页面
-│   ├── register.html         # 学生注册页面
-│   └── upload.html           # 文件上传页面
-└── util/                     # 工具模块目录
-    ├── __init__.py           # 包初始化文件
-    ├── admin.py              # 管理员功能模块
-    ├── api.py                # API接口模块
-    ├── auth.py               # 认证功能模块
-    ├── config.py             # 配置参数模块
-    ├── email_config.py       # 邮件配置（需自行配置）
-    ├── models.py             # 数据模型模块
-    ├── student.py            # 学生功能模块
-    └── utils.py              # 通用工具函数
-```
+## 🔥 Core Functionality
 
-## 安装与配置
+### Student Side
 
-1. 克隆或下载项目代码
-2. 安装依赖包：
+- User registration and login (email verification)
+- File upload and management
+- Personal submission history viewing
+- Profile management
+
+### Admin Side
+
+- Course and assignment configuration
+- Student submission statistics
+- Batch download of student submissions
+- Export submission statistics (Excel format)
+
+## 🚀 Quick Start
+
+### Server Deployment
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/FrankLightcone/StarVortex.git
+   cd StarVortex
    ```
-   pip install flask flask-login werkzeug
-   ```
-3. 配置邮件服务：
-   - 编辑 `util/email_config.py` 文件，填入有效的SMTP服务器信息
 
-## 运行方法
-
-1. 启动应用：
+2. Install dependencies
+   ```bash
+   pip install -r requirements.txt
    ```
+
+3. Configure email service
+   - Edit the `util/email_config.py` file with valid SMTP server information
+
+4. Start the application
+   ```bash
    python main.py
    ```
-2. 访问以下链接：
-   - 学生界面：http://localhost:10099/
-   - 管理员界面：http://localhost:10099/admin
 
-## 默认账户
+5. Access the following links
+   - Student interface: http://localhost:10086/
+   - Admin interface: http://localhost:10086/admin
 
-- 管理员账户：
-  - 用户名：admin
-  - 密码：admin123（请在生产环境中修改）
+### Desktop Client Usage
 
-## 数据文件
+1. Download the latest version from the [releases page](https://github.com/FrankLightcone/StarVortex/releases)
+2. Install and launch the application
+3. Enter the server address to connect
 
-- `users.json`：用户数据
-- `course_config.json`：课程配置
-- `assignments.json`：作业信息
+## 📊 System Architecture
 
-## 注意事项
+```
+HomeworkHub/
+├── main.py                   # Main application entry
+├── requirements.txt          # Dependency list
+├── static/                   # Static files directory
+│   ├── css/                  # Style files
+│   ├── js/                   # JavaScript files
+│   ├── img/                  # Image resources
+│   └── upload/               # Upload storage directory
+├── templates/                # HTML templates directory
+├── util/                     # Utility modules directory
+│   ├── admin.py              # Admin functionality module
+│   ├── api.py                # API interface module
+│   ├── auth.py               # Authentication module
+│   ├── models.py             # Data model module
+│   ├── student.py            # Student functionality module
+│   └── utils.py              # Common utility functions
+└── desktop/                  # Desktop client source code
+```
 
-1. 首次运行时会自动创建默认配置文件
-2. 默认端口为10099，可在main.py中修改
-3. 生产环境部署时，请修改默认密钥和管理员密码
-4. 确保邮件配置正确，否则注册功能将无法使用
+## 📸 Screenshots
 
----
-备注：
-项目中的背景图片“中大风光”来自：https://www.sysu.edu.cn/zdkd1/xyfg1.htm
+<table>
+  <tr>
+    <td><img src="./screenshot/login.png" alt="Login Interface" width="100%"></td>
+    <td><img src="./screenshot/upload.png" alt="Student Upload Interface" width="100%"></td>
+  </tr>
+  <tr>
+    <td><img src="./screenshot/admin.png" alt="Admin Interface" width="100%"></td>
+    <td><img src="./screenshot/client" alt="Desktop Client" width="100%"></td>
+  </tr>
+</table>
+
+## 📝 Configuration Parameters
+
+| Parameter | Description | Default Value |
+|-----------|-------------|---------------|
+| UPLOAD_FOLDER | File upload directory | static/upload |
+| MAX_CONTENT_LENGTH | Maximum file size limit | 256MB |
+| SMTP_SERVER | Email server address | smtp.example.com |
+| SMTP_PORT | Email server port | 587 |
+| ADMIN_USERNAME | Admin username | admin |
+
+## 🔧 Advanced Configuration
+
+The system provides rich configuration options that can be customized according to actual requirements:
+
+1. Course configuration: Edit the `course_config.json` file
+2. Assignment advanced restrictions: Set through the admin interface
+3. Email templates: Modify the `util/email_templates.py` file
+
+## 🗣️ Tech Stack
+
+**Backend**
+- Python + Flask
+- Flask-Login (user authentication)
+- Werkzeug (security components)
+
+**Frontend**
+- HTML5 + CSS3
+- TailwindCSS
+- JavaScript (vanilla)
+
+**Desktop Client**
+- Electron
+- Node.js
+
+## 📄 License
+
+[MIT License](LICENSE)
+
+## 👥 Contributing
+
+Issues and pull requests are welcome!
