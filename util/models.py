@@ -27,12 +27,13 @@ from util.config import USERS_FILE, ADMIN_USERNAME, ADMIN_PASSWORD_HASH
 class User(UserMixin):
     """用户类，扩展了 UserMixin 以支持 Flask-Login 功能"""
     
-    def __init__(self, username, is_admin=False, name=None, email=None, student_id=None):
+    def __init__(self, username, is_admin=False, name=None, email=None, student_id=None, class_name=None):
         self.id = username
         self.is_admin = is_admin
         self.name = name
         self.email = email
         self.student_id = student_id
+        self.class_name = class_name  # 新增班级字段
 
     @property
     def is_authenticated(self):
@@ -60,7 +61,8 @@ class User(UserMixin):
                 user_data.get('is_admin', False),
                 user_data.get('name'),
                 user_data.get('email'),
-                user_data.get('student_id')
+                user_data.get('student_id'),
+                user_data.get('class_name')  # 加载班级信息
             )
         elif user_id == ADMIN_USERNAME:
             return User(ADMIN_USERNAME, True)

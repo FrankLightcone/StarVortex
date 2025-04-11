@@ -2,25 +2,35 @@
   "courses": [
     {
       "name": "GNSS",
+      "classes": [
+        {
+          "name": "2023级遥感1班",
+          "description": "2023级遥感科学与技术专业A班"
+        },
+        {
+          "name": "2023级遥感2班",
+          "description": "2023级遥感科学与技术专业B班"
+        }
+      ],
       "assignments": [
         "lab3：广播星历精度评估"
       ]
     },
     {
       "name": "DIP",
+      "classes": [
+        {
+          "name": "2023级遥感1班",
+          "description": "2023级遥感科学与技术专业A班"
+        },
+        {
+          "name": "2023级遥感2班",
+          "description": "2023级遥感科学与技术专业B班"
+        }
+      ],
       "assignments": [
         "lab3：频率域滤波"
       ]
-    },
-    {
-      "name": "地图学原理",
-      "assignments": [
-        "lab3：点阵地图与路网地图制作"
-      ]
-    },
-    {
-      "name": "误差理论",
-      "assignments": []
     }
   ]
 }

@@ -85,6 +85,7 @@ def register():
     email = data.get('email')
     verify_code = data.get('verify_code')
     password = data.get('password')
+    class_name = data.get('class_name')  # 新增班级字段
 
     # 验证码校验
     if email not in verification_codes:
@@ -110,7 +111,8 @@ def register():
         'name': name,
         'email': email,
         'student_id': student_id,
-        'password': generate_password_hash(password)
+        'password': generate_password_hash(password),
+        'class_name': class_name  # 保存班级信息
     }
 
     # 以姓名为用户名
@@ -131,8 +133,9 @@ def send_verify_code():
     email = data.get('email')
     name = data.get('name')
     student_id = data.get('student_id')
+    class_name = data.get('class_name')  # 新增班级字段
 
-    if not all([email, name, student_id]):
+    if not all([email, name, student_id, class_name]):  # 增加班级检查
         return jsonify({'status': 'error', 'message': '信息不完整'})
 
     # 将发送邮箱号定位测试邮箱白名单，可多次注册
@@ -155,7 +158,8 @@ def send_verify_code():
     verification_codes[email] = {
         'code': code,
         'name': name,
-        'student_id': student_id
+        'student_id': student_id,
+        'class_name': class_name  # 存储班级信息
     }
 
     # 发送验证码
