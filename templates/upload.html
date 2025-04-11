@@ -106,21 +106,16 @@
                         </div>
                         
                         <div>
-                            <label for="class_name" class="block text-sm font-medium text-gray-700 mb-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
                                 班级
                             </label>
                             <div class="relative">
-                                <select 
-                                    id="class_name" 
-                                    name="class_name" 
-                                    required 
-                                    class="form-select block w-full focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
-                                    disabled
-                                >
-                                    <option value="">请先选择课程</option>
-                                </select>
+                                <div class="form-input block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-sm text-gray-500">
+                                    {{ user_class_name }}
+                                    <input type="hidden" id="class_name" name="class_name" value="{{ user_class_name }}">
+                                </div>
                                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400"></i>
+                                    <i class="fas fa-users text-gray-400"></i>
                                 </div>
                             </div>
                         </div>
@@ -137,7 +132,7 @@
                                     class="form-select block w-full focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
                                     disabled
                                 >
-                                    <option value="">请先选择课程和班级</option>
+                                    <option value="">请先选择课程</option>
                                 </select>
                                 <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                                     <i class="fas fa-chevron-down text-gray-400"></i>
@@ -420,6 +415,25 @@
                                         name="profile_student_id" 
                                         class="form-input block w-full pl-10 py-2 text-base border-gray-300 bg-gray-100 sm:text-sm rounded-md cursor-not-allowed"
                                         value="{{ user_student_id }}" 
+                                        readonly
+                                    >
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="profile_student_class" class="block text-sm font-medium text-gray-700">
+                                    班级
+                                </label>
+                                <div class="mt-1 relative">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-chalkboard-teacher text-gray-400"></i>
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        id="profile_student_class" 
+                                        name="profile_student_class" 
+                                        class="form-input block w-full pl-10 py-2 text-base border-gray-300 bg-gray-100 sm:text-sm rounded-md cursor-not-allowed"
+                                        value="{{ user_class_name }}" 
                                         readonly
                                     >
                                 </div>

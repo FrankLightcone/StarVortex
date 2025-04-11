@@ -27,11 +27,7 @@
       "enableFeedback": false
     },
     "createdAt": "2025-04-09T13:57:51.064123",
-    "updatedAt": "2025-04-09T19:18:34.497008",
-    "classNames": [
-      "2023级遥感1班",
-      "2023级遥感2班"
-    ]
+    "updatedAt": "2025-04-09T19:18:34.497008"
   },
   {
     "id": "2",
@@ -65,8 +61,7 @@
       "enableFeedback": false
     },
     "createdAt": "2025-04-09T13:58:17.179958",
-    "updatedAt": "2025-04-09T16:11:14.037476",
-    "classNames": []
+    "updatedAt": "2025-04-09T16:11:14.037476"
   },
   {
     "id": "3",
@@ -99,11 +94,7 @@
       "enableGrading": false,
       "enableFeedback": false
     },
-    "createdAt": "2025-04-09T16:14:20.911800",
-    "classNames": [
-      "2023级遥感1班",
-      "2023级遥感2班"
-    ]
+    "createdAt": "2025-04-09T16:14:20.911800"
   },
   {
     "id": "4",
@@ -136,10 +127,7 @@
       "enableGrading": false,
       "enableFeedback": false
     },
-    "createdAt": "2025-04-11T21:35:10.916912",
-    "classNames": [
-      "2023级遥感1班"
-    ]
+    "createdAt": "2025-04-11T21:35:10.916912"
   },
   {
     "id": "5",
@@ -172,10 +160,7 @@
       "enableGrading": false,
       "enableFeedback": false
     },
-    "createdAt": "2025-04-11T21:35:38.392520",
-    "classNames": [
-      "2023级遥感2班"
-    ]
+    "createdAt": "2025-04-11T21:35:38.392520"
   },
   {
     "id": "6",
@@ -208,10 +193,6 @@
       "enableGrading": false,
       "enableFeedback": false
     },
-    "createdAt": "2025-04-11T21:35:52.632886",
-    "classNames": [
-      "2023级遥感1班",
-      "2023级遥感2班"
-    ]
+    "createdAt": "2025-04-11T21:35:52.632886"
   }
 ]

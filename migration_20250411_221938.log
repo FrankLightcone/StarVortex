@@ -1,0 +1,14 @@
+2025-04-11 22:19:45,718 - INFO: 开始迁移课程配置文件
+2025-04-11 22:19:45,719 - INFO: 文件已备份: course_config.json -> course_config.json.bak_20250411_221945
+2025-04-11 22:19:45,719 - INFO: 配置文件已经是新结构，无需迁移
+2025-04-11 22:19:45,719 - INFO: 开始更新作业配置文件
+2025-04-11 22:19:45,721 - INFO: 文件已备份: assignments.json -> assignments.json.bak_20250411_221945
+2025-04-11 22:19:45,722 - INFO: 作业配置文件更新成功 (有更新)
+2025-04-11 22:19:45,722 - INFO: 开始迁移文件系统结构
+2025-04-11 22:19:45,757 - INFO: 复制作业目录: static/upload/GNSS/2023级遥感1班 -> static/upload_temp/GNSS/2023级遥感1班/2023级遥感1班
+2025-04-11 22:19:45,781 - INFO: 复制作业目录: static/upload/GNSS/2023级遥感1班 -> static/upload_temp/GNSS/2023级遥感2班/2023级遥感1班
+2025-04-11 22:19:45,802 - INFO: 复制作业目录: static/upload/GNSS/2023级遥感2班 -> static/upload_temp/GNSS/2023级遥感1班/2023级遥感2班
+2025-04-11 22:19:45,823 - INFO: 复制作业目录: static/upload/GNSS/2023级遥感2班 -> static/upload_temp/GNSS/2023级遥感2班/2023级遥感2班
+2025-04-11 22:19:45,823 - INFO: 复制作业目录: static/upload/GNSS/1班的作业 -> static/upload_temp/GNSS/2023级遥感1班/1班的作业
+2025-04-11 22:19:45,823 - INFO: 复制作业目录: static/upload/GNSS/1班的作业 -> static/upload_temp/GNSS/2023级遥感2班/1班的作业
+2025-04-11 22:19:45,823 - INFO: 文件系统结构迁移成功. 原目录已备份到: static/upload_backup_20250411_221945

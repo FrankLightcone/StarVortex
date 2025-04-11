@@ -75,20 +75,39 @@ def safe_filename(filename):
 @student_required
 def upload_file():
     """学生文件上传页面"""
-    # 获取课程配置
-    config = load_course_config()
-    courses = [course['name'] for course in config['courses']]
-    
     # 获取用户信息
     users = load_users()
     user_data = users.get(current_user.id, {})
+    user_class_name = user_data.get('class_name', '')
+    
+    # 设置默认班级（如果用户没有班级）
+    if not user_class_name:
+        user_class_name = "默认班级"
+        # 可以选择更新用户信息来添加班级
+        user_data['class_name'] = user_class_name
+        users[current_user.id] = user_data
+        save_users(users)  # 保存更改
+        logging.warning(f"用户 {current_user.id} 没有班级，已分配默认班级")
+    
+    # 获取班级可用的课程列表
+    courses = get_courses_for_class(user_class_name)
+    
+    # 如果没有课程，尝试从配置中获取所有课程
+    if not courses:
+        config = load_course_config()
+        all_courses = set()
+        for class_info in config.get('classes', []):
+            for course_info in class_info.get('courses', []):
+                all_courses.add(course_info['name'])
+        courses = list(all_courses)
+        logging.warning(f"班级 {user_class_name} 没有可用课程，使用所有课程")
     
     # 用户信息字典
     user_info = {
         'user_name': current_user.id,
         'user_email': user_data.get('email', ''),
         'user_student_id': user_data.get('student_id', ''),
-        'user_class_name': user_data.get('class', '')
+        'user_class_name': user_class_name
     }
     
     if request.method == 'POST':
@@ -97,15 +116,21 @@ def upload_file():
             course = request.form.get('course')
             assignment_name = request.form.get('assignment_name')
             
+            # 获取班级名称 - 从用户数据中获取而不是表单
+            class_name = user_data.get('class_name', '')
+            
             # 添加日志以调试请求内容
-            logging.info(f'POST请求: course={course}, assignment={assignment_name}')
-            logging.info(f'表单数据: {request.form}')
-            logging.info(f'文件: {request.files}')
+            logging.info(f'POST请求: course={course}, class_name={class_name}, assignment={assignment_name}')
             
             # 检查课程和作业名称
             if not course or not assignment_name:
                 logging.warning('缺少课程或作业名称')
                 return jsonify({'status': 'error', 'message': '请选择课程和作业名称'}), 400
+                
+            # 检查班级
+            if not class_name:
+                logging.warning('用户没有分配班级')
+                return jsonify({'status': 'error', 'message': '您的账号未分配班级，请联系管理员'}), 400
 
             # 检查是否有文件
             if 'file' not in request.files:
@@ -231,7 +256,7 @@ def upload_file():
             }), 500
     
     # GET请求返回页面
-    return render_template('upload.html', courses=courses, course_config=config, **user_info)
+    return render_template('upload.html', courses=courses, **user_info)
 
 # 添加用于跟踪每日上传量的函数
 def get_today_upload_size(student_id, date):
@@ -388,6 +413,15 @@ def get_assignment_stats():
     if not course or not assignment_name:
         return jsonify({'status': 'error', 'message': '缺少课程或作业名称参数'}), 400
     
+    # 获取用户班级
+    users = load_users()
+    user_data = users[current_user.id]
+    student_id = user_data['student_id']
+    class_name = user_data.get('class_name', '')
+    
+    if not class_name:
+        return jsonify({'status': 'error', 'message': '您的账号未关联班级，请联系管理员'}), 400
+    
     # 获取作业详情
     from util.utils import load_assignments
     assignments = load_assignments()
@@ -400,12 +434,13 @@ def get_assignment_stats():
     due_date = datetime.fromisoformat(assignment_obj['dueDate'])
     due_date_str = due_date.strftime('%Y-%m-%d %H:%M')
     
-    # 创建作业目录路径
-    assignment_path = os.path.join(UPLOAD_FOLDER, course, assignment_name)
+    # 创建作业目录路径 - 包含班级层级
+    assignment_path = os.path.join(UPLOAD_FOLDER, course, class_name, assignment_name)
     
-    # 获取所有用户，统计学生数量
-    users = load_users()
-    student_count = sum(1 for user in users.values() if not user.get('is_admin', False))
+    # 获取同班级学生数量
+    class_students = [username for username, user in users.items() 
+                     if not user.get('is_admin', False) and user.get('class_name') == class_name]
+    student_count = len(class_students)
     
     # 检查作业目录是否存在
     submission_count = 0
@@ -420,7 +455,6 @@ def get_assignment_stats():
         submission_count = len(student_folders)
         
         # 检查当前用户是否已提交
-        student_id = users[current_user.id]['student_id']
         student_folder_pattern = f"{student_id}_{current_user.id}"
         has_submitted = any(f.startswith(student_folder_pattern) for f in student_folders)
     
@@ -632,7 +666,7 @@ def download_all_files(course, assignment):
 
 def upload_file_with_class(file, course, class_name, assignment_name, student_id, username):
     """
-    上传文件到指定路径，增加班级层级
+    上传文件到指定路径，包含班级层级
     
     Args:
         file: 上传的文件对象
@@ -691,3 +725,14 @@ def upload_file_with_class(file, course, class_name, assignment_name, student_id
         return True, file_path
     except Exception as e:
         return False, str(e)
+    
+def get_courses_for_class(class_name):
+    """获取班级可用的课程列表"""
+    config = load_course_config()
+    
+    # 查找班级的课程
+    for class_info in config.get('classes', []):
+        if class_info['name'] == class_name:
+            return [course['name'] for course in class_info.get('courses', [])]
+    
+    return []

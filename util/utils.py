@@ -191,26 +191,67 @@ def load_course_config():
     """加载课程配置"""
     try:
         with open(COURSE_CONFIG_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            config = json.load(f)
+            
+            # 检查是否使用旧格式
+            if 'courses' in config and 'classes' not in config:
+                # 转换为新格式的临时结构，避免其他代码错误
+                logging.warning("检测到旧版课程配置格式，建议运行数据迁移脚本")
+                # 创建一个默认班级，包含所有课程
+                default_class = {
+                    "name": "默认班级",
+                    "description": "系统自动创建的默认班级",
+                    "courses": []
+                }
+                
+                # 将旧结构中的课程添加到默认班级
+                for course in config.get('courses', []):
+                    course_copy = course.copy()
+                    # 移除classes字段，因为新结构中课程不包含班级
+                    if 'classes' in course_copy:
+                        del course_copy['classes']
+                    default_class['courses'].append(course_copy)
+                
+                # 创建新格式配置
+                new_config = {"classes": [default_class]}
+                return new_config
+            
+            # 确保classes字段存在
+            if 'classes' not in config:
+                config['classes'] = []
+                
+            return config
     except FileNotFoundError:
-        # 默认配置
+        # 默认配置 - 使用新结构
         default_config = {
-            "courses": [
+            "classes": [
                 {
-                    "name": "GNSS",
-                    "assignments": ["实验1", "实验2", "大作业"]
+                    "name": "2023级遥感1班",
+                    "description": "2023级遥感科学与技术专业A班",
+                    "courses": [
+                        {
+                            "name": "GNSS",
+                            "assignments": ["实验1", "实验2", "大作业"]
+                        },
+                        {
+                            "name": "DIP",
+                            "assignments": ["实验1", "实验2", "实验3", "期末大作业"]
+                        }
+                    ]
                 },
                 {
-                    "name": "DIP",
-                    "assignments": ["实验1", "实验2", "实验3", "期末大作业"]
-                },
-                {
-                    "name": "地图学原理",
-                    "assignments": ["作业1", "作业2", "期中论文", "期末论文"]
-                },
-                {
-                    "name": "误差理论",
-                    "assignments": ["作业1", "作业2", "作业3", "期末报告"]
+                    "name": "2023级遥感2班",
+                    "description": "2023级遥感科学与技术专业B班",
+                    "courses": [
+                        {
+                            "name": "GNSS",
+                            "assignments": ["实验1", "实验2", "大作业"]
+                        },
+                        {
+                            "name": "DIP",
+                            "assignments": ["实验1", "实验2", "实验3", "期末大作业"]
+                        }
+                    ]
                 }
             ]
         }

@@ -46,7 +46,15 @@ def dashboard():
     """管理员控制面板"""
     # 获取课程配置
     course_config = load_course_config()
-    courses = [course['name'] for course in course_config['courses']]
+    
+    # 提取所有课程 - 修复部分
+    courses = set()  # 使用集合避免重复
+    for class_info in course_config.get('classes', []):
+        for course_info in class_info.get('courses', []):
+            courses.add(course_info['name'])
+    
+    # 转换为列表
+    courses = list(courses)
     
     return render_template('admin.html', 
                           courses=courses, 
@@ -92,14 +100,22 @@ def create_assignment():
     # 生成新的作业ID
     new_id = str(max([int(a['id']) for a in assignments], default=0) + 1)
     
+    # 获取班级和课程信息
+    course = data['course']
+    class_names = data.get('classNames', [])
+    
+    if not class_names:
+        return jsonify({'status': 'error', 'message': '请选择至少一个班级'}), 400
+    
     # 创建新作业对象
     new_assignment = {
         'id': new_id,
-        'course': data['course'],
+        'course': course,
         'name': data['name'],
         'dueDate': data['dueDate'],
         'description': data.get('description', ''),
-        'advancedSettings': data.get('advancedSettings', None),  # 保存高级设置
+        'advancedSettings': data.get('advancedSettings', None),
+        'classNames': class_names,  # 存储适用的班级
         'createdAt': datetime.datetime.now().isoformat()
     }
     
@@ -107,16 +123,17 @@ def create_assignment():
     assignments.append(new_assignment)
     save_assignments(assignments)
     
-    # 如果这是课程的新作业，更新课程配置
-    course_config = load_course_config()
-    for course in course_config['courses']:
-        if course['name'] == data['course'] and data['name'] not in course['assignments']:
-            course['assignments'].append(data['name'])
+    # 更新课程配置 - 为每个选中的班级添加该作业
+    config = load_course_config()
+    for class_info in config.get('classes', []):
+        if class_info['name'] in class_names:
+            for course_info in class_info.get('courses', []):
+                if course_info['name'] == course and data['name'] not in course_info['assignments']:
+                    course_info['assignments'].append(data['name'])
     
     # 保存更新后的课程配置
     with open(COURSE_CONFIG_FILE, 'w', encoding='utf-8') as f:
-        import json
-        json.dump(course_config, f, ensure_ascii=False, indent=2)
+        json.dump(config, f, ensure_ascii=False, indent=2)
     
     return jsonify({'status': 'success', 'assignment': new_assignment})
 
@@ -622,15 +639,15 @@ def get_all_classes():
     config = load_course_config()
     all_classes = []
     
-    for course in config['courses']:
-        course_name = course['name']
-        if 'classes' in course:
-            for class_info in course['classes']:
-                all_classes.append({
-                    'course': course_name,
-                    'name': class_info['name'],
-                    'description': class_info.get('description', '')
-                })
+    for class_info in config.get('classes', []):
+        # 提取该班级的所有课程
+        courses = [course['name'] for course in class_info.get('courses', [])]
+        
+        all_classes.append({
+            'name': class_info.get('name', ''),
+            'description': class_info.get('description', ''),
+            'courses': courses
+        })
     
     return jsonify({'classes': all_classes})
 
@@ -784,3 +801,23 @@ def get_class_students(class_name):
         'student_count': len(students),
         'students': students
     })
+
+@admin_bp.route('/class_courses/<class_name>', methods=['GET'])
+@admin_required
+def get_class_courses(class_name):
+    """获取班级的课程列表"""
+    config = load_course_config()
+    
+    for class_info in config.get('classes', []):
+        if class_info['name'] == class_name:
+            courses = [course['name'] for course in class_info.get('courses', [])]
+            return jsonify({
+                'status': 'success',
+                'class_name': class_name,
+                'courses': courses
+            })
+    
+    return jsonify({
+        'status': 'error',
+        'message': '班级不存在'
+    }), 404

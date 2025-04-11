@@ -155,12 +155,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log("开始加载作业列表...");
         
-        // 从服务器获取所有作业数据 - 修改API端点
+        // 从服务器获取所有作业数据
         fetch('/all_assignments')
             .then(response => {
                 console.log("API响应状态:", response.status);
                 if (!response.ok) {
-                    throw new Error(`API返回错误状态: ${response.status}`);
+                    return response.json().then(errData => {
+                        throw new Error(`API返回错误: ${errData.message || '未知错误'}`);
+                    }).catch(e => {
+                        throw new Error(`API返回错误状态: ${response.status}`);
+                    });
                 }
                 return response.json();
             })
@@ -212,6 +216,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 清空列表并添加作业
                 assignmentsListBody.innerHTML = '';
+                
+                if (filteredAssignments.length === 0) {
+                    assignmentsListBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                没有匹配的作业
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
                 
                 filteredAssignments.forEach(assignment => {
                     const row = document.createElement('tr');
@@ -318,10 +333,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 assignmentsListBody.innerHTML = `
                     <tr>
                         <td colspan="6" class="px-6 py-4 text-center text-sm text-red-500">
-                            加载作业列表失败: ${error.message}
+                            加载失败: ${error.message}
                         </td>
                     </tr>
-                `;
+                `;// 显示系统提示
+                if (typeof showToast === 'function') {
+                    showToast(`加载作业列表失败: ${error.message}`, 'error');
+                }
             });
     }
 
@@ -435,74 +453,73 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===== 作业上传相关逻辑 =====
     
     // 课程选择事件
-if (courseSelect) {
-    courseSelect.addEventListener('change', function() {
-        const selectedCourse = this.value;
-        
-        // 清空班级和作业名称下拉框
-        const classSelect = document.getElementById('class_name');
-        classSelect.innerHTML = '';
-        assignmentSelect.innerHTML = '';
-        
-        // 禁用班级和作业名称下拉框
-        classSelect.disabled = true;
-        assignmentSelect.disabled = true;
-        
-        // 隐藏作业信息
-        assignmentInfo.classList.add('hidden');
-        
-        if (selectedCourse) {
-            // 启用班级下拉框
-            classSelect.disabled = false;
+    if (courseSelect) {
+        courseSelect.addEventListener('change', function() {
+            const selectedCourse = this.value;
             
-            // 从服务器获取选中课程的班级列表
-            fetch(`/get_classes?course=${encodeURIComponent(selectedCourse)}`)
-                .then(response => response.json())
-                .then(data => {
-                    // 添加默认选项
-                    const defaultOption = document.createElement('option');
-                    defaultOption.value = '';
-                    defaultOption.textContent = '请选择班级';
-                    classSelect.appendChild(defaultOption);
-                    
-                    // 添加班级选项
-                    if (data.classes && data.classes.length > 0) {
-                        data.classes.forEach(classInfo => {
+            // 清空作业名称下拉框
+            assignmentSelect.innerHTML = '';
+            
+            // 禁用作业名称下拉框
+            assignmentSelect.disabled = true;
+            
+            // 隐藏作业信息
+            assignmentInfo.classList.add('hidden');
+            
+            if (selectedCourse) {
+                // 启用作业名称下拉框
+                assignmentSelect.disabled = false;
+                
+                // 从服务器获取选中课程的作业列表
+                // 注意：现在API期望接收class_name参数，但前端已经不需要选择班级
+                // 因为后端API会自动使用当前用户的班级
+                fetch(`/get_assignments?course=${encodeURIComponent(selectedCourse)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // 添加默认选项
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = '请选择作业';
+                        assignmentSelect.appendChild(defaultOption);
+                        
+                        // 添加作业选项
+                        if (data.assignments && data.assignments.length > 0) {
+                            data.assignments.forEach(assignment => {
+                                const option = document.createElement('option');
+                                option.value = assignment;
+                                option.textContent = assignment;
+                                assignmentSelect.appendChild(option);
+                            });
+                        } else {
                             const option = document.createElement('option');
-                            option.value = classInfo.name;
-                            option.textContent = classInfo.name;
-                            classSelect.appendChild(option);
-                        });
-                    } else {
+                            option.value = '';
+                            option.textContent = '该课程暂无作业';
+                            assignmentSelect.appendChild(option);
+                        }
+                        
+                        // 更新上传按钮状态
+                        updateUploadButtonState();
+                    })
+                    .catch(error => {
+                        console.error('获取作业列表失败:', error);
+                        // 添加错误提示选项
                         const option = document.createElement('option');
                         option.value = '';
-                        option.textContent = '该课程暂无班级';
-                        classSelect.appendChild(option);
-                    }
-                    
-                    // 更新上传按钮状态
-                    updateUploadButtonState();
-                })
-                .catch(error => {
-                    console.error('获取班级列表失败:', error);
-                    // 添加错误提示选项
-                    const option = document.createElement('option');
-                    option.value = '';
-                    option.textContent = '加载班级失败';
-                    classSelect.appendChild(option);
-                });
-        } else {
-            // 添加默认提示
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = '请先选择课程';
-            classSelect.appendChild(option);
-        }
-        
-        // 更新上传按钮状态
-        updateUploadButtonState();
-    });
-}
+                        option.textContent = '加载作业失败';
+                        assignmentSelect.appendChild(option);
+                    });
+            } else {
+                // 添加默认提示
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '请先选择课程';
+                assignmentSelect.appendChild(option);
+            }
+            
+            // 更新上传按钮状态
+            updateUploadButtonState();
+        });
+    }
 
 // 班级选择事件
 const classSelect = document.getElementById('class_name');
@@ -577,15 +594,14 @@ if (classSelect) {
 if (assignmentSelect) {
     assignmentSelect.addEventListener('change', function() {
         const selectedCourse = courseSelect.value;
-        const selectedClass = classSelect.value;
         const selectedAssignment = this.value;
         
         // 隐藏作业信息
         assignmentInfo.classList.add('hidden');
         
-        if (selectedCourse && selectedClass && selectedAssignment) {
+        if (selectedCourse && selectedAssignment) {
             // 获取作业统计信息
-            fetch(`/get_assignment_stats?course=${encodeURIComponent(selectedCourse)}&class=${encodeURIComponent(selectedClass)}&assignment=${encodeURIComponent(selectedAssignment)}`)
+            fetch(`/get_assignment_stats?course=${encodeURIComponent(selectedCourse)}&assignment=${encodeURIComponent(selectedAssignment)}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.stats) {
