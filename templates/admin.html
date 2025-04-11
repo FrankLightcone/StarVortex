@@ -144,7 +144,7 @@
                     </h3>
                 </div>
                 <div class="px-4 py-5 sm:p-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                         <div>
                             <label for="submissionCourseFilter" class="block text-sm font-medium text-gray-700 mb-1">
                                 课程筛选
@@ -159,6 +159,20 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        
+                        <div>
+                            <label for="submissionClassFilter" class="block text-sm font-medium text-gray-700 mb-1">
+                                班级筛选
+                            </label>
+                            <select 
+                                id="submissionClassFilter" 
+                                class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                disabled
+                            >
+                                <option value="">请先选择课程</option>
+                            </select>
+                        </div>
+                        
                         <div>
                             <label for="submissionAssignmentFilter" class="block text-sm font-medium text-gray-700 mb-1">
                                 作业筛选
@@ -168,7 +182,7 @@
                                 class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                                 disabled
                             >
-                                <option value="">请先选择课程</option>
+                                <option value="">请先选择课程和班级</option>
                             </select>
                         </div>
                     </div>
@@ -223,6 +237,180 @@
                     </div>
                 </div>
             </div>
+
+        </div>
+        
+        <!-- 班级管理标签页 -->
+        <div id="classesTab" class="tab-content">
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+                <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                        班级管理
+                    </h3>
+                    <button id="addClassBtn" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        添加班级
+                    </button>
+                </div>
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="mb-4">
+                        <label for="classFilterCourse" class="block text-sm font-medium text-gray-700 mb-1">
+                            课程筛选
+                        </label>
+                        <select 
+                            id="classFilterCourse" 
+                            class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                        >
+                            <option value="">全部课程</option>
+                            {% for course in courses %}
+                            <option value="{{ course }}">{{ course }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="overflow-hidden rounded-md border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        课程
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        班级名称
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        班级描述
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        学生数量
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        操作
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="classesList" class="bg-white divide-y divide-gray-200">
+                                <!-- 动态加载班级列表 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加/编辑班级弹窗 -->
+        <div id="classModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="classModalTitle" class="text-lg font-medium text-gray-900">添加班级</h3>
+                    <button id="closeClassModalBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="classForm">
+                    <input type="hidden" id="classId" value="">
+                    <input type="hidden" id="originalClassName" value="">
+                    <input type="hidden" id="originalCourse" value="">
+                    
+                    <div class="mb-4">
+                        <label for="classCourse" class="block text-sm font-medium text-gray-700 mb-1">
+                            所属课程 <span class="text-red-500">*</span>
+                        </label>
+                        <select 
+                            id="classCourse" 
+                            name="classCourse" 
+                            required 
+                            class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                        >
+                            <option value="">请选择课程</option>
+                            {% for course in courses %}
+                            <option value="{{ course }}">{{ course }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="className" class="block text-sm font-medium text-gray-700 mb-1">
+                            班级名称 <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="className" 
+                            name="className" 
+                            required 
+                            class="form-input block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            placeholder="例如：2023级遥感A班"
+                        >
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="classDescription" class="block text-sm font-medium text-gray-700 mb-1">
+                            班级描述 (可选)
+                        </label>
+                        <input 
+                            type="text" 
+                            id="classDescription" 
+                            name="classDescription" 
+                            class="form-input block w-full pl-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                            placeholder="描述班级的专业、年级等信息..."
+                        >
+                    </div>
+
+                    <div class="flex justify-end mt-6">
+                        <button
+                            type="button"
+                            id="cancelClassBtn"
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-2"
+                        >
+                            取消
+                        </button>
+                        <button
+                            type="submit"
+                            class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            保存
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 班级学生列表弹窗 -->
+        <div id="classStudentsModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="classStudentsTitle" class="text-lg font-medium text-gray-900">班级学生列表</h3>
+                    <button id="closeClassStudentsBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div id="classStudentsContent">
+                    <div class="overflow-hidden rounded-lg border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        学号
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        姓名
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        邮箱
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="classStudentsList" class="bg-white divide-y divide-gray-200">
+                                <!-- 动态加载学生列表 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -270,6 +458,19 @@
                             <option value="{{ course }}">{{ course }}</option>
                             {% endfor %}
                         </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="classNames" class="block text-sm font-medium text-gray-700 mb-1">
+                            发布到班级 <span class="text-red-500">*</span>
+                        </label>
+                        <div class="max-h-52 overflow-y-auto border border-gray-300 rounded-md p-2">
+                            <div id="classCheckboxes" class="space-y-2">
+                                <!-- 班级复选框将通过JavaScript动态添加 -->
+                                <div class="text-sm text-gray-500 p-2">请先选择课程</div>
+                            </div>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">可选择多个班级</p>
                     </div>
                     
                     <div class="mb-4">

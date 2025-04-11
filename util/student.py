@@ -87,7 +87,8 @@ def upload_file():
     user_info = {
         'user_name': current_user.id,
         'user_email': user_data.get('email', ''),
-        'user_student_id': user_data.get('student_id', '')
+        'user_student_id': user_data.get('student_id', ''),
+        'user_class_name': user_data.get('class', '')
     }
     
     if request.method == 'POST':
@@ -183,51 +184,11 @@ def upload_file():
                         logging.warning(f'文件数量超过限制: {len(existing_files)} >= {settings.get("maxFileCount", 10)}')
                         return jsonify({'status': 'error', 'message': f'已达到最大文件数量限制 ({settings.get("maxFileCount", 10)} 个文件)'}), 400
             
-            # 安全处理原始文件名
-            original_filename = safe_filename(file.filename)
-            base, ext = os.path.splitext(original_filename)
+            is_success, file_path = upload_file_with_class(file, course, user_info['user_class_name'], assignment_name, student_id, current_user.id)
             
-            # 创建课程和作业文件夹结构
-            course_folder = os.path.join(UPLOAD_FOLDER, course)
-            assignment_folder = os.path.join(course_folder, assignment_name)
-            
-            # 确保文件夹存在
-            os.makedirs(assignment_folder, exist_ok=True)
-            
-            # 创建以学生信息命名的子文件夹
-            student_folder_name = f"{student_id}_{current_user.id}"
-            student_folder = os.path.join(assignment_folder, student_folder_name)
-            os.makedirs(student_folder, exist_ok=True)
-            
-            # 保存文件到学生文件夹
-            file_path = os.path.join(student_folder, original_filename)
-            
-            # 处理文件重名情况
-            counter = 1
-            while os.path.exists(file_path):
-                new_filename = f"{base}_{counter}{ext}"
-                file_path = os.path.join(student_folder, new_filename)
-                counter += 1
-            
-            # 保存文件
-            file.save(file_path)
-            logging.info(f'File uploaded to: {file_path}')
-            
-            # 同时创建一个压缩文件，但使用非阻塞线程
-            zip_filename = f"{student_folder_name}.zip"
-            zip_filepath = os.path.join(assignment_folder, zip_filename)
-            
-            # 启动线程压缩文件夹
-            try:
-                t = threading.Thread(
-                    target=compress_folder, 
-                    args=(student_folder, zip_filepath)
-                )
-                t.daemon = True  # 设置为守护线程，确保主程序退出时线程也退出
-                t.start()
-            except Exception as e:
-                logging.error(f'Failed to start compression thread: {str(e)}')
-                # 线程启动失败不影响上传成功
+            if not is_success:
+                logging.warning(f'文件上传失败: {file_path}')
+                return jsonify({'status': 'error', 'message': f'文件上传失败: {file_path}'}), 500
             
             # 记录今日上传量
             update_daily_upload_record(student_id, file_size)
@@ -668,3 +629,65 @@ def download_all_files(course, assignment):
     except Exception as e:
         logging.error(f'Error creating zip file: {str(e)}')
         return f"创建压缩文件失败: {str(e)}", 500
+
+def upload_file_with_class(file, course, class_name, assignment_name, student_id, username):
+    """
+    上传文件到指定路径，增加班级层级
+    
+    Args:
+        file: 上传的文件对象
+        course: 课程名称
+        class_name: 班级名称
+        assignment_name: 作业名称
+        student_id: 学生ID
+        username: 用户名
+    
+    Returns:
+        (bool, str): (是否成功, 消息或文件路径)
+    """
+    try:
+        # 安全处理原始文件名
+        original_filename = safe_filename(file.filename)
+        
+        # 创建课程、班级、作业文件夹结构
+        course_folder = os.path.join(UPLOAD_FOLDER, course)
+        class_folder = os.path.join(course_folder, class_name)
+        assignment_folder = os.path.join(class_folder, assignment_name)
+        
+        # 确保文件夹存在
+        os.makedirs(assignment_folder, exist_ok=True)
+        
+        # 创建以学生信息命名的子文件夹
+        student_folder_name = f"{student_id}_{username}"
+        student_folder = os.path.join(assignment_folder, student_folder_name)
+        os.makedirs(student_folder, exist_ok=True)
+        
+        # 生成文件路径
+        file_path = os.path.join(student_folder, original_filename)
+        
+        # 处理文件重名
+        counter = 1
+        base, ext = os.path.splitext(original_filename)
+        while os.path.exists(file_path):
+            new_filename = f"{base}_{counter}{ext}"
+            file_path = os.path.join(student_folder, new_filename)
+            counter += 1
+        
+        # 保存文件
+        file.save(file_path)
+        
+        # 创建ZIP文件
+        zip_filename = f"{student_folder_name}.zip"
+        zip_filepath = os.path.join(assignment_folder, zip_filename)
+        
+        # 启动线程压缩文件夹
+        t = threading.Thread(
+            target=compress_folder,
+            args=(student_folder, zip_filepath)
+        )
+        t.daemon = True
+        t.start()
+        
+        return True, file_path
+    except Exception as e:
+        return False, str(e)

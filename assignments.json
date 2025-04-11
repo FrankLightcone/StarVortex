@@ -95,5 +95,104 @@
       "enableFeedback": false
     },
     "createdAt": "2025-04-09T16:14:20.911800"
+  },
+  {
+    "id": "4",
+    "course": "GNSS",
+    "name": "1班的作业",
+    "dueDate": "2025-04-18T21:34",
+    "description": "",
+    "advancedSettings": {
+      "maxFileCount": 10,
+      "maxFileSize": 256,
+      "fileSizeUnit": "MB",
+      "dailyQuota": 1,
+      "allowedTypes": [
+        "pdf",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+        "ppt",
+        "pptx",
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "zip",
+        "rar",
+        "txt",
+        "csv"
+      ],
+      "enableGrading": false,
+      "enableFeedback": false
+    },
+    "createdAt": "2025-04-11T21:35:10.916912"
+  },
+  {
+    "id": "5",
+    "course": "DIP",
+    "name": "2班的作业",
+    "dueDate": "2025-04-18T21:35",
+    "description": "",
+    "advancedSettings": {
+      "maxFileCount": 10,
+      "maxFileSize": 256,
+      "fileSizeUnit": "MB",
+      "dailyQuota": 1,
+      "allowedTypes": [
+        "pdf",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+        "ppt",
+        "pptx",
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "zip",
+        "rar",
+        "txt",
+        "csv"
+      ],
+      "enableGrading": false,
+      "enableFeedback": false
+    },
+    "createdAt": "2025-04-11T21:35:38.392520"
+  },
+  {
+    "id": "6",
+    "course": "GNSS",
+    "name": "两个班共同的作业",
+    "dueDate": "2025-04-18T21:35",
+    "description": "",
+    "advancedSettings": {
+      "maxFileCount": 10,
+      "maxFileSize": 256,
+      "fileSizeUnit": "MB",
+      "dailyQuota": 1,
+      "allowedTypes": [
+        "pdf",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+        "ppt",
+        "pptx",
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "zip",
+        "rar",
+        "txt",
+        "csv"
+      ],
+      "enableGrading": false,
+      "enableFeedback": false
+    },
+    "createdAt": "2025-04-11T21:35:52.632886"
   }
 ]

@@ -20,6 +20,7 @@
 日期: 2025-04-04
 """
 
+import json
 import os
 import io
 import xlsxwriter
@@ -183,9 +184,10 @@ def delete_assignment(assignment_id):
 def get_submissions():
     """获取作业提交情况"""
     course = request.args.get('course')
+    class_name = request.args.get('class_name')  # 新增班级参数
     assignment = request.args.get('assignment')
     
-    if not course or not assignment:
+    if not course or not class_name or not assignment:
         return jsonify({'submissions': [], 'stats': None})
     
     # 获取作业详情
@@ -215,12 +217,16 @@ def get_submissions():
     due_date = datetime.datetime.fromisoformat(assignment_obj['dueDate'])
     due_date_str = due_date.strftime('%Y-%m-%d %H:%M')
     
-    # 创建作业目录路径
-    assignment_path = os.path.join(UPLOAD_FOLDER, course, assignment)
+    # 创建作业目录路径 - 修改为包含班级
+    assignment_path = os.path.join(UPLOAD_FOLDER, course, class_name, assignment)
     
     # 获取所有用户，统计学生数量
     users = load_users()
-    student_count = sum(1 for user in users.values() if not user.get('is_admin', False))
+    # 这里可以优化为只统计该班级的学生
+    class_students = [user for username, user in users.items() 
+                     if not user.get('is_admin', False) 
+                     and user.get('class_name') == class_name]
+    student_count = len(class_students)
     
     submissions = []
     
@@ -259,7 +265,7 @@ def get_submissions():
                         'name': file,
                         'size': format_file_size(file_size),
                         'uploadTime': file_datetime.isoformat(),
-                        'path': f"/admin/file/{course}/{assignment}/{folder}/{file}"
+                        'path': f"/admin/file/{course}/{class_name}/{assignment}/{folder}/{file}"  # 修改文件路径
                     })
             
             submission_time = datetime.datetime.fromtimestamp(latest_time) if latest_time else datetime.datetime.now()
@@ -270,6 +276,7 @@ def get_submissions():
             submissions.append({
                 'studentId': student_id,
                 'studentName': student_name,
+                'class': class_name,  # 增加班级信息
                 'submissionTime': submission_time.isoformat(),
                 'fileCount': len(files),
                 'files': files
@@ -286,17 +293,18 @@ def get_submissions():
         'totalStudents': student_count,
         'submittedCount': submission_count,
         'submissionRate': submission_rate,
-        'dueDateStr': due_date_str
+        'dueDateStr': due_date_str,
+        'className': class_name  # 增加班级信息
     }
     
     return jsonify({'submissions': submissions, 'stats': stats})
 
-@admin_bp.route('/file/<course>/<assignment>/<folder>/<filename>')
+@admin_bp.route('/file/<course>/<class_name>/<assignment>/<folder>/<filename>')
 @admin_required
-def serve_file(course, assignment, folder, filename):
-    """提供文件下载"""
-    file_path = os.path.join(UPLOAD_FOLDER, course, assignment, folder, filename)
-    directory = os.path.join(UPLOAD_FOLDER, course, assignment, folder)
+def serve_file(course, class_name, assignment, folder, filename):
+    """提供文件下载 - 支持班级层级"""
+    file_path = os.path.join(UPLOAD_FOLDER, course, class_name, assignment, folder, filename)
+    directory = os.path.join(UPLOAD_FOLDER, course, class_name, assignment, folder)
     
     if not os.path.exists(file_path):
         return "文件不存在", 404
@@ -308,13 +316,14 @@ def serve_file(course, assignment, folder, filename):
 def download_submissions():
     """下载单个学生提交的文件或整个作业的所有提交"""
     course = request.args.get('course')
+    class_name = request.args.get('class_name')  # 新增班级参数
     assignment = request.args.get('assignment')
     student = request.args.get('student')
     
-    if not course or not assignment:
+    if not course or not class_name or not assignment:
         return "Missing parameters", 400
     
-    assignment_path = os.path.join(UPLOAD_FOLDER, course, assignment)
+    assignment_path = os.path.join(UPLOAD_FOLDER, course, class_name, assignment)
     
     if not os.path.exists(assignment_path):
         return "Assignment not found", 404
@@ -338,7 +347,7 @@ def download_submissions():
         student_path = os.path.join(assignment_path, student_folder)
         
         # 创建zip文件
-        zip_filename = f"{course}_{assignment}_{student_folder}_{timestamp}.zip"
+        zip_filename = f"{course}_{class_name}_{assignment}_{student_folder}_{timestamp}.zip"
         zip_path = os.path.join(temp_dir, zip_filename)
         
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -354,7 +363,7 @@ def download_submissions():
         # 下载所有提交
         # 检查是否存在未过期的合并zip文件（小于1小时）
         existing_zips = [f for f in os.listdir(assignment_path) 
-                         if f.endswith('.zip') and f.startswith(f"{course}_{assignment}_all_")]
+                         if f.endswith('.zip') and f.startswith(f"{course}_{class_name}_{assignment}_all_")]
         
         if existing_zips:
             # 获取最新的zip文件
@@ -368,7 +377,7 @@ def download_submissions():
                 return send_from_directory(assignment_path, most_recent, as_attachment=True)
         
         # 创建包含所有提交的新zip文件
-        zip_filename = f"{course}_{assignment}_all_{timestamp}.zip"
+        zip_filename = f"{course}_{class_name}_{assignment}_all_{timestamp}.zip"
         zip_path = os.path.join(assignment_path, zip_filename)
         
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -396,28 +405,30 @@ def download_submissions():
 def export_stats():
     """导出作业提交统计为Excel文件"""
     course = request.args.get('course')
+    class_name = request.args.get('class_name')  # 新增班级参数
     assignment = request.args.get('assignment')
     
-    if not course or not assignment:
-        return jsonify({'status': 'error', 'message': '缺少课程或作业名称参数'}), 400
+    if not course or not class_name or not assignment:
+        return jsonify({'status': 'error', 'message': '缺少课程、班级或作业名称参数'}), 400
     
     # 获取作业详情
     assignment_obj = next((a for a in load_assignments() if a['course'] == course and a['name'] == assignment), None)
     if not assignment_obj:
         return jsonify({'status': 'error', 'message': '作业不存在'}), 404
     
-    # 获取所有学生信息
+    # 获取所有学生信息 - 筛选特定班级的学生
     users = load_users()
     students = [
-        {'username': username, 'name': info.get('name', ''), 'student_id': info.get('student_id', ''), 'email': info.get('email', '')} 
+        {'username': username, 'name': info.get('name', ''), 'student_id': info.get('student_id', ''), 
+         'email': info.get('email', ''), 'class_name': info.get('class_name', '')} 
         for username, info in users.items() 
-        if not info.get('is_admin', False)
+        if not info.get('is_admin', False) and info.get('class_name') == class_name  # 只包含指定班级
     ]
     
     # 创建内存中的Excel文件
     output = io.BytesIO()
     workbook = xlsxwriter.Workbook(output)
-    worksheet = workbook.add_worksheet("提交统计")
+    worksheet = workbook.add_worksheet(f"{class_name}提交统计")
     
     # 添加标题样式
     header_format = workbook.add_format({
@@ -472,23 +483,24 @@ def export_stats():
         'bold': True
     })
 
-    # 表头
-    headers = ['序号', '学号', '姓名', '邮箱', '提交时间', '提交状态', '文件数量', '文件大小(总计)']
+    # 表头增加班级字段
+    headers = ['序号', '学号', '姓名', '班级', '邮箱', '提交时间', '提交状态', '文件数量', '文件大小(总计)']
     for col, header in enumerate(headers):
         worksheet.write(0, col, header, header_format)
     
     # 设置列宽
-    worksheet.set_column(0, 0, 5)  # 序号
-    worksheet.set_column(1, 1, 12)  # 学号
-    worksheet.set_column(2, 2, 12)  # 姓名
-    worksheet.set_column(3, 3, 25)  # 邮箱
-    worksheet.set_column(4, 4, 18)  # 提交时间
-    worksheet.set_column(5, 5, 10)  # 提交状态
-    worksheet.set_column(6, 6, 10)  # 文件数量
-    worksheet.set_column(7, 7, 15)  # 文件大小
+    worksheet.set_column(0, 0, 5)    # 序号
+    worksheet.set_column(1, 1, 12)   # 学号
+    worksheet.set_column(2, 2, 12)   # 姓名
+    worksheet.set_column(3, 3, 20)   # 班级
+    worksheet.set_column(4, 4, 25)   # 邮箱
+    worksheet.set_column(5, 5, 18)   # 提交时间
+    worksheet.set_column(6, 6, 10)   # 提交状态
+    worksheet.set_column(7, 7, 10)   # 文件数量
+    worksheet.set_column(8, 8, 15)   # 文件大小
     
-    # 获取提交情况
-    assignment_path = os.path.join(UPLOAD_FOLDER, course, assignment)
+    # 获取提交情况 - 修改文件路径包含班级
+    assignment_path = os.path.join(UPLOAD_FOLDER, course, class_name, assignment)
     submissions = {}
     
     if os.path.exists(assignment_path):
@@ -541,30 +553,31 @@ def export_stats():
         username = student['username']
         submission = submissions.get(username)
         
-        worksheet.write(row, 0, row, cell_format)  # 序号
-        worksheet.write(row, 1, student['student_id'], cell_format)  # 学号
-        worksheet.write(row, 2, student['name'], cell_format)  # 姓名
-        worksheet.write(row, 3, student['email'], cell_format)  # 邮箱
+        worksheet.write(row, 0, row, cell_format)                              # 序号
+        worksheet.write(row, 1, student['student_id'], cell_format)            # 学号
+        worksheet.write(row, 2, student['name'], cell_format)                  # 姓名
+        worksheet.write(row, 3, student['class_name'], cell_format)            # 班级
+        worksheet.write(row, 4, student['email'], cell_format)                 # 邮箱
         
         if submission:
             # 有提交记录
             submission_time = datetime.datetime.fromtimestamp(submission['latest_time'])
-            worksheet.write_datetime(row, 4, submission_time, date_format)  # 提交时间
+            worksheet.write_datetime(row, 5, submission_time, date_format)      # 提交时间
             
             # 判断是否逾期提交
             if submission_time > due_date:
-                worksheet.write(row, 5, "逾期提交", late_format)  # 提交状态
+                worksheet.write(row, 6, "逾期提交", late_format)                 # 提交状态
             else:
-                worksheet.write(row, 5, "已提交", submitted_format)  # 提交状态
+                worksheet.write(row, 6, "已提交", submitted_format)              # 提交状态
                 
-            worksheet.write(row, 6, submission['file_count'], cell_format)  # 文件数量
-            worksheet.write(row, 7, format_file_size(submission['total_size']), cell_format)  # 文件大小
+            worksheet.write(row, 7, submission['file_count'], cell_format)      # 文件数量
+            worksheet.write(row, 8, format_file_size(submission['total_size']), cell_format)  # 文件大小
         else:
             # 无提交记录
-            worksheet.write(row, 4, "未提交", cell_format)  # 提交时间
-            worksheet.write(row, 5, "未提交", not_submitted_format)  # 提交状态
-            worksheet.write(row, 6, 0, cell_format)  # 文件数量
-            worksheet.write(row, 7, "0 B", cell_format)  # 文件大小
+            worksheet.write(row, 5, "未提交", cell_format)                       # 提交时间
+            worksheet.write(row, 6, "未提交", not_submitted_format)              # 提交状态
+            worksheet.write(row, 7, 0, cell_format)                             # 文件数量
+            worksheet.write(row, 8, "0 B", cell_format)                         # 文件大小
     
     # 添加统计信息
     summary_row = len(students) + 2
@@ -591,7 +604,7 @@ def export_stats():
     output.seek(0)
     
     # 生成文件名
-    filename = f"{course}_{assignment}_提交统计_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
+    filename = f"{course}_{class_name}_{assignment}_提交统计_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx"
     
     # 发送文件
     return send_file(
@@ -601,3 +614,173 @@ def export_stats():
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
 
+#region 管理班级
+@admin_bp.route('/classes', methods=['GET'])
+@admin_required
+def get_all_classes():
+    """获取所有班级列表"""
+    config = load_course_config()
+    all_classes = []
+    
+    for course in config['courses']:
+        course_name = course['name']
+        if 'classes' in course:
+            for class_info in course['classes']:
+                all_classes.append({
+                    'course': course_name,
+                    'name': class_info['name'],
+                    'description': class_info.get('description', '')
+                })
+    
+    return jsonify({'classes': all_classes})
+
+@admin_bp.route('/classes', methods=['POST'])
+@admin_required
+def add_class():
+    """添加新班级"""
+    data = request.json
+    course_name = data.get('course')
+    class_name = data.get('name')
+    description = data.get('description', '')
+    
+    if not course_name or not class_name:
+        return jsonify({'status': 'error', 'message': '课程名称和班级名称不能为空'}), 400
+    
+    config = load_course_config()
+    
+    # 检查课程是否存在
+    course_found = False
+    for course in config['courses']:
+        if course['name'] == course_name:
+            course_found = True
+            
+            # 确保classes字段存在
+            if 'classes' not in course:
+                course['classes'] = []
+                
+            # 检查班级是否已存在
+            for existing_class in course['classes']:
+                if existing_class['name'] == class_name:
+                    return jsonify({'status': 'error', 'message': '该班级已存在'}), 400
+            
+            # 添加新班级
+            course['classes'].append({
+                'name': class_name,
+                'description': description
+            })
+            break
+    
+    if not course_found:
+        return jsonify({'status': 'error', 'message': '课程不存在'}), 404
+    
+    # 保存更改
+    with open(COURSE_CONFIG_FILE, 'w', encoding='utf-8') as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+    
+    return jsonify({
+        'status': 'success', 
+        'message': f'班级 {class_name} 已添加到课程 {course_name}',
+        'class': {
+            'course': course_name,
+            'name': class_name,
+            'description': description
+        }
+    })
+
+@admin_bp.route('/classes/<course>/<class_name>', methods=['PUT'])
+@admin_required
+def update_class(course, class_name):
+    """更新班级信息"""
+    data = request.json
+    new_name = data.get('name')
+    new_description = data.get('description')
+    
+    if not new_name:
+        return jsonify({'status': 'error', 'message': '班级名称不能为空'}), 400
+    
+    config = load_course_config()
+    
+    # 查找班级并更新
+    for course_item in config['courses']:
+        if course_item['name'] == course and 'classes' in course_item:
+            for class_item in course_item['classes']:
+                if class_item['name'] == class_name:
+                    # 检查新名称是否与其他班级冲突
+                    if new_name != class_name and any(c['name'] == new_name for c in course_item['classes']):
+                        return jsonify({'status': 'error', 'message': '班级名称已存在'}), 400
+                    
+                    # 更新班级信息
+                    class_item['name'] = new_name
+                    class_item['description'] = new_description
+                    
+                    # 保存更改
+                    with open(COURSE_CONFIG_FILE, 'w', encoding='utf-8') as f:
+                        json.dump(config, f, ensure_ascii=False, indent=2)
+                    
+                    return jsonify({
+                        'status': 'success', 
+                        'message': '班级信息已更新',
+                        'class': {
+                            'course': course,
+                            'name': new_name,
+                            'description': new_description
+                        }
+                    })
+    
+    return jsonify({'status': 'error', 'message': '班级不存在'}), 404
+
+@admin_bp.route('/classes/<course>/<class_name>', methods=['DELETE'])
+@admin_required
+def delete_class(course, class_name):
+    """删除班级"""
+    config = load_course_config()
+    
+    # 查找班级
+    for course_item in config['courses']:
+        if course_item['name'] == course and 'classes' in course_item:
+            for i, class_item in enumerate(course_item['classes']):
+                if class_item['name'] == class_name:
+                    # 从列表中删除班级
+                    course_item['classes'].pop(i)
+                    
+                    # 保存更改
+                    with open(COURSE_CONFIG_FILE, 'w', encoding='utf-8') as f:
+                        json.dump(config, f, ensure_ascii=False, indent=2)
+                    
+                    return jsonify({
+                        'status': 'success', 
+                        'message': f'班级 {class_name} 已从课程 {course} 中删除'
+                    })
+    
+    return jsonify({'status': 'error', 'message': '班级不存在'}), 404
+
+@admin_bp.route('/class_students/<class_name>', methods=['GET'])
+@admin_required
+def get_class_students(class_name):
+    """获取班级学生列表"""
+    if not class_name:
+        return jsonify({'status': 'error', 'message': '班级名称不能为空'}), 400
+    
+    # 加载所有用户
+    users = load_users()
+    
+    # 筛选该班级的学生
+    students = []
+    for username, user_data in users.items():
+        if not user_data.get('is_admin', False) and user_data.get('class_name') == class_name:
+            students.append({
+                'username': username,
+                'name': user_data.get('name', username),
+                'student_id': user_data.get('student_id', ''),
+                'email': user_data.get('email', '')
+            })
+    
+    # 按学号排序
+    students.sort(key=lambda x: x['student_id'])
+    
+    return jsonify({
+        'status': 'success',
+        'class_name': class_name,
+        'student_count': len(students),
+        'students': students
+    })

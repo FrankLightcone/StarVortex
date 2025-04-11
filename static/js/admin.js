@@ -451,13 +451,25 @@ window.addEventListener('DOMContentLoaded', function() {
         // 收集高级设置数据
         const advancedSettings = collectAdvancedSettings();
         
+        // 收集选中的班级
+        const selectedClasses = [];
+        document.querySelectorAll('input[name="classNames"]:checked').forEach(checkbox => {
+            selectedClasses.push(checkbox.value);
+        });
+        
+        if (selectedClasses.length === 0) {
+            showToast('请至少选择一个班级', 'error');
+            return;
+        }
+        
         const formData = {
             id: id || null,
             course,
             name,
             dueDate: deadline,
             description,
-            advancedSettings
+            advancedSettings,
+            classNames: selectedClasses  // 添加班级信息
         };
         
         // 在实际应用中，应该发送请求到服务器保存作业
@@ -676,30 +688,26 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // 加载提交情况
-    function loadSubmissions(course, assignment) {
-        if (!submissionsList || !downloadAllBtn || !submissionStats) return;
-        
-        if (!course || !assignment) {
+    // 加载提交记录
+    function loadSubmissions(course, class_name, assignment) {
+        if (!course || !class_name || !assignment) {
             submissionsList.innerHTML = `
                 <tr>
                     <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
-                        请选择课程和作业名称查看提交情况
+                        请选择课程、班级和作业名称查看提交情况
                     </td>
                 </tr>
             `;
             downloadAllBtn.disabled = true;
-            if (exportSubmissionsBtn) {
-                exportSubmissionsBtn.disabled = true;
-            }
-            submissionStats.textContent = '请选择课程和作业名称查看提交情况';
+            exportSubmissionsBtn.disabled = true;
+            submissionStats.textContent = '请选择课程、班级和作业名称查看提交情况';
             return;
         }
         
-        // 修改为加载中状态
+        // 显示加载中
         submissionsList.innerHTML = `
             <tr>
-                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500">
                     <div class="flex flex-col items-center">
                         <svg class="animate-spin h-5 w-5 text-blue-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -711,18 +719,16 @@ window.addEventListener('DOMContentLoaded', function() {
             </tr>
         `;
         
-        fetch(`/admin/submissions?course=${encodeURIComponent(course)}&assignment=${encodeURIComponent(assignment)}`)
+        fetch(`/admin/submissions?course=${encodeURIComponent(course)}&class_name=${encodeURIComponent(class_name)}&assignment=${encodeURIComponent(assignment)}`)
             .then(response => response.json())
             .then(data => {
                 renderSubmissionsList(data.submissions || []);
                 
                 // 更新统计信息
                 if (data.stats) {
-                    submissionStats.textContent = `总共 ${data.stats.totalStudents} 名学生，已提交 ${data.stats.submittedCount} 人，提交率 ${data.stats.submissionRate}，截止日期: ${data.stats.dueDateStr}`;
+                    submissionStats.textContent = `班级: ${data.stats.className} | 总共 ${data.stats.totalStudents} 名学生，已提交 ${data.stats.submittedCount} 人，提交率 ${data.stats.submissionRate}，截止日期: ${data.stats.dueDateStr}`;
                     downloadAllBtn.disabled = (data.submissions || []).length === 0;
-                    if (exportSubmissionsBtn) {
-                        exportSubmissionsBtn.disabled = (data.submissions || []).length === 0;
-                    }
+                    exportSubmissionsBtn.disabled = (data.submissions || []).length === 0;
                 }
             })
             .catch(error => {
@@ -737,9 +743,7 @@ window.addEventListener('DOMContentLoaded', function() {
                 `;
                 
                 downloadAllBtn.disabled = true;
-                if (exportSubmissionsBtn) {
-                    exportSubmissionsBtn.disabled = true;
-                }
+                exportSubmissionsBtn.disabled = true;
             });
     }
     
@@ -986,49 +990,101 @@ window.addEventListener('DOMContentLoaded', function() {
     
     // 提交情况课程筛选变化
     if (submissionCourseFilter) {
-        submissionCourseFilter.addEventListener('change', () => {
-            const courseValue = submissionCourseFilter.value;
+        // 提交情况加载时级联选择
+        submissionCourseFilter.addEventListener('change', function() {
+            const courseValue = this.value;
             
-            // 清空作业下拉框
-            if (submissionAssignmentFilter) {
-                submissionAssignmentFilter.innerHTML = '';
-                submissionAssignmentFilter.disabled = !courseValue;
-                
-                if (!courseValue) {
-                    submissionAssignmentFilter.innerHTML = '<option value="">请先选择课程</option>';
-                    loadSubmissions('', '');
-                    return;
-                }
-                
-                // 根据选择的课程加载作业列表
-                const courseAssignments = assignments
-                    .filter(a => a.course === courseValue)
-                    .map(a => a.name);
-                
+            // 清空班级和作业下拉框
+            submissionClassFilter.innerHTML = '';
+            submissionAssignmentFilter.innerHTML = '';
+            
+            submissionClassFilter.disabled = !courseValue;
+            submissionAssignmentFilter.disabled = true;
+            
+            if (!courseValue) {
+                submissionClassFilter.innerHTML = '<option value="">请先选择课程</option>';
+                submissionAssignmentFilter.innerHTML = '<option value="">请先选择课程和班级</option>';
+                loadSubmissions('', '', '');
+                return;
+            }
+            
+            // 获取班级列表
+            fetch(`/get_classes?course=${encodeURIComponent(courseValue)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 添加选项
+                    submissionClassFilter.innerHTML = '<option value="">请选择班级</option>';
+                    
+                    if (data.classes && data.classes.length > 0) {
+                        data.classes.forEach(classInfo => {
+                            const option = document.createElement('option');
+                            option.value = classInfo.name;
+                            option.textContent = classInfo.name;
+                            submissionClassFilter.appendChild(option);
+                        });
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = '该课程暂无班级';
+                        submissionClassFilter.appendChild(option);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取班级列表失败:', error);
+                    submissionClassFilter.innerHTML = '<option value="">加载班级失败</option>';
+                });
+        });
+    }
+
+    // 班级选择变化
+    submissionClassFilter.addEventListener('change', function() {
+        const courseValue = submissionCourseFilter.value;
+        const classValue = this.value;
+        
+        // 清空作业下拉框
+        submissionAssignmentFilter.innerHTML = '';
+        submissionAssignmentFilter.disabled = !classValue;
+        
+        if (!courseValue || !classValue) {
+            submissionAssignmentFilter.innerHTML = '<option value="">请先选择课程和班级</option>';
+            loadSubmissions('', '', '');
+            return;
+        }
+        
+        // 获取作业列表
+        fetch(`/get_assignments?course=${encodeURIComponent(courseValue)}`)
+            .then(response => response.json())
+            .then(data => {
                 // 添加选项
                 submissionAssignmentFilter.innerHTML = '<option value="">请选择作业</option>';
                 
-                courseAssignments.forEach(name => {
+                if (data.assignments && data.assignments.length > 0) {
+                    data.assignments.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        submissionAssignmentFilter.appendChild(option);
+                    });
+                } else {
                     const option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name;
+                    option.value = '';
+                    option.textContent = '该课程暂无作业';
                     submissionAssignmentFilter.appendChild(option);
-                });
-                
-                // 清空提交列表
-                loadSubmissions('', '');
-            }
-        });
-    }
+                }
+            })
+            .catch(error => {
+                console.error('获取作业列表失败:', error);
+                submissionAssignmentFilter.innerHTML = '<option value="">加载作业失败</option>';
+            });
+    });
     
     // 提交情况作业筛选变化
     if (submissionAssignmentFilter) {
-        submissionAssignmentFilter.addEventListener('change', () => {
-            const courseValue = submissionCourseFilter ? submissionCourseFilter.value : '';
-            const assignmentValue = submissionAssignmentFilter.value;
-            
-            loadSubmissions(courseValue, assignmentValue);
-        });
+        const courseValue = submissionCourseFilter.value;
+        const classValue = submissionClassFilter.value;
+        const assignmentValue = this.value;
+        
+        loadSubmissions(courseValue, classValue, assignmentValue);
     }
     
     // 下载所有提交按钮
@@ -1043,6 +1099,546 @@ window.addEventListener('DOMContentLoaded', function() {
             }
             
             window.location.href = `/admin/download?course=${encodeURIComponent(courseValue)}&assignment=${encodeURIComponent(assignmentValue)}`;
+        });
+    }
+
+    // 课程选择改变时加载班级
+    courseName.addEventListener('change', function() {
+        const selectedCourse = this.value;
+        const classCheckboxes = document.getElementById('classCheckboxes');
+        
+        // 清空班级选择框
+        classCheckboxes.innerHTML = '';
+        
+        if (!selectedCourse) {
+            classCheckboxes.innerHTML = '<div class="text-sm text-gray-500 p-2">请先选择课程</div>';
+            return;
+        }
+        
+        // 显示加载中
+        classCheckboxes.innerHTML = '<div class="text-sm text-gray-500 p-2">加载班级中...</div>';
+        
+        // 获取班级列表
+        fetch(`/get_classes?course=${encodeURIComponent(selectedCourse)}`)
+            .then(response => response.json())
+            .then(data => {
+                classCheckboxes.innerHTML = '';
+                
+                if (!data.classes || data.classes.length === 0) {
+                    classCheckboxes.innerHTML = '<div class="text-sm text-gray-500 p-2">该课程暂无班级</div>';
+                    return;
+                }
+                
+                // 添加"全选"选项
+                const allCheckbox = document.createElement('div');
+                allCheckbox.className = 'flex items-center';
+                allCheckbox.innerHTML = `
+                    <input type="checkbox" id="selectAllClasses" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                    <label for="selectAllClasses" class="ml-2 block text-sm text-gray-900 font-medium">全选</label>
+                `;
+                classCheckboxes.appendChild(allCheckbox);
+                
+                // 添加分隔线
+                const divider = document.createElement('div');
+                divider.className = 'border-t border-gray-200 my-2';
+                classCheckboxes.appendChild(divider);
+                
+                // 添加班级选项
+                data.classes.forEach(classInfo => {
+                    const checkbox = document.createElement('div');
+                    checkbox.className = 'flex items-center';
+                    
+                    const id = `class_${classInfo.name.replace(/\s+/g, '_')}`;
+                    checkbox.innerHTML = `
+                        <input type="checkbox" id="${id}" name="classNames" value="${classInfo.name}" class="class-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded">
+                        <label for="${id}" class="ml-2 block text-sm text-gray-900">
+                            ${classInfo.name}
+                            <span class="text-xs text-gray-500">${classInfo.description || ''}</span>
+                        </label>
+                    `;
+                    
+                    classCheckboxes.appendChild(checkbox);
+                });
+                
+                // 添加全选/取消全选功能
+                const selectAllCheckbox = document.getElementById('selectAllClasses');
+                const classCheckboxInputs = document.querySelectorAll('.class-checkbox');
+                
+                selectAllCheckbox.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    classCheckboxInputs.forEach(checkbox => {
+                        checkbox.checked = isChecked;
+                    });
+                });
+                
+                // 当单个班级复选框状态变化时，更新"全选"复选框
+                classCheckboxInputs.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const allChecked = [...classCheckboxInputs].every(cb => cb.checked);
+                        selectAllCheckbox.checked = allChecked;
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('获取班级列表失败:', error);
+                classCheckboxes.innerHTML = '<div class="text-sm text-red-500 p-2">加载班级失败</div>';
+            });
+    });
+
+    //region 班级管理
+    // 新增导航项目 - 在原有导航中添加班级管理标签
+    const navItems = document.querySelector('.border-b.border-gray-200.mb-6 nav');
+    const classesTabButton = document.createElement('button');
+    classesTabButton.id = 'tabClasses';
+    classesTabButton.className = 'tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-6 border-b-2 border-transparent font-medium text-sm leading-5 focus:outline-none';
+    classesTabButton.textContent = '班级管理';
+    navItems.appendChild(classesTabButton);
+
+    // 班级相关变量
+    let classesData = [];
+    const classesTab = document.getElementById('classesTab');
+    const classesList = document.getElementById('classesList');
+    const classFilterCourse = document.getElementById('classFilterCourse');
+    const addClassBtn = document.getElementById('addClassBtn');
+    const classModal = document.getElementById('classModal');
+    const classModalTitle = document.getElementById('classModalTitle');
+    const classForm = document.getElementById('classForm');
+    const classId = document.getElementById('classId');
+    const originalClassName = document.getElementById('originalClassName');
+    const originalCourse = document.getElementById('originalCourse');
+    const classCourse = document.getElementById('classCourse');
+    const className = document.getElementById('className');
+    const classDescription = document.getElementById('classDescription');
+    const closeClassModalBtn = document.getElementById('closeClassModalBtn');
+    const cancelClassBtn = document.getElementById('cancelClassBtn');
+    const classStudentsModal = document.getElementById('classStudentsModal');
+    const classStudentsTitle = document.getElementById('classStudentsTitle');
+    const classStudentsList = document.getElementById('classStudentsList');
+    const closeClassStudentsBtn = document.getElementById('closeClassStudentsBtn');
+
+    // 班级管理标签页点击事件
+    if (classesTabButton) {
+        classesTabButton.addEventListener('click', () => {
+            // 更新按钮样式
+            tabButtons.forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-blue-500');
+                btn.classList.add('text-gray-500', 'border-transparent');
+            });
+            
+            classesTabButton.classList.remove('text-gray-500', 'border-transparent');
+            classesTabButton.classList.add('text-blue-600', 'border-blue-500');
+            
+            // 切换标签页内容
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            classesTab.classList.add('active');
+            
+            // 加载班级列表
+            loadClasses();
+        });
+    }
+
+    // 加载班级列表
+    function loadClasses() {
+        const courseFilter = classFilterCourse ? classFilterCourse.value : '';
+        
+        // 显示加载中
+        if (classesList) {
+            classesList.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                        <svg class="animate-spin h-5 w-5 mx-auto text-blue-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>加载中...</span>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // 加载班级数据
+        fetch('/admin/classes')
+            .then(response => response.json())
+            .then(data => {
+                classesData = data.classes || [];
+                
+                // 根据课程筛选
+                const filteredClasses = courseFilter ? 
+                    classesData.filter(c => c.course === courseFilter) : 
+                    classesData;
+                
+                renderClassesList(filteredClasses);
+            })
+            .catch(error => {
+                console.error('加载班级列表失败:', error);
+                
+                if (classesList) {
+                    classesList.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-sm text-red-500">
+                                加载班级列表失败: ${error.message}
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+    }
+
+    // 渲染班级列表
+    function renderClassesList(classes) {
+        if (!classesList) return;
+        
+        // 清空列表
+        classesList.innerHTML = '';
+        
+        // 检查是否有班级
+        if (classes.length === 0) {
+            classesList.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                        暂无班级数据
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // 当前用户学生数量缓存
+        const studentCounts = {};
+        
+        // 添加班级到列表
+        classes.forEach(classInfo => {
+            const row = document.createElement('tr');
+            row.className = 'class-item hover:bg-gray-50';
+            
+            // 从用户数据中计算该班级的学生数量
+            if (!studentCounts[classInfo.name]) {
+                // 异步加载学生数量
+                loadClassStudentCount(classInfo.name).then(count => {
+                    const studentCountElem = row.querySelector('.student-count');
+                    if (studentCountElem) {
+                        studentCountElem.textContent = count;
+                    }
+                    studentCounts[classInfo.name] = count;
+                });
+            }
+            
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    ${classInfo.course}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${classInfo.name}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${classInfo.description || '-'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 student-count">
+                    加载中...
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button 
+                        class="text-indigo-600 hover:text-indigo-900 mr-3 view-students" 
+                        data-course="${classInfo.course}" 
+                        data-class="${classInfo.name}"
+                    >
+                        查看学生
+                    </button>
+                    <button 
+                        class="text-blue-600 hover:text-blue-900 mr-3 edit-class" 
+                        data-course="${classInfo.course}" 
+                        data-class="${classInfo.name}"
+                    >
+                        编辑
+                    </button>
+                    <button 
+                        class="text-red-600 hover:text-red-900 delete-class" 
+                        data-course="${classInfo.course}" 
+                        data-class="${classInfo.name}"
+                    >
+                        删除
+                    </button>
+                </td>
+            `;
+            
+            classesList.appendChild(row);
+            
+            // 添加事件监听器
+            
+            // 查看学生按钮
+            const viewStudentsBtn = row.querySelector('.view-students');
+            if (viewStudentsBtn) {
+                viewStudentsBtn.addEventListener('click', () => {
+                    viewClassStudents(classInfo.name);
+                });
+            }
+            
+            // 编辑按钮
+            const editBtn = row.querySelector('.edit-class');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    openEditClassModal(classInfo);
+                });
+            }
+            
+            // 删除按钮
+            const deleteBtn = row.querySelector('.delete-class');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    deleteClass(classInfo.course, classInfo.name);
+                });
+            }
+        });
+    }
+
+    // 加载班级学生数量
+    async function loadClassStudentCount(className) {
+        try {
+            const response = await fetch(`/admin/class_students/${encodeURIComponent(className)}`);
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                return data.student_count;
+            } else {
+                console.error('获取班级学生数量失败:', data.message);
+                return 0;
+            }
+        } catch (error) {
+            console.error('获取班级学生数量出错:', error);
+            return 0;
+        }
+    }
+
+    // 查看班级学生
+    function viewClassStudents(className) {
+        if (!classStudentsModal || !classStudentsTitle || !classStudentsList) return;
+        
+        // 更新标题
+        classStudentsTitle.textContent = `${className} 学生列表`;
+        
+        // 显示加载中
+        classStudentsList.innerHTML = `
+            <tr>
+                <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <svg class="animate-spin h-5 w-5 mx-auto text-blue-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>加载中...</span>
+                </td>
+            </tr>
+        `;
+        
+        // 显示弹窗
+        classStudentsModal.classList.remove('hidden');
+        
+        // 加载学生数据
+        fetch(`/admin/class_students/${encodeURIComponent(className)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const students = data.students || [];
+                    
+                    // 清空列表
+                    classStudentsList.innerHTML = '';
+                    
+                    // 检查是否有学生
+                    if (students.length === 0) {
+                        classStudentsList.innerHTML = `
+                            <tr>
+                                <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    该班级暂无学生
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    // 添加学生到列表
+                    students.forEach(student => {
+                        const row = document.createElement('tr');
+                        row.className = 'student-item hover:bg-gray-50';
+                        
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                ${student.student_id}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${student.name}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${student.email || '-'}
+                            </td>
+                        `;
+                        
+                        classStudentsList.appendChild(row);
+                    });
+                } else {
+                    classStudentsList.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="px-6 py-4 text-center text-sm text-red-500">
+                                加载学生列表失败: ${data.message}
+                            </td>
+                        </tr>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('加载班级学生列表失败:', error);
+                
+                classStudentsList.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="px-6 py-4 text-center text-sm text-red-500">
+                            加载学生列表失败: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            });
+    }
+
+    // 打开添加班级弹窗
+    function openAddClassModal() {
+        if (!classModal || !classModalTitle || !classForm) return;
+        
+        classModalTitle.textContent = '添加班级';
+        classId.value = '';
+        originalClassName.value = '';
+        originalCourse.value = '';
+        classForm.reset();
+        
+        classModal.classList.remove('hidden');
+    }
+
+    // 打开编辑班级弹窗
+    function openEditClassModal(classInfo) {
+        if (!classModal || !classModalTitle || !classForm || !classCourse || !className || !classDescription) return;
+        
+        classModalTitle.textContent = '编辑班级';
+        originalClassName.value = classInfo.name;
+        originalCourse.value = classInfo.course;
+        
+        classCourse.value = classInfo.course;
+        className.value = classInfo.name;
+        classDescription.value = classInfo.description || '';
+        
+        classModal.classList.remove('hidden');
+    }
+
+    // 关闭班级弹窗
+    function closeClassModal() {
+        if (classModal) {
+            classModal.classList.add('hidden');
+        }
+    }
+
+    // 关闭班级学生弹窗
+    function closeClassStudentsModal() {
+        if (classStudentsModal) {
+            classStudentsModal.classList.add('hidden');
+        }
+    }
+
+    // 删除班级
+    function deleteClass(course, className) {
+        if (!confirm(`确定要删除班级 "${className}" 吗？这将同时删除该班级下的所有提交记录。`)) {
+            return;
+        }
+        
+        fetch(`/admin/classes/${encodeURIComponent(course)}/${encodeURIComponent(className)}`, {
+            method: 'DELETE'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(data.message || '班级已删除', 'success');
+                    loadClasses();
+                } else {
+                    showToast(data.message || '删除班级失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('删除班级失败:', error);
+                showToast('删除班级失败: ' + error.message, 'error');
+            });
+    }
+
+    // 班级筛选变化
+    if (classFilterCourse) {
+        classFilterCourse.addEventListener('change', loadClasses);
+    }
+
+    // 添加班级按钮
+    if (addClassBtn) {
+        addClassBtn.addEventListener('click', openAddClassModal);
+    }
+
+    // 关闭班级弹窗按钮
+    if (closeClassModalBtn) {
+        closeClassModalBtn.addEventListener('click', closeClassModal);
+    }
+
+    // 取消按钮
+    if (cancelClassBtn) {
+        cancelClassBtn.addEventListener('click', closeClassModal);
+    }
+
+    // 关闭班级学生弹窗按钮
+    if (closeClassStudentsBtn) {
+        closeClassStudentsBtn.addEventListener('click', closeClassStudentsModal);
+    }
+
+    // 班级表单提交
+    if (classForm) {
+        classForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const course = classCourse.value;
+            const name = className.value;
+            const description = classDescription.value;
+            
+            if (!course || !name) {
+                showToast('课程和班级名称不能为空', 'error');
+                return;
+            }
+            
+            const isEdit = originalClassName.value !== '';
+            const url = isEdit ? 
+                `/admin/classes/${encodeURIComponent(originalCourse.value)}/${encodeURIComponent(originalClassName.value)}` : 
+                '/admin/classes';
+            
+            const method = isEdit ? 'PUT' : 'POST';
+            
+            const data = {
+                course: course,
+                name: name,
+                description: description
+            };
+            
+            // 保存或更新班级
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        closeClassModal();
+                        loadClasses();
+                        showToast(data.message || (isEdit ? '班级已更新' : '班级已添加'), 'success');
+                    } else {
+                        showToast(data.message || '保存班级失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('保存班级失败:', error);
+                    showToast('保存班级失败: ' + error.message, 'error');
+                });
         });
     }
 });

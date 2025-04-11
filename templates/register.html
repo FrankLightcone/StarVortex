@@ -74,6 +74,25 @@
                 </div>
 
                 <div>
+                    <label for="class_name" class="block text-sm font-medium text-white">
+                        班级
+                    </label>
+                    <div class="mt-1">
+                        <select 
+                            id="class_name" 
+                            name="class_name" 
+                            required 
+                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
+                        >
+                            <option value="">请选择班级</option>
+                            {% for class_info in classes %}
+                            <option value="{{ class_info.name }}">{{ class_info.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div>
                     <label for="email" class="block text-sm font-medium text-white">
                         邮箱
                     </label>

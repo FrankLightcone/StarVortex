@@ -435,155 +435,198 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===== 作业上传相关逻辑 =====
     
     // 课程选择事件
-    if (courseSelect) {
-        courseSelect.addEventListener('change', function() {
-            const selectedCourse = this.value;
+if (courseSelect) {
+    courseSelect.addEventListener('change', function() {
+        const selectedCourse = this.value;
+        
+        // 清空班级和作业名称下拉框
+        const classSelect = document.getElementById('class_name');
+        classSelect.innerHTML = '';
+        assignmentSelect.innerHTML = '';
+        
+        // 禁用班级和作业名称下拉框
+        classSelect.disabled = true;
+        assignmentSelect.disabled = true;
+        
+        // 隐藏作业信息
+        assignmentInfo.classList.add('hidden');
+        
+        if (selectedCourse) {
+            // 启用班级下拉框
+            classSelect.disabled = false;
             
-            // 清空作业名称下拉框
-            assignmentSelect.innerHTML = '';
-            
-            // 隐藏作业信息
-            assignmentInfo.classList.add('hidden');
-            
-            if (selectedCourse) {
-                // 启用作业名称下拉框
-                assignmentSelect.disabled = false;
-                
-                // 从服务器获取选中课程的作业列表
-                fetch(`/get_assignments?course=${encodeURIComponent(selectedCourse)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // 添加默认选项
-                        const defaultOption = document.createElement('option');
-                        defaultOption.value = '';
-                        defaultOption.textContent = '请选择作业';
-                        assignmentSelect.appendChild(defaultOption);
-                        
-                        // 添加作业选项
-                        if (data.assignments && data.assignments.length > 0) {
-                            data.assignments.forEach(assignment => {
-                                const option = document.createElement('option');
-                                option.value = assignment;
-                                option.textContent = assignment;
-                                assignmentSelect.appendChild(option);
-                            });
-                        } else {
+            // 从服务器获取选中课程的班级列表
+            fetch(`/get_classes?course=${encodeURIComponent(selectedCourse)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 添加默认选项
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = '请选择班级';
+                    classSelect.appendChild(defaultOption);
+                    
+                    // 添加班级选项
+                    if (data.classes && data.classes.length > 0) {
+                        data.classes.forEach(classInfo => {
                             const option = document.createElement('option');
-                            option.value = '';
-                            option.textContent = '该课程暂无作业';
-                            assignmentSelect.appendChild(option);
-                        }
-                        
-                        // 更新上传按钮状态
-                        updateUploadButtonState();
-                    })
-                    .catch(error => {
-                        console.error('获取作业列表失败:', error);
-                        // 添加错误提示选项
+                            option.value = classInfo.name;
+                            option.textContent = classInfo.name;
+                            classSelect.appendChild(option);
+                        });
+                    } else {
                         const option = document.createElement('option');
                         option.value = '';
-                        option.textContent = '加载作业失败';
-                        assignmentSelect.appendChild(option);
-                    });
-            } else {
-                // 禁用作业名称下拉框
-                assignmentSelect.disabled = true;
-                
-                // 添加默认提示
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = '请先选择课程';
-                assignmentSelect.appendChild(option);
-            }
-            
-            // 更新上传按钮状态
-            updateUploadButtonState();
-        });
-    }
-    
-    // 作业选择事件 - 加载作业统计信息
-    if (assignmentSelect) {
-        assignmentSelect.addEventListener('change', function() {
-            const selectedCourse = courseSelect.value;
-            const selectedAssignment = this.value;
-            
-            // 隐藏作业信息
-            assignmentInfo.classList.add('hidden');
-            
-            if (selectedCourse && selectedAssignment) {
-                // 获取作业统计信息
-                fetch(`/get_assignment_stats?course=${encodeURIComponent(selectedCourse)}&assignment=${encodeURIComponent(selectedAssignment)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.stats) {
-                            // 更新统计信息
-                            assignmentDueDate.textContent = data.stats.dueDate;
-                            assignmentSubmissionCount.textContent = data.stats.submissionCount;
-                            assignmentStatus.textContent = data.stats.status;
-                            mySubmissionStatus.textContent = data.stats.mySubmission;
-                            
-                            // 根据状态修改颜色
-                            if (data.stats.status === "已截止") {
-                                assignmentStatus.classList.add('text-red-600');
-                                assignmentStatus.classList.remove('text-blue-600');
-                            } else {
-                                assignmentStatus.classList.add('text-blue-600');
-                                assignmentStatus.classList.remove('text-red-600');
-                            }
-                            
-                            // 根据提交状态修改颜色
-                            if (data.stats.hasSubmitted) {
-                                mySubmissionStatus.classList.add('text-green-600');
-                                mySubmissionStatus.classList.remove('text-red-600');
-                            } else {
-                                mySubmissionStatus.classList.add('text-red-600');
-                                mySubmissionStatus.classList.remove('text-green-600');
-                            }
-                            
-                            // 显示作业信息
-                            assignmentInfo.classList.remove('hidden');
-                            
-                            // 获取并显示文件限制信息
-                            fetchAssignmentSettings(selectedCourse, selectedAssignment)
-                                .then(settings => {
-                                    // 找到或创建文件限制信息区域
-                                    let fileLimitsElement = document.getElementById('fileLimitsInfo');
-                                    if (!fileLimitsElement) {
-                                        fileLimitsElement = document.createElement('div');
-                                        fileLimitsElement.id = 'fileLimitsInfo';
-                                        fileLimitsElement.className = 'flex flex-wrap mt-2 text-xs text-gray-500';
-                                        assignmentInfo.appendChild(fileLimitsElement);
-                                    }
-                                    
-                                    // 显示文件限制信息
-                                    const maxFileSize = `${settings.maxFileSize} ${settings.fileSizeUnit}`;
-                                    fileLimitsElement.innerHTML = `
-                                        <div class="file-limit-badge mr-2 mb-1">
-                                            <i class="fas fa-file"></i> 最多 ${settings.maxFileCount} 个文件
-                                        </div>
-                                        <div class="file-limit-badge mr-2 mb-1">
-                                            <i class="fas fa-hdd"></i> 单文件限制 ${maxFileSize}
-                                        </div>
-                                        <div class="file-limit-badge mb-1">
-                                            <i class="fas fa-file-alt"></i> 允许的类型: ${settings.allowedTypes.join(', ')}
-                                        </div>
-                                    `;
-                                })
-                                .catch(error => {
-                                    console.error('获取文件限制信息失败:', error);
-                                });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('获取作业统计信息失败:', error);
-                        showToast('获取作业统计信息失败', 'error');
-                    });
-            }
-            
-            // 更新上传按钮状态
-            updateUploadButtonState();
-        });    }
+                        option.textContent = '该课程暂无班级';
+                        classSelect.appendChild(option);
+                    }
+                    
+                    // 更新上传按钮状态
+                    updateUploadButtonState();
+                })
+                .catch(error => {
+                    console.error('获取班级列表失败:', error);
+                    // 添加错误提示选项
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = '加载班级失败';
+                    classSelect.appendChild(option);
+                });
+        } else {
+            // 添加默认提示
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '请先选择课程';
+            classSelect.appendChild(option);
+        }
+        
+        // 更新上传按钮状态
+        updateUploadButtonState();
+    });
+}
 
+// 班级选择事件
+const classSelect = document.getElementById('class_name');
+if (classSelect) {
+    classSelect.addEventListener('change', function() {
+        const selectedCourse = courseSelect.value;
+        const selectedClass = this.value;
+        
+        // 清空作业名称下拉框
+        assignmentSelect.innerHTML = '';
+        
+        // 隐藏作业信息
+        assignmentInfo.classList.add('hidden');
+        
+        if (selectedCourse && selectedClass) {
+            // 启用作业名称下拉框
+            assignmentSelect.disabled = false;
+            
+            // 从服务器获取选中课程的作业列表
+            fetch(`/get_assignments?course=${encodeURIComponent(selectedCourse)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 添加默认选项
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = '请选择作业';
+                    assignmentSelect.appendChild(defaultOption);
+                    
+                    // 添加作业选项
+                    if (data.assignments && data.assignments.length > 0) {
+                        data.assignments.forEach(assignment => {
+                            const option = document.createElement('option');
+                            option.value = assignment;
+                            option.textContent = assignment;
+                            assignmentSelect.appendChild(option);
+                        });
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = '该课程暂无作业';
+                        assignmentSelect.appendChild(option);
+                    }
+                    
+                    // 更新上传按钮状态
+                    updateUploadButtonState();
+                })
+                .catch(error => {
+                    console.error('获取作业列表失败:', error);
+                    // 添加错误提示选项
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = '加载作业失败';
+                    assignmentSelect.appendChild(option);
+                });
+        } else {
+            // 禁用作业名称下拉框
+            assignmentSelect.disabled = true;
+            
+            // 添加默认提示
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '请先选择课程和班级';
+            assignmentSelect.appendChild(option);
+        }
+        
+        // 更新上传按钮状态
+        updateUploadButtonState();
+    });
+}
+
+// 作业选择事件 - 加载作业统计信息
+if (assignmentSelect) {
+    assignmentSelect.addEventListener('change', function() {
+        const selectedCourse = courseSelect.value;
+        const selectedClass = classSelect.value;
+        const selectedAssignment = this.value;
+        
+        // 隐藏作业信息
+        assignmentInfo.classList.add('hidden');
+        
+        if (selectedCourse && selectedClass && selectedAssignment) {
+            // 获取作业统计信息
+            fetch(`/get_assignment_stats?course=${encodeURIComponent(selectedCourse)}&class=${encodeURIComponent(selectedClass)}&assignment=${encodeURIComponent(selectedAssignment)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.stats) {
+                        // 更新统计信息
+                        assignmentDueDate.textContent = data.stats.dueDate;
+                        assignmentSubmissionCount.textContent = data.stats.submissionCount;
+                        assignmentStatus.textContent = data.stats.status;
+                        mySubmissionStatus.textContent = data.stats.mySubmission;
+                        
+                        // 根据状态修改颜色
+                        if (data.stats.status === "已截止") {
+                            assignmentStatus.classList.add('text-red-600');
+                            assignmentStatus.classList.remove('text-blue-600');
+                        } else {
+                            assignmentStatus.classList.add('text-blue-600');
+                            assignmentStatus.classList.remove('text-red-600');
+                        }
+                        
+                        // 根据提交状态修改颜色
+                        if (data.stats.hasSubmitted) {
+                            mySubmissionStatus.classList.add('text-green-600');
+                            mySubmissionStatus.classList.remove('text-red-600');
+                        } else {
+                            mySubmissionStatus.classList.add('text-red-600');
+                            mySubmissionStatus.classList.remove('text-green-600');
+                        }
+                        
+                        // 显示作业信息
+                        assignmentInfo.classList.remove('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('获取作业统计信息失败:', error);
+                    showToast('获取作业统计信息失败', 'error');
+                });
+        }
+        
+        // 更新上传按钮状态
+        updateUploadButtonState();
+    });
+}
     // 拖拽事件处理
     if (dropZone) {
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {

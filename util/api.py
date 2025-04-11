@@ -236,3 +236,20 @@ def get_default_settings():
         'enableGrading': False,
         'enableFeedback': False
     }
+
+@api_bp.route('/get_classes', methods=['GET'])
+def get_classes():
+    """获取特定课程的班级列表API"""
+    course = request.args.get('course')
+    if not course:
+        return jsonify({'classes': []})
+    
+    config = load_course_config()
+    for course_config in config['courses']:
+        if course_config['name'] == course:
+            # 如果课程存在但没有班级字段，则返回空列表
+            if 'classes' not in course_config:
+                return jsonify({'classes': []})
+            return jsonify({'classes': course_config['classes']})
+    
+    return jsonify({'classes': []})

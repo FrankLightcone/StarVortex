@@ -76,7 +76,7 @@ def calculate_md5(file_path):
     return hash_md5.hexdigest()
 
 # 初始化更新路由时调用
-@update_api_bp.before_app_first_request
+@update_api_bp.before_app_request
 def initialize_updates():
     ensure_updates_dir()
     
