@@ -53,6 +53,10 @@ class User(UserMixin):
     @staticmethod
     def load_user(user_id):
         """根据用户ID加载用户对象"""
+        if user_id == ADMIN_USERNAME:
+            # 确保直接返回管理员用户
+            return User(ADMIN_USERNAME, True)
+            
         users = load_users()
         if user_id in users:
             user_data = users[user_id]
@@ -64,8 +68,6 @@ class User(UserMixin):
                 user_data.get('student_id'),
                 user_data.get('class_name')  # 加载班级信息
             )
-        elif user_id == ADMIN_USERNAME:
-            return User(ADMIN_USERNAME, True)
         return None
 
 

@@ -38,11 +38,15 @@ from datetime import datetime, timedelta
 
 auth_bp = Blueprint('auth', __name__)
 
-# 管理员权限校验装饰器
+# 管理员权限校验装饰器，增加debug信息
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # 添加调试日志
+        logging.info(f"Admin check: authenticated={current_user.is_authenticated}, is_admin={getattr(current_user, 'is_admin', False)}")
+        
         if not current_user.is_authenticated or not current_user.is_admin:
+            logging.warning(f"Unauthorized access attempt to admin area: {request.path}")
             return redirect(url_for('auth.admin_login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -171,18 +175,35 @@ def send_verify_code():
 @auth_bp.route('/admin', methods=['GET', 'POST'])
 def admin_login():
     """管理员登录页面"""
+    # 检查用户是否已经登录并且是管理员
     if current_user.is_authenticated and current_user.is_admin:
-        return redirect(url_for('admin.dashboard'))
+        # 调试日志
+        logging.info(f"Admin already logged in: {current_user.id}, is_admin={current_user.is_admin}")
+        # 确保重定向的URL是正确的
+        return redirect('/admin/dashboard')  # 直接使用硬编码路径而不是url_for
         
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         
-        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
-            user = User(ADMIN_USERNAME, True)
-            login_user(user)
-            return redirect(url_for('admin.dashboard'))
+        logging.info(f"Admin login attempt: {username}")
         
+        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
+            # 创建管理员用户实例
+            user = User(ADMIN_USERNAME, True)
+            logging.info(f"Admin login successful: {user.id}, is_admin={user.is_admin}")
+            
+            # 登录用户
+            login_user(user)
+            
+            # 确保is_admin属性被正确设置
+            if not hasattr(current_user, 'is_admin') or not current_user.is_admin:
+                logging.error(f"Admin flag not set correctly after login: {current_user}")
+            
+            # 确保重定向的URL是正确的
+            return redirect('/admin/dashboard')  # 直接使用硬编码路径
+        
+        logging.warning(f"Admin login failed: {username}")
         return render_template('admin_login.html', error='用户名或密码错误')
     
     return render_template('admin_login.html')

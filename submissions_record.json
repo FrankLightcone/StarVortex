@@ -5,6 +5,38 @@
       "notified": true,
       "last_upload_time": 1744209247.5346482,
       "notification_cooldown": 1744209259.9153697
+    },
+    "GNSS_1班的作业": {
+      "md5": "0615d84568dbdeaa7f7945681640ff88",
+      "notified": true,
+      "last_upload_time": 1744386277.1298325,
+      "notification_cooldown": 1744386289.9592893
+    },
+    "GNSS_lab3：广播星历精度评估": {
+      "md5": "0615d84568dbdeaa7f7945681640ff88",
+      "notified": true,
+      "last_upload_time": 1744388060.9098876,
+      "notification_cooldown": 1744388075.04311
+    },
+    "DIP_lab3：频率域滤波": {
+      "md5": "e400b9240060b28ce778b8b40ca12a00",
+      "notified": true,
+      "last_upload_time": 1744461489.3913364,
+      "notification_cooldown": 1744461502.0541973
+    },
+    "GNSS_两个班共同的作业": {
+      "md5": "0615d84568dbdeaa7f7945681640ff88",
+      "notified": true,
+      "last_upload_time": 1744461528.7286165,
+      "notification_cooldown": 1744461540.5278974
+    }
+  },
+  "23300001_测试1": {
+    "GNSS_1班的作业": {
+      "md5": "0615d84568dbdeaa7f7945681640ff88",
+      "notified": true,
+      "last_upload_time": 1744386797.5242076,
+      "notification_cooldown": 1744386810.6486897
     }
   }
 }

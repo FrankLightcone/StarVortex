@@ -25,9 +25,11 @@ import os
 import io
 import xlsxwriter
 import shutil
+import logging
 import datetime
+from datetime import timedelta
 import zipfile
-from flask import Blueprint, render_template, request, jsonify, send_from_directory, send_file
+from flask import Blueprint, render_template, request, jsonify, send_from_directory, send_file, redirect, url_for
 from flask_login import current_user
 
 from util.auth import admin_required
@@ -44,45 +46,135 @@ admin_bp = Blueprint('admin', __name__)
 @admin_required
 def dashboard():
     """管理员控制面板"""
+    # 增加日志记录，帮助调试
+    logging.info(f"Admin dashboard accessed by: {current_user.id}")
+    
     # 获取课程配置
     course_config = load_course_config()
     
-    # 提取所有课程 - 修复部分
-    courses = set()  # 使用集合避免重复
+    # 提取所有班级
+    classes = set()
+
     for class_info in course_config.get('classes', []):
-        for course_info in class_info.get('courses', []):
-            courses.add(course_info['name'])
+        class_name = class_info.get('name', '')
+        classes.add(class_name)
     
     # 转换为列表
-    courses = list(courses)
+    classes = list(classes)
     
     return render_template('admin.html', 
-                          courses=courses, 
+                          classes=classes,
                           course_config=course_config, 
                           admin_name=ADMIN_USERNAME)
+
+@admin_bp.route('/get_courses_by_class', methods=['GET'])
+@admin_required
+def get_courses_by_class():
+    """根据班级获取课程列表"""
+    class_name = request.args.get('class_name')
+    course_config = load_course_config()
+
+    # 如果班级为all，则返回所有课程
+    if class_name == 'all':
+        logging.info("获取所有课程")
+        courses = set()
+        for class_info in course_config.get('classes', []):
+            for course in class_info.get('courses', []):
+                courses.add(course['name'])
+        
+        # 转换为列表
+        courses = list(courses)
+
+        return jsonify({'courses': courses})
+    
+    # 查找对应班级的课程
+    courses = []
+    for class_info in course_config.get('classes', []):
+        if class_info.get('name') == class_name:
+            courses = [course['name'] for course in class_info.get('courses', [])]
+            break
+    
+    return jsonify({'courses': courses})
+
+@admin_bp.route('/get_assignments_by_class_and_course', methods=['GET'])
+@admin_required
+def get_assignments_by_class_and_course():
+    """根据班级和课程获取作业列表"""
+    class_name = request.args.get('class_name')
+    course_name = request.args.get('course')
+    
+    # 获取所有作业
+    assignments = load_assignments()
+    logging.info(f"获取作业列表: 班级={class_name}, 课程={course_name}")
+    
+    # 筛选出符合条件的作业
+    filtered_assignments = [
+        assignment for assignment in assignments 
+        if assignment['course'] == course_name and class_name in assignment.get('classNames', [])
+    ]
+
+    # 修改为作业名称返回
+    filtered_assignments = [
+        {'id': assignment['id'], 'name': assignment['name']}
+        for assignment in filtered_assignments
+    ]
+    
+    return jsonify({'assignments': filtered_assignments})
+
+@admin_bp.route('/')  # 添加根路由重定向
+@admin_required
+def admin_root():
+    """管理员根路由 - 重定向到dashboard"""
+    return redirect(url_for('admin.dashboard'))
 
 @admin_bp.route('/assignments', methods=['GET'])
 @admin_required
 def get_assignments_admin():
-    """获取所有作业"""
+    """获取所有作业 - 支持多种文件结构"""
     assignments = load_assignments()
     
-    # 计算每个作业的提交数量
+    # 计算每个作业的提交数量 - 考虑多种路径结构
     for assignment in assignments:
         course = assignment['course']
         assignment_name = assignment['name']
         
-        # 创建作业目录路径
-        assignment_path = os.path.join(UPLOAD_FOLDER, course, assignment_name)
+        # 查找适用的班级
+        class_names = assignment.get('classNames', [])
         
-        # 计算学生文件夹数量
-        if os.path.exists(assignment_path):
-            student_folders = [f for f in os.listdir(assignment_path) 
-                              if os.path.isdir(os.path.join(assignment_path, f)) 
-                              and not f.endswith('.zip')]
-            assignment['submissionCount'] = len(student_folders)
-        else:
-            assignment['submissionCount'] = 0
+        # 如果没有指定班级，则尝试从配置中查找
+        if not class_names:
+            config = load_course_config()
+            for class_info in config.get('classes', []):
+                for course_info in class_info.get('courses', []):
+                    if course_info['name'] == course and assignment_name in course_info.get('assignments', []):
+                        class_names.append(class_info['name'])
+        
+        # 确保班级列表无重复
+        class_names = list(set(class_names))
+        logging.debug(f"作业适用班级: {course}/{assignment_name} -> {class_names}")
+        
+        # 初始化提交计数
+        submission_count = 0
+        
+        # 检查所有班级的提交
+        for class_name in class_names:
+            # 检查多种可能的文件路径
+            possible_paths = [
+                os.path.join(UPLOAD_FOLDER, class_name, course, assignment_name),  # 新结构: /班级/课程/作业/
+                os.path.join(UPLOAD_FOLDER, course, class_name, assignment_name),  # 旧结构: /课程/班级/作业/
+                os.path.join(UPLOAD_FOLDER, course, assignment_name)               # 最旧结构: /课程/作业/
+            ]
+            
+            # 检查所有可能的路径
+            for path in possible_paths:
+                if os.path.exists(path):
+                    student_folders = [f for f in os.listdir(path) 
+                                     if os.path.isdir(os.path.join(path, f)) 
+                                     and not f.endswith('.zip')]
+                    submission_count += len(student_folders)
+        
+        # 更新作业对象
+        assignment['submissionCount'] = submission_count
             
         # 根据截止日期计算状态
         due_date = datetime.datetime.fromisoformat(assignment['dueDate'])
@@ -199,7 +291,7 @@ def delete_assignment(assignment_id):
 @admin_bp.route('/submissions', methods=['GET'])
 @admin_required
 def get_submissions():
-    """获取作业提交情况"""
+    """获取作业提交情况 - 支持多种文件结构"""
     course = request.args.get('course')
     class_name = request.args.get('class_name')  # 新增班级参数
     assignment = request.args.get('assignment')
@@ -207,25 +299,32 @@ def get_submissions():
     if not course or not class_name or not assignment:
         return jsonify({'submissions': [], 'stats': None})
     
+    # 添加调试日志
+    logging.info(f"管理员查询提交情况: 课程={course}, 班级={class_name}, 作业={assignment}")
+    
     # 获取作业详情
+    from util.utils import load_assignments
     assignments = load_assignments()
     assignment_obj = next((a for a in assignments if a['course'] == course and a['name'] == assignment), None)
+    logging.info(f"作业对象: {assignment_obj}")
     
     # 如果作业不存在于assignments.json但存在于course_config中，创建默认作业对象
     if not assignment_obj:
         course_config = load_course_config()
-        for course_item in course_config['courses']:
-            if course_item['name'] == course and assignment in course_item['assignments']:
-                # 创建默认作业对象
-                assignment_obj = {
-                    'id': f"{course}_{assignment}",
-                    'course': course,
-                    'name': assignment,
-                    'dueDate': (datetime.datetime.now() + datetime.timedelta(days=7)).isoformat(),
-                    'description': '',
-                    'createdAt': datetime.datetime.now().isoformat()
-                }
-                break
+        for class_info in course_config.get('classes', []):
+            if class_info['name'] == class_name:
+                for course_info in class_info.get('courses', []):
+                    if course_info['name'] == course and assignment in course_info.get('assignments', []):
+                        # 创建默认作业对象
+                        assignment_obj = {
+                            'id': f"{course}_{assignment}",
+                            'course': course,
+                            'name': assignment,
+                            'dueDate': (datetime.now() + timedelta(days=7)).isoformat(),
+                            'description': '',
+                            'createdAt': datetime.now().isoformat()
+                        }
+                        break
         
         if not assignment_obj:
             return jsonify({'status': 'error', 'message': '作业不存在'}), 404
@@ -234,76 +333,99 @@ def get_submissions():
     due_date = datetime.datetime.fromisoformat(assignment_obj['dueDate'])
     due_date_str = due_date.strftime('%Y-%m-%d %H:%M')
     
-    # 创建作业目录路径 - 修改为包含班级
-    assignment_path = os.path.join(UPLOAD_FOLDER, course, class_name, assignment)
+    # 检查多种可能的文件路径
+    possible_paths = [
+        os.path.join(UPLOAD_FOLDER, class_name, course, assignment),  # 新结构: /班级/课程/作业/
+    ]
+    
+    submissions = []
+    assignment_paths = []
+    
+    # 检查所有可能的路径
+    for path in possible_paths:
+        if os.path.exists(path) and os.path.isdir(path):
+            assignment_paths.append(path)
+            logging.info(f"找到有效路径: {path}")
+    
+    # 整合所有路径下的提交
+    student_folders_all = []
+    for assignment_path in assignment_paths:
+        student_folders = [f for f in os.listdir(assignment_path) 
+                          if os.path.isdir(os.path.join(assignment_path, f)) 
+                          and not f.endswith('.zip')]
+        for folder in student_folders:
+            student_folders_all.append((folder, assignment_path))
     
     # 获取所有用户，统计学生数量
     users = load_users()
-    # 这里可以优化为只统计该班级的学生
+    # 获取指定班级的学生
     class_students = [user for username, user in users.items() 
                      if not user.get('is_admin', False) 
                      and user.get('class_name') == class_name]
     student_count = len(class_students)
+
+    if not assignment_paths:
+        logging.warning(f"未找到作业路径: 课程={course}, 班级={class_name}, 作业={assignment}")
+        return jsonify({'submissions': [], 'stats': {
+            'totalStudents': student_count,
+            'submittedCount': 0,
+            'submissionRate': "0%",
+            'dueDateStr': due_date_str,
+            'className': class_name
+        }})
     
-    submissions = []
-    
-    # 检查作业目录是否存在
-    if os.path.exists(assignment_path):
-        # 获取学生文件夹
-        student_folders = [f for f in os.listdir(assignment_path) 
-                          if os.path.isdir(os.path.join(assignment_path, f)) 
-                          and not f.endswith('.zip')]
-        
-        for folder in student_folders:
-            # 文件夹名称格式: student_id_name
-            parts = folder.split('_', 1)
-            if len(parts) < 2:
-                continue
+    # 处理所有找到的学生文件夹
+    for folder, assignment_path in student_folders_all:
+        # 文件夹名称格式: student_id_name
+        parts = folder.split('_', 1)
+        if len(parts) < 2:
+            continue
                 
-            student_id = parts[0]
-            student_name = parts[1]
-            folder_path = os.path.join(assignment_path, folder)
-            
-            # 获取文件夹中的文件
-            files = []
-            latest_time = None
-            
-            for file in os.listdir(folder_path):
-                file_path = os.path.join(folder_path, file)
-                if os.path.isfile(file_path):
-                    file_size = os.path.getsize(file_path)
-                    file_time = os.path.getmtime(file_path)
-                    file_datetime = datetime.datetime.fromtimestamp(file_time)
-                    
-                    if latest_time is None or file_time > latest_time:
-                        latest_time = file_time
-                    
-                    files.append({
-                        'name': file,
-                        'size': format_file_size(file_size),
-                        'uploadTime': file_datetime.isoformat(),
-                        'path': f"/admin/file/{course}/{class_name}/{assignment}/{folder}/{file}"  # 修改文件路径
-                    })
-            
-            submission_time = datetime.datetime.fromtimestamp(latest_time) if latest_time else datetime.datetime.now()
-            
-            # 按上传时间排序文件，最新的在前
-            files.sort(key=lambda x: x['uploadTime'], reverse=True)
-            
-            submissions.append({
-                'studentId': student_id,
-                'studentName': student_name,
-                'class': class_name,  # 增加班级信息
-                'submissionTime': submission_time.isoformat(),
-                'fileCount': len(files),
-                'files': files
-            })
+        student_id = parts[0]
+        student_name = parts[1]
+        folder_path = os.path.join(assignment_path, folder)
         
-        # 按提交时间排序，最新的在前
-        submissions.sort(key=lambda x: x['submissionTime'], reverse=True)
+        # 获取文件夹中的文件
+        files = []
+        latest_time = None
+        
+        for file in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, file)
+            if os.path.isfile(file_path):
+                file_size = os.path.getsize(file_path)
+                file_time = os.path.getmtime(file_path)
+                file_datetime = datetime.datetime.fromtimestamp(file_time)
+                
+                if latest_time is None or file_time > latest_time:
+                    latest_time = file_time
+                
+                files.append({
+                    'name': file,
+                    'size': format_file_size(file_size),
+                    'uploadTime': file_datetime.isoformat(),
+                    'path': f"/admin/file/{course}/{class_name}/{assignment}/{folder}/{file}"
+                })
+        
+        submission_time = datetime.datetime.fromtimestamp(latest_time) if latest_time else datetime.now()
+        
+        # 按上传时间排序文件，最新的在前
+        files.sort(key=lambda x: x['uploadTime'], reverse=True)
+        
+        submissions.append({
+            'studentId': student_id,
+            'studentName': student_name,
+            'class': class_name,
+            'submissionTime': submission_time.isoformat(),
+            'fileCount': len(files),
+            'files': files
+        })
     
-    # 计算统计信息
-    submission_count = len(submissions)
+    # 按提交时间排序，最新的在前
+    submissions.sort(key=lambda x: x['submissionTime'], reverse=True)
+    
+    # 统计信息 - 使用去重后的学生ID计算
+    submitted_students = set(s['studentId'] for s in submissions)
+    submission_count = len(submitted_students)
     submission_rate = f"{(submission_count / student_count * 100):.1f}%" if student_count > 0 else "0%"
     
     stats = {
@@ -311,7 +433,7 @@ def get_submissions():
         'submittedCount': submission_count,
         'submissionRate': submission_rate,
         'dueDateStr': due_date_str,
-        'className': class_name  # 增加班级信息
+        'className': class_name
     }
     
     return jsonify({'submissions': submissions, 'stats': stats})
@@ -319,48 +441,71 @@ def get_submissions():
 @admin_bp.route('/file/<course>/<class_name>/<assignment>/<folder>/<filename>')
 @admin_required
 def serve_file(course, class_name, assignment, folder, filename):
-    """提供文件下载 - 支持班级层级"""
-    file_path = os.path.join(UPLOAD_FOLDER, course, class_name, assignment, folder, filename)
-    directory = os.path.join(UPLOAD_FOLDER, course, class_name, assignment, folder)
+    """提供文件下载 - 支持多种文件结构"""
+    # 检查多种可能的文件路径
+    possible_paths = [
+        # 新结构: /班级/课程/作业/
+        os.path.join(UPLOAD_FOLDER, class_name, course, assignment, folder, filename),
+        # 旧结构: /课程/班级/作业/
+        os.path.join(UPLOAD_FOLDER, course, class_name, assignment, folder, filename),
+        # 最旧结构: /课程/作业/
+        os.path.join(UPLOAD_FOLDER, course, assignment, folder, filename)
+    ]
     
-    if not os.path.exists(file_path):
-        return "文件不存在", 404
+    # 尝试所有可能的路径
+    for file_path in possible_paths:
+        if os.path.exists(file_path):
+            directory = os.path.dirname(file_path)
+            return send_from_directory(directory, filename)
     
-    return send_from_directory(directory, filename)
+    return "文件不存在", 404
 
-@admin_bp.route('/download')
+@admin_bp.route('/download', methods=['GET'])
 @admin_required
 def download_submissions():
-    """下载单个学生提交的文件或整个作业的所有提交"""
+    """下载单个学生提交的文件或整个作业的所有提交 - 支持多种文件结构"""
     course = request.args.get('course')
     class_name = request.args.get('class_name')  # 新增班级参数
     assignment = request.args.get('assignment')
     student = request.args.get('student')
     
     if not course or not class_name or not assignment:
-        return "Missing parameters", 400
+        return "缺少参数", 400
     
-    assignment_path = os.path.join(UPLOAD_FOLDER, course, class_name, assignment)
+    # 检查多种可能的文件路径
+    possible_paths = [
+        os.path.join(UPLOAD_FOLDER, class_name, course, assignment),  # 新结构: /班级/课程/作业/
+        os.path.join(UPLOAD_FOLDER, course, class_name, assignment),  # 旧结构: /课程/班级/作业/
+        os.path.join(UPLOAD_FOLDER, course, assignment)               # 最旧结构: /课程/作业/
+    ]
     
-    if not os.path.exists(assignment_path):
-        return "Assignment not found", 404
+    # 查找存在的有效路径
+    valid_paths = [path for path in possible_paths if os.path.exists(path)]
+    
+    if not valid_paths:
+        return "作业未找到", 404
     
     # 临时目录用于准备下载
     temp_dir = os.path.join(UPLOAD_FOLDER, 'temp')
     os.makedirs(temp_dir, exist_ok=True)
     
-    timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     
     if student:
         # 下载单个学生的提交
-        student_folders = [f for f in os.listdir(assignment_path) 
-                          if os.path.isdir(os.path.join(assignment_path, f)) 
-                          and f.startswith(student)]
+        student_folders = []
+        for path in valid_paths:
+            folders = [f for f in os.listdir(path) 
+                     if os.path.isdir(os.path.join(path, f)) 
+                     and f.startswith(student)]
+            if folders:
+                student_folders.append((folders[0], path))
         
         if not student_folders:
-            return "Student submission not found", 404
+            return "学生提交未找到", 404
         
-        student_folder = student_folders[0]
+        # 使用找到的第一个文件夹
+        student_folder, assignment_path = student_folders[0]
         student_path = os.path.join(assignment_path, student_folder)
         
         # 创建zip文件
@@ -378,43 +523,29 @@ def download_submissions():
         return send_from_directory(temp_dir, zip_filename, as_attachment=True)
     else:
         # 下载所有提交
-        # 检查是否存在未过期的合并zip文件（小于1小时）
-        existing_zips = [f for f in os.listdir(assignment_path) 
-                         if f.endswith('.zip') and f.startswith(f"{course}_{class_name}_{assignment}_all_")]
-        
-        if existing_zips:
-            # 获取最新的zip文件
-            most_recent = max(existing_zips, key=lambda f: os.path.getmtime(os.path.join(assignment_path, f)))
-            most_recent_path = os.path.join(assignment_path, most_recent)
-            
-            # 检查是否在1小时内创建的
-            mtime = os.path.getmtime(most_recent_path)
-            if (datetime.datetime.now() - datetime.datetime.fromtimestamp(mtime)).total_seconds() < 3600:
-                # 提供现有zip文件
-                return send_from_directory(assignment_path, most_recent, as_attachment=True)
-        
         # 创建包含所有提交的新zip文件
         zip_filename = f"{course}_{class_name}_{assignment}_all_{timestamp}.zip"
-        zip_path = os.path.join(assignment_path, zip_filename)
+        zip_path = os.path.join(temp_dir, zip_filename)
         
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            # 获取所有学生文件夹
-            student_folders = [f for f in os.listdir(assignment_path) 
-                              if os.path.isdir(os.path.join(assignment_path, f)) 
-                              and not f.endswith('.zip')]
-            
-            for folder in student_folders:
-                folder_path = os.path.join(assignment_path, folder)
+            # 遍历所有有效路径下的学生文件夹
+            for path in valid_paths:
+                student_folders = [f for f in os.listdir(path) 
+                                 if os.path.isdir(os.path.join(path, f)) 
+                                 and not f.endswith('.zip')]
                 
-                for root, _, files in os.walk(folder_path):
-                    for file in files:
-                        file_path = os.path.join(root, file)
-                        # 使用学生文件夹作为zip中的顶层目录
-                        arcname = os.path.join(folder, os.path.relpath(file_path, folder_path))
-                        zipf.write(file_path, arcname=arcname)
+                for folder in student_folders:
+                    folder_path = os.path.join(path, folder)
+                    
+                    for root, _, files in os.walk(folder_path):
+                        for file in files:
+                            file_path = os.path.join(root, file)
+                            # 使用学生文件夹作为zip中的顶层目录
+                            arcname = os.path.join(folder, os.path.relpath(file_path, folder_path))
+                            zipf.write(file_path, arcname=arcname)
         
         # 提供zip文件下载
-        return send_from_directory(assignment_path, zip_filename, as_attachment=True)
+        return send_from_directory(temp_dir, zip_filename, as_attachment=True)
 
 #region 导出作业提交统计为Excel文件
 @admin_bp.route('/export-stats')

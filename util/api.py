@@ -215,7 +215,7 @@ def all_assignments():
                     is_expired = due_date < datetime.now()
                     
                     # 构建作业目录路径 - 包含班级层级
-                    assignment_path = os.path.join(UPLOAD_FOLDER, course_name, class_name, assignment_name)
+                    assignment_path = os.path.join(UPLOAD_FOLDER, class_name, course_name, assignment_name)
                     
                     # 检查目录是否存在，如果不存在则创建
                     if not os.path.exists(assignment_path):
@@ -223,6 +223,9 @@ def all_assignments():
                     
                     # 检查当前用户是否已提交
                     has_submitted = False
+
+                    # 调试输出
+                    logging.info(f"检查提交状态: {assignment_path}, 学号: {student_id}, 用户ID: {current_user.id}")
                     
                     if os.path.exists(assignment_path):
                         # 查找匹配学生ID的文件夹

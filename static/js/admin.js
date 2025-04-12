@@ -14,10 +14,14 @@ window.addEventListener('DOMContentLoaded', function() {
     const advancedSettingsPanel = document.getElementById('advancedSettingsPanel');
     const customFileTypesToggle = document.getElementById('customFileTypesToggle');
     const customFileTypesContainer = document.getElementById('customFileTypesContainer');
+
+    // 作业管理页面下拉框
+    const classFilter = document.getElementById('classFilter');
+    const courseFilter = document.getElementById('courseFilter');
     
     // 课程和作业筛选下拉框
-    const courseFilter = document.getElementById('courseFilter');
     const submissionCourseFilter = document.getElementById('submissionCourseFilter');
+    const submissionClassFilter = document.getElementById('submissionClassFilter');
     const submissionAssignmentFilter = document.getElementById('submissionAssignmentFilter');
     
     // 显示信息的元素
@@ -142,12 +146,14 @@ window.addEventListener('DOMContentLoaded', function() {
     
     // 标签页切换
     if (tabButtons) {
+        console.info(tabButtons);
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 // 使用直接映射而不是字符串替换，以确保准确匹配
                 const tabMapping = {
                     'tabAssignments': 'assignmentsTab',
-                    'tabSubmissions': 'submissionsTab'
+                    'tabSubmissions': 'submissionsTab',
+                    'tabClasses': 'classesTab',
                 };
                 
                 const tabContentId = tabMapping[button.id];
@@ -157,7 +163,7 @@ window.addEventListener('DOMContentLoaded', function() {
                     console.error(`找不到与按钮ID "${button.id}" 对应的标签页内容元素`);
                     return;
                 }
-                
+
                 // 更新按钮样式
                 tabButtons.forEach(btn => {
                     btn.classList.remove('text-blue-600', 'border-blue-500');
@@ -177,6 +183,10 @@ window.addEventListener('DOMContentLoaded', function() {
                     targetTab.classList.add('active');
                 } else {
                     console.error(`找不到ID为 "${tabContentId}" 的标签页内容元素`);
+                }
+
+                if (tabContentId === 'classesTab') {
+                    loadClasses();
                 }
             });
         });
@@ -232,99 +242,302 @@ window.addEventListener('DOMContentLoaded', function() {
                 renderAssignmentsList();
             });
     }
+
+    if (classFilter) {
+        classFilter.addEventListener('change', function() {
+            const selectedClass = this.value;
+
+            // 如果选择的是 “全部班级” 课程筛选下拉框便加载所有课程
+            if (!selectedClass) {
+                courseFilter.innerHTML = '';
+
+                fetch('/admin/get_courses_by_class?class_name=all') 
+                    .then(response => response.json())
+                    .then(data => {
+                        // 清空课程下拉框
+                        courseFilter.innerHTML = '<option value="">全部课程</option>';
+                        console.info("data", data);
+                        // 添加课程选项
+                        if (data.courses && data.courses.length > 0) {
+                            data.courses.forEach(course => {
+                                const option = document.createElement('option');
+                                option.value = course;
+                                option.textContent = course;
+                                courseFilter.appendChild(option);
+                            });
+                        } else {
+                            const option = document.createElement('option');
+                            option.value = '';
+                            option.textContent = '暂无课程';
+                            courseFilter.appendChild(option);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading courses:', error);
+                    });
+            } else {
+                // 加载选定班级的课程
+                fetch(`/admin/get_courses_by_class?class_name=${encodeURIComponent(selectedClass)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // 清空课程下拉框
+                        courseFilter.innerHTML = '<option value="">全部课程</option>';
+                        // 添加课程选项
+                        if (data.courses && data.courses.length > 0) {
+                            data.courses.forEach(course => {
+                                const option = document.createElement('option');
+                                option.value = course;
+                                option.textContent = course;
+                                courseFilter.appendChild(option);
+                            });
+                        } else {
+                            const option = document.createElement('option');
+                            option.value = '';
+                            option.textContent = '暂无课程';
+                            courseFilter.appendChild(option);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading courses:', error);
+                    });
+            }
+            renderAssignmentsList()
+        });
+        classFilter.dispatchEvent(new Event('change'));
+    }
+        
+// 渲染作业列表
+function renderAssignmentsList() {
+    // 检查是否存在作业列表元素
+    if (!assignmentsList) return;
     
-    // 渲染作业列表
-    function renderAssignmentsList() {
-        if (!assignmentsList) return;
+    // 移除之前可能存在的所有弹出列表
+    const existingPopups = document.querySelectorAll('.class-list-popup');
+    existingPopups.forEach(popup => popup.remove());
+    
+    // 添加点击事件监听器到文档，点击非列表区域时关闭弹出窗口
+    document.addEventListener('click', closeAllClassLists);
+    
+    // 筛选作业
+    const classNameValue = classFilter ? classFilter.value : '';
+    const courseNameValue = courseFilter ? courseFilter.value : '';
+    console.info("classNameValue", classNameValue);
+    console.info("courseNameValue", courseNameValue);
+    
+    const filteredAssignments = assignments.filter(assignment => {
+        const courseMatch = courseNameValue ? assignment.course === courseNameValue : true;
+        const classMatch = classNameValue ? assignment.classNames.includes(classNameValue) : true;
+        return courseMatch && classMatch;
+    });
+    
+    console.info('assignments', assignments);
+    // 清空列表
+    assignmentsList.innerHTML = '';
+    
+    // 检查是否有作业
+    if (filteredAssignments.length === 0) {
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = `
+            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                暂无作业数据
+            </td>
+        `;
+        assignmentsList.appendChild(emptyRow);
+        return;
+    }
+    
+    // 添加作业到列表
+    filteredAssignments.forEach(assignment => {
+        const row = document.createElement('tr');
+        row.className = 'assignment-item';
         
-        // 筛选作业
-        const courseNameValue = courseFilter ? courseFilter.value : '';
-        const filteredAssignments = courseNameValue ? 
-            assignments.filter(a => a.course === courseNameValue) : 
-            assignments;
+        const dueDateTime = new Date(assignment.dueDate);
+        const now = new Date();
+        const isExpired = dueDateTime < now;
         
-        // 清空列表
-        assignmentsList.innerHTML = '';
+        // 格式化截止日期显示
+        const formattedDueDate = dueDateTime.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
         
-        // 检查是否有作业
-        if (filteredAssignments.length === 0) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `
-                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                    暂无作业数据
-                </td>
-            `;
-            assignmentsList.appendChild(emptyRow);
-            return;
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                ${assignment.classNames.length === 1 ? 
+                    `${assignment.classNames[0]}` : 
+                    `<div class="class-list-container" data-assignment-id="${assignment.id}">
+                        <span class="mr-1">${assignment.classNames.length}个班级</span>
+                        <button class="toggle-class-list text-blue-500 focus:outline-none inline-flex items-center" type="button">
+                            <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                    </div>`
+                }
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                ${assignment.course}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${assignment.name}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${formattedDueDate}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                ${isExpired ? 
+                    '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">已截止</span>' :
+                    '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">进行中</span>'
+                }
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${assignment.submissionCount}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button 
+                    class="text-blue-600 hover:text-blue-900 mr-3 edit-assignment" 
+                    data-id="${assignment.id}"
+                >
+                    编辑
+                </button>
+                <button 
+                    class="text-red-600 hover:text-red-900 delete-assignment" 
+                    data-id="${assignment.id}"
+                >
+                    删除
+                </button>
+            </td>
+        `;
+        
+        // 添加事件监听器
+        assignmentsList.appendChild(row);
+        
+        // 班级列表展开/折叠按钮
+        const toggleButton = row.querySelector('.toggle-class-list');
+        if (toggleButton && assignment.classNames.length > 1) {
+            toggleButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // 阻止事件冒泡
+                
+                // 关闭所有其他弹出的班级列表
+                closeAllClassLists();
+                
+                // 创建弹出列表
+                createClassListPopup(e.currentTarget, assignment.classNames, assignment.id);
+                
+                // 旋转箭头图标
+                const svg = e.currentTarget.querySelector('svg');
+                svg.style.transform = 'rotate(180deg)';
+            });
         }
         
-        // 添加作业到列表
-        filteredAssignments.forEach(assignment => {
-            const row = document.createElement('tr');
-            row.className = 'assignment-item';
-            
-            const dueDateTime = new Date(assignment.dueDate);
-            const now = new Date();
-            const isExpired = dueDateTime < now;
-            
-            // 格式化截止日期显示
-            const formattedDueDate = dueDateTime.toLocaleString('zh-CN', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ${assignment.course}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${assignment.name}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${formattedDueDate}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    ${isExpired ? 
-                        '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">已截止</span>' :
-                        '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">进行中</span>'
-                    }
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${assignment.submissionCount}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button 
-                        class="text-blue-600 hover:text-blue-900 mr-3 edit-assignment" 
-                        data-id="${assignment.id}"
-                    >
-                        编辑
-                    </button>
-                    <button 
-                        class="text-red-600 hover:text-red-900 delete-assignment" 
-                        data-id="${assignment.id}"
-                    >
-                        删除
-                    </button>
-                </td>
-            `;
-            
-            // 添加事件监听器
-            assignmentsList.appendChild(row);
-            
-            // 编辑按钮
-            row.querySelector('.edit-assignment').addEventListener('click', () => {
-                openEditAssignmentModal(assignment);
-            });
-            
-            // 删除按钮
-            row.querySelector('.delete-assignment').addEventListener('click', () => {
-                deleteAssignment(assignment.id);
-            });
+        // 编辑按钮
+        row.querySelector('.edit-assignment').addEventListener('click', () => {
+            openEditAssignmentModal(assignment);
         });
+        
+        // 删除按钮
+        row.querySelector('.delete-assignment').addEventListener('click', () => {
+            deleteAssignment(assignment.id);
+        });
+    });
+}
+
+// 创建班级列表弹出窗口
+function createClassListPopup(buttonElement, classNames, assignmentId) {
+    // 获取按钮位置
+    const buttonRect = buttonElement.getBoundingClientRect();
+    
+    // 创建弹出窗口元素
+    const popup = document.createElement('div');
+    popup.className = 'class-list-popup fixed bg-white rounded shadow-lg p-2 text-sm z-50 transform transition-all duration-200 ease-out';
+    popup.style.width = 'auto';
+    popup.style.minWidth = '150px';
+    popup.dataset.assignmentId = assignmentId;
+    
+    // 添加班级列表内容
+    popup.innerHTML = `
+        <div class="font-medium pb-1 border-b border-gray-100 mb-1">班级列表</div>
+        ${classNames.map(cls => `<div class="py-1">${cls}</div>`).join('')}
+    `;
+    
+    // 添加到文档中
+    document.body.appendChild(popup);
+    
+    // 计算弹出窗口位置
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    
+    // 默认向下弹出
+    let top = buttonRect.bottom + window.scrollY;
+    let left = buttonRect.left + window.scrollX;
+    
+    // 检查是否需要向上弹出（靠近底部）
+    const popupHeight = popup.offsetHeight;
+    if (buttonRect.bottom + popupHeight > viewportHeight) {
+        top = buttonRect.top + window.scrollY - popupHeight;
+        popup.style.transformOrigin = 'bottom';
+    } else {
+        popup.style.transformOrigin = 'top';
     }
+    
+    // 确保不会超出右侧边界
+    const popupWidth = popup.offsetWidth;
+    if (left + popupWidth > viewportWidth) {
+        left = viewportWidth - popupWidth - 10; // 10px 的边距
+    }
+    
+    // 设置位置
+    popup.style.top = `${top}px`;
+    popup.style.left = `${left}px`;
+    
+    // 添加出场动画
+    popup.style.opacity = '0';
+    popup.style.transform = 'scaleY(0)';
+    
+    // 触发重排后应用动画
+    setTimeout(() => {
+        popup.style.opacity = '1';
+        popup.style.transform = 'scaleY(1)';
+    }, 10);
+    
+    // 保存当前打开的弹出窗口与按钮的关联
+    buttonElement.dataset.popupOpen = 'true';
+    popup.dataset.buttonId = assignmentId;
+}
+
+// 关闭所有班级列表弹出窗口
+function closeAllClassLists(event) {
+    if (event && event.target.closest('.toggle-class-list')) {
+        // 如果点击的是切换按钮，不关闭
+        return;
+    }
+    
+    const popups = document.querySelectorAll('.class-list-popup');
+    if (popups.length === 0) return;
+    
+    popups.forEach(popup => {
+        // 添加退场动画
+        popup.style.opacity = '0';
+        popup.style.transform = 'scaleY(0)';
+        
+        // 重置所有相关按钮的图标
+        const assignmentId = popup.dataset.assignmentId;
+        const buttons = document.querySelectorAll(`.toggle-class-list[data-popup-open="true"]`);
+        buttons.forEach(button => {
+            const svg = button.querySelector('svg');
+            if (svg) svg.style.transform = '';
+            button.dataset.popupOpen = 'false';
+        });
+        
+        // 动画结束后移除元素
+        setTimeout(() => {
+            popup.remove();
+        }, 200);
+    });
+}
     
     // 打开添加作业弹窗
     function openAddAssignmentModal() {
@@ -726,7 +939,11 @@ window.addEventListener('DOMContentLoaded', function() {
                 
                 // 更新统计信息
                 if (data.stats) {
-                    submissionStats.textContent = `班级: ${data.stats.className} | 总共 ${data.stats.totalStudents} 名学生，已提交 ${data.stats.submittedCount} 人，提交率 ${data.stats.submissionRate}，截止日期: ${data.stats.dueDateStr}`;
+                    submissionStats.innerHTML = `
+                        班级: ${data.stats.className}  |  课程：${course}  |  作业：${assignment}<br>
+                        总共 ${data.stats.totalStudents} 名学生，已提交 ${data.stats.submittedCount} 人，提交率 ${data.stats.submissionRate}，截止日期: ${data.stats.dueDateStr}
+                    `;
+
                     downloadAllBtn.disabled = (data.submissions || []).length === 0;
                     exportSubmissionsBtn.disabled = (data.submissions || []).length === 0;
                 }
@@ -987,95 +1204,119 @@ window.addEventListener('DOMContentLoaded', function() {
     if (courseFilter) {
         courseFilter.addEventListener('change', renderAssignmentsList);
     }
+
+    // 提交情况班级筛选变化
+    if (submissionClassFilter) {
+        submissionClassFilter.addEventListener('change', function() {
+            const classValue = this.value;
+            
+            // 清空课程和作业下拉框
+            submissionAssignmentFilter.innerHTML = '';
+            submissionCourseFilter.innerHTML = '';
+            
+            // 禁用课程下拉框
+            submissionCourseFilter.disabled = !classValue;
+            submissionAssignmentFilter.disabled = true;
+            
+            if (!classValue) {
+                submissionCourseFilter.innerHTML = '<option value="">请先选择班级</option>';
+                submissionAssignmentFilter.innerHTML = '<option value="">请先选择班级和课程</option>';
+                console.info('classValue:', classValue);
+                return;
+            }
+            console.info('classValue:', classValue);
+            
+            // 获取班级列表
+            fetch(`/admin/get_courses_by_class?class_name=${encodeURIComponent(classValue)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 添加选项
+                    console.log('课程列表:', data);
+                    
+                    if (data.courses && data.courses.length > 0) {
+                        // 添加选项
+                        submissionCourseFilter.innerHTML = '<option value="">请选择课程</option>';
+                        data.courses.forEach(courseName => {
+                            const option = document.createElement('option');
+                            option.value = courseName;
+                            option.textContent = courseName;
+                            submissionCourseFilter.appendChild(option);
+                        });
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = '该班级暂无课程';
+                        submissionCourseFilter.appendChild(option);
+                    }
+
+                    submissionAssignmentFilter.innerHTML = '<option value="">请先选择课程</option>';
+                })
+                .catch(error => {
+                    console.error('获取课程列表失败:', error);
+                    submissionCourseFilter.innerHTML = '<option value="">加载课程失败</option>';
+                });
+        });
+    }
     
     // 提交情况课程筛选变化
     if (submissionCourseFilter) {
         // 提交情况加载时级联选择
         submissionCourseFilter.addEventListener('change', function() {
             const courseValue = this.value;
+            const classValue = submissionClassFilter.value;
             
-            // 清空班级和作业下拉框
-            submissionClassFilter.innerHTML = '';
+            // 清空作业下拉框
             submissionAssignmentFilter.innerHTML = '';
-            
-            submissionClassFilter.disabled = !courseValue;
-            submissionAssignmentFilter.disabled = true;
-            
+            // 根据情况禁用作业下拉框
+            submissionAssignmentFilter.disabled = !courseValue;
+
+            console.info('courseValue:', courseValue);
             if (!courseValue) {
-                submissionClassFilter.innerHTML = '<option value="">请先选择课程</option>';
-                submissionAssignmentFilter.innerHTML = '<option value="">请先选择课程和班级</option>';
-                loadSubmissions('', '', '');
+                submissionAssignmentFilter.innerHTML = '<option value="">请先选择课程</option>';
+                // loadSubmissions('', '', '');
                 return;
             }
             
-            // 获取班级列表
-            fetch(`/get_classes?course=${encodeURIComponent(courseValue)}`)
+            // 获取作业列表
+            fetch(`/admin/get_assignments_by_class_and_course?course=${encodeURIComponent(courseValue)}&class_name=${encodeURIComponent(classValue)}`)
                 .then(response => response.json())
                 .then(data => {
-                    // 添加选项
-                    submissionClassFilter.innerHTML = '<option value="">请选择班级</option>';
-                    
-                    if (data.classes && data.classes.length > 0) {
-                        data.classes.forEach(classInfo => {
+                    console.info('作业列表:', data);
+                    if (data.assignments && data.assignments.length > 0) {
+                        // 添加选项
+                        submissionAssignmentFilter.innerHTML = '<option value="">请选择作业</option>';
+                        data.assignments.forEach(assignmentInfo => {
                             const option = document.createElement('option');
-                            option.value = classInfo.name;
-                            option.textContent = classInfo.name;
-                            submissionClassFilter.appendChild(option);
+                            option.value = assignmentInfo.name;
+                            option.textContent = assignmentInfo.name;
+                            submissionAssignmentFilter.appendChild(option);
                         });
                     } else {
                         const option = document.createElement('option');
                         option.value = '';
-                        option.textContent = '该课程暂无班级';
-                        submissionClassFilter.appendChild(option);
+                        option.textContent = '该课程暂无作业';
+                        submissionAssignmentFilter.appendChild(option);
                     }
                 })
                 .catch(error => {
-                    console.error('获取班级列表失败:', error);
-                    submissionClassFilter.innerHTML = '<option value="">加载班级失败</option>';
+                    console.error('获取作业列表失败:', error);
+                    submissionAssignmentFilter.innerHTML = '<option value="">加载作业失败</option>';
                 });
         });
     }
 
-    // 班级选择变化
-    submissionClassFilter.addEventListener('change', function() {
+    // 作业选择变化
+    submissionAssignmentFilter.addEventListener('change', function() {
+        const classValue = submissionClassFilter.value;
         const courseValue = submissionCourseFilter.value;
-        const classValue = this.value;
+        const assignmentValue = this.value;
         
-        // 清空作业下拉框
-        submissionAssignmentFilter.innerHTML = '';
-        submissionAssignmentFilter.disabled = !classValue;
-        
-        if (!courseValue || !classValue) {
-            submissionAssignmentFilter.innerHTML = '<option value="">请先选择课程和班级</option>';
-            loadSubmissions('', '', '');
+        if (!assignmentValue) {
+            submissionAssignmentFilter.innerHTML = '<option value="">请选择作业</option>';
             return;
         }
         
-        // 获取作业列表
-        fetch(`/get_assignments?course=${encodeURIComponent(courseValue)}`)
-            .then(response => response.json())
-            .then(data => {
-                // 添加选项
-                submissionAssignmentFilter.innerHTML = '<option value="">请选择作业</option>';
-                
-                if (data.assignments && data.assignments.length > 0) {
-                    data.assignments.forEach(name => {
-                        const option = document.createElement('option');
-                        option.value = name;
-                        option.textContent = name;
-                        submissionAssignmentFilter.appendChild(option);
-                    });
-                } else {
-                    const option = document.createElement('option');
-                    option.value = '';
-                    option.textContent = '该课程暂无作业';
-                    submissionAssignmentFilter.appendChild(option);
-                }
-            })
-            .catch(error => {
-                console.error('获取作业列表失败:', error);
-                submissionAssignmentFilter.innerHTML = '<option value="">加载作业失败</option>';
-            });
+        loadSubmissions(courseValue, classValue, assignmentValue);
     });
     
     // 提交情况作业筛选变化
@@ -1083,6 +1324,10 @@ window.addEventListener('DOMContentLoaded', function() {
         const courseValue = submissionCourseFilter.value;
         const classValue = submissionClassFilter.value;
         const assignmentValue = this.value;
+
+        console.info('courseValue:', courseValue);
+        console.info('classValue:', classValue);
+        console.info('assignmentValue:', assignmentValue);
         
         loadSubmissions(courseValue, classValue, assignmentValue);
     }
@@ -1187,16 +1432,18 @@ window.addEventListener('DOMContentLoaded', function() {
 
     //region 班级管理
     // 新增导航项目 - 在原有导航中添加班级管理标签
-    const navItems = document.querySelector('.border-b.border-gray-200.mb-6 nav');
-    const classesTabButton = document.createElement('button');
-    classesTabButton.id = 'tabClasses';
-    classesTabButton.className = 'tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-6 border-b-2 border-transparent font-medium text-sm leading-5 focus:outline-none';
-    classesTabButton.textContent = '班级管理';
-    navItems.appendChild(classesTabButton);
+    // const navItems = document.querySelector('.border-b.border-gray-200.mb-6 nav');
+    // const classesTabButton = document.createElement('button');
+    // classesTabButton.id = 'tabClasses';
+    // classesTabButton.className = 'tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-6 border-b-2 border-transparent font-medium text-sm leading-5 focus:outline-none';
+    // classesTabButton.textContent = '班级管理';
+    // navItems.appendChild(classesTabButton);
+
+    // const classesTabButton = document.getElementById('tabClasses');
+    // navItems.appendChild(classesTabButton);
 
     // 班级相关变量
     let classesData = [];
-    const classesTab = document.getElementById('classesTab');
     const classesList = document.getElementById('classesList');
     const classFilterCourse = document.getElementById('classFilterCourse');
     const addClassBtn = document.getElementById('addClassBtn');
@@ -1217,28 +1464,28 @@ window.addEventListener('DOMContentLoaded', function() {
     const closeClassStudentsBtn = document.getElementById('closeClassStudentsBtn');
 
     // 班级管理标签页点击事件
-    if (classesTabButton) {
-        classesTabButton.addEventListener('click', () => {
-            // 更新按钮样式
-            tabButtons.forEach(btn => {
-                btn.classList.remove('text-blue-600', 'border-blue-500');
-                btn.classList.add('text-gray-500', 'border-transparent');
-            });
+    // if (classesTabButton) {
+    //     classesTabButton.addEventListener('click', () => {
+    //         // 更新按钮样式
+    //         tabButtons.forEach(btn => {
+    //             btn.classList.remove('text-blue-600', 'border-blue-500');
+    //             btn.classList.add('text-gray-500', 'border-transparent');
+    //         });
             
-            classesTabButton.classList.remove('text-gray-500', 'border-transparent');
-            classesTabButton.classList.add('text-blue-600', 'border-blue-500');
+    //         classesTabButton.classList.remove('text-gray-500', 'border-transparent');
+    //         classesTabButton.classList.add('text-blue-600', 'border-blue-500');
             
-            // 切换标签页内容
-            tabContents.forEach(content => {
-                content.classList.remove('active');
-            });
+    //         // 切换标签页内容
+    //         tabContents.forEach(content => {
+    //             content.classList.remove('active');
+    //         });
             
-            classesTab.classList.add('active');
+    //         classesTab.classList.add('active');
             
-            // 加载班级列表
-            loadClasses();
-        });
-    }
+    //         // 加载班级列表
+    //         loadClasses();
+    //     });
+    // }
 
     // 加载班级列表
     function loadClasses() {
