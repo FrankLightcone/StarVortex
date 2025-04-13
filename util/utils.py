@@ -272,3 +272,17 @@ def save_assignments(assignments):
     """保存作业列表"""
     with open(ASSIGNMENTS_FILE, 'w', encoding='utf-8') as f:
         json.dump(assignments, f, ensure_ascii=False, indent=2)
+
+def get_all_classes():
+    """获取所有班级列表"""
+    config = load_course_config()
+    return config.get('classes', [])
+
+def get_all_courses():
+    """获取所有课程列表"""
+    config = load_course_config()
+    courses = []
+    for class_info in config.get('classes', []):
+        for course in class_info.get('courses', []):
+            courses.append(course['name'])
+    return list(set(courses))  # 去重

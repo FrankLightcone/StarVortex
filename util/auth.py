@@ -26,7 +26,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from functools import wraps
 
 from util.models import User, validate_user, load_users, save_users
-from util.utils import verification_codes, send_verification_email, generate_verification_code, reset_codes, send_reset_password_email
+from util.utils import verification_codes, send_verification_email, generate_verification_code, reset_codes, send_reset_password_email, get_all_classes
 from util.config import ADMIN_USERNAME, ADMIN_PASSWORD_HASH
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -80,7 +80,13 @@ def logout():
 @auth_bp.route('/register', methods=['GET'])
 def show_register():
     """显示注册页面"""
-    return render_template('register.html')
+    # 获取班级信息
+    classes = get_all_classes()
+    if not classes:
+        logging.error("No classes available for registration")
+        return render_template('register.html', error='没有可用的班级信息，请联系管理员')
+    # 传递班级信息到模板
+    return render_template('register.html', classes=classes)
 
 @auth_bp.route('/register', methods=['POST'])
 def register():

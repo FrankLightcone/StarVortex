@@ -182,12 +182,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = nameInput.value.trim();
             const email = emailInput.value.trim();
             const studentId = studentIdInput.value.trim();
+            const className = document.getElementById('class_name').value.trim();
 
             // 验证所有必填字段
             let isValid = true;
             isValid = validateField(nameInput, value => value.length >= 2, '姓名至少需要2个字符') && isValid;
             isValid = validateField(studentIdInput, value => value.length >= 5, '请输入有效的学号') && isValid;
             isValid = validateField(emailInput, validateEmail, '请输入有效的邮箱地址') && isValid;
+
+            // 检查班级名称是否为空
+            if (className === '') {
+                showToast('班级名称不能为空');
+                registerPanel.classList.add('shake');
+                setTimeout(() => {
+                    registerPanel.classList.remove('shake');
+                }, 600);
+                return;
+            }
             
             if (!isValid) {
                 registerPanel.classList.add('shake');
@@ -218,7 +229,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify({
                         name: name,
                         email: email,
-                        student_id: studentId
+                        student_id: studentId,
+                        class_name: className
                     })
                 });
 
@@ -265,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const studentId = studentIdInput.value.trim();
             const password = passwordInput.value.trim();
             const verifyCode = verifyCodeInput.value.trim();
+            const className = document.getElementById('class_name').value.trim();
             
             // 验证所有必填字段
             let isValid = true;
@@ -273,6 +286,16 @@ document.addEventListener('DOMContentLoaded', function() {
             isValid = validateField(emailInput, validateEmail, '请输入有效的邮箱地址') && isValid;
             isValid = validateField(passwordInput, value => value.length >= 6, '密码长度至少为6位') && isValid;
             isValid = validateField(verifyCodeInput, value => value.length > 0, '请输入验证码') && isValid;
+
+            // 检查班级名称是否为空
+            if (className === '') {
+                showToast('班级名称不能为空');
+                registerPanel.classList.add('shake');
+                setTimeout(() => {
+                    registerPanel.classList.remove('shake');
+                }, 600);
+                return;
+            }
             
             if (!isValid) {
                 registerPanel.classList.add('shake');
@@ -303,7 +326,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         email: email,
                         student_id: studentId,
                         password: password,
-                        verify_code: verifyCode
+                        verify_code: verifyCode,
+                        class_name: className
                     })
                 });
 

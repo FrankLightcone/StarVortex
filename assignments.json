@@ -216,5 +216,41 @@
       "2023级遥感1班",
       "2023级遥感2班"
     ]
+  },
+  {
+    "id": "7",
+    "course": "GNSS",
+    "name": "实验一(For 遥感1班)",
+    "dueDate": "2025-04-20T15:23",
+    "description": "",
+    "advancedSettings": {
+      "maxFileCount": 10,
+      "maxFileSize": 256,
+      "fileSizeUnit": "MB",
+      "dailyQuota": 1,
+      "allowedTypes": [
+        "pdf",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+        "ppt",
+        "pptx",
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "zip",
+        "rar",
+        "txt",
+        "csv"
+      ],
+      "enableGrading": false,
+      "enableFeedback": false
+    },
+    "classNames": [
+      "2023级遥感1班"
+    ],
+    "createdAt": "2025-04-13T15:23:45.401286"
   }
 ]

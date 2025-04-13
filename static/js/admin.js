@@ -1,4 +1,5 @@
 window.addEventListener('DOMContentLoaded', function() {
+    // region 获取界面元素
     // DOM 元素
     const toast = document.getElementById('toast');
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -39,7 +40,6 @@ window.addEventListener('DOMContentLoaded', function() {
     const assignmentForm = document.getElementById('assignmentForm');
     const modalTitle = document.getElementById('modalTitle');
     const assignmentId = document.getElementById('assignmentId');
-    const courseName = document.getElementById('courseName');
     const assignmentName = document.getElementById('assignmentName');
     const dueDate = document.getElementById('dueDate');
     const assignmentDescription = document.getElementById('assignmentDescription');
@@ -48,11 +48,33 @@ window.addEventListener('DOMContentLoaded', function() {
     const closeModalBtn = document.getElementById('closeModalBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const closeSubmissionDetailBtn = document.getElementById('closeSubmissionDetailBtn');
+
+    // 班级相关变量
+    let classesData = [];
+    const classesList = document.getElementById('classesList');
+    const classFilterClass = document.getElementById('classFilterClass');
+    const addClassBtn = document.getElementById('addClassBtn');
+    const classModal = document.getElementById('classModal');
+    const classModalTitle = document.getElementById('classModalTitle');
+    const classForm = document.getElementById('classForm');
+    const classId = document.getElementById('classId');
+    const originalClassName = document.getElementById('originalClassName');
+    const className = document.getElementById('className');
+    const classDescription = document.getElementById('classDescription');
+    const closeClassModalBtn = document.getElementById('closeClassModalBtn');
+    const cancelClassBtn = document.getElementById('cancelClassBtn');
+    const classStudentsModal = document.getElementById('classStudentsModal');
+    const classStudentsTitle = document.getElementById('classStudentsTitle');
+    const classStudentsList = document.getElementById('classStudentsList');
+    const closeClassStudentsBtn = document.getElementById('closeClassStudentsBtn');
+    
+    const classNamesSelect = document.getElementById('classNamesPublish');
+    const courseNameSelect = document.getElementById('courseNamePublish');
     
     // 课程配置
     let assignments = [];
 
-    // 处理作业表单中的基本设置和高级设置标签切换
+    //region 处理作业表单中的基本设置和高级设置标签切换
     if (basicSettingsTab && advancedSettingsTab) {
         // 基本设置标签页点击事件
         basicSettingsTab.addEventListener('click', function() {
@@ -118,8 +140,13 @@ window.addEventListener('DOMContentLoaded', function() {
     if (exportSubmissionsBtn) {
         exportSubmissionsBtn.addEventListener('click', exportSubmissionStats);
     }
+
+    // 设置班级选择变更事件
+    if (classNamesSelect) {
+        classNamesSelect.addEventListener('change', handleClassChange);
+    }
     
-    // Toast notification function
+    // region Toast notification
     function showToast(message, type = 'error') {
         if (!toast) return;
         
@@ -144,7 +171,7 @@ window.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
     
-    // 标签页切换
+    // region 标签页切换
     if (tabButtons) {
         console.info(tabButtons);
         tabButtons.forEach(button => {
@@ -192,7 +219,7 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 加载作业列表
+    // region 作业管理
     function loadAssignments() {
         // 在实际应用中，这里应该从服务器加载数据
         // 模拟从服务器获取数据
@@ -306,246 +333,315 @@ window.addEventListener('DOMContentLoaded', function() {
         classFilter.dispatchEvent(new Event('change'));
     }
         
-// 渲染作业列表
-function renderAssignmentsList() {
-    // 检查是否存在作业列表元素
-    if (!assignmentsList) return;
-    
-    // 移除之前可能存在的所有弹出列表
-    const existingPopups = document.querySelectorAll('.class-list-popup');
-    existingPopups.forEach(popup => popup.remove());
-    
-    // 添加点击事件监听器到文档，点击非列表区域时关闭弹出窗口
-    document.addEventListener('click', closeAllClassLists);
-    
-    // 筛选作业
-    const classNameValue = classFilter ? classFilter.value : '';
-    const courseNameValue = courseFilter ? courseFilter.value : '';
-    console.info("classNameValue", classNameValue);
-    console.info("courseNameValue", courseNameValue);
-    
-    const filteredAssignments = assignments.filter(assignment => {
-        const courseMatch = courseNameValue ? assignment.course === courseNameValue : true;
-        const classMatch = classNameValue ? assignment.classNames.includes(classNameValue) : true;
-        return courseMatch && classMatch;
-    });
-    
-    console.info('assignments', assignments);
-    // 清空列表
-    assignmentsList.innerHTML = '';
-    
-    // 检查是否有作业
-    if (filteredAssignments.length === 0) {
-        const emptyRow = document.createElement('tr');
-        emptyRow.innerHTML = `
-            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                暂无作业数据
-            </td>
-        `;
-        assignmentsList.appendChild(emptyRow);
-        return;
-    }
-    
-    // 添加作业到列表
-    filteredAssignments.forEach(assignment => {
-        const row = document.createElement('tr');
-        row.className = 'assignment-item';
+    // region 作业管理：渲染作业列表
+    function renderAssignmentsList() {
+        // 检查是否存在作业列表元素
+        if (!assignmentsList) return;
         
-        const dueDateTime = new Date(assignment.dueDate);
-        const now = new Date();
-        const isExpired = dueDateTime < now;
+        // 移除之前可能存在的所有弹出列表
+        const existingPopups = document.querySelectorAll('.class-list-popup');
+        existingPopups.forEach(popup => popup.remove());
         
-        // 格式化截止日期显示
-        const formattedDueDate = dueDateTime.toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
+        // 添加点击事件监听器到文档，点击非列表区域时关闭弹出窗口
+        document.addEventListener('click', closeAllClassLists);
+        
+        // 筛选作业
+        const classNameValue = classFilter ? classFilter.value : '';
+        const courseNameValue = courseFilter ? courseFilter.value : '';
+        console.info("classNameValue", classNameValue);
+        console.info("courseNameValue", courseNameValue);
+        
+        const filteredAssignments = assignments.filter(assignment => {
+            const courseMatch = courseNameValue ? assignment.course === courseNameValue : true;
+            const classMatch = classNameValue ? assignment.classNames.includes(classNameValue) : true;
+            return courseMatch && classMatch;
         });
         
-        row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                ${assignment.classNames.length === 1 ? 
-                    `${assignment.classNames[0]}` : 
-                    `<div class="class-list-container" data-assignment-id="${assignment.id}">
-                        <span class="mr-1">${assignment.classNames.length}个班级</span>
-                        <button class="toggle-class-list text-blue-500 focus:outline-none inline-flex items-center" type="button">
-                            <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                    </div>`
-                }
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                ${assignment.course}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${assignment.name}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${formattedDueDate}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                ${isExpired ? 
-                    '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">已截止</span>' :
-                    '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">进行中</span>'
-                }
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${assignment.submissionCount}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button 
-                    class="text-blue-600 hover:text-blue-900 mr-3 edit-assignment" 
-                    data-id="${assignment.id}"
-                >
-                    编辑
-                </button>
-                <button 
-                    class="text-red-600 hover:text-red-900 delete-assignment" 
-                    data-id="${assignment.id}"
-                >
-                    删除
-                </button>
-            </td>
-        `;
+        console.info('assignments', assignments);
+        // 清空列表
+        assignmentsList.innerHTML = '';
         
-        // 添加事件监听器
-        assignmentsList.appendChild(row);
-        
-        // 班级列表展开/折叠按钮
-        const toggleButton = row.querySelector('.toggle-class-list');
-        if (toggleButton && assignment.classNames.length > 1) {
-            toggleButton.addEventListener('click', (e) => {
-                e.stopPropagation(); // 阻止事件冒泡
-                
-                // 关闭所有其他弹出的班级列表
-                closeAllClassLists();
-                
-                // 创建弹出列表
-                createClassListPopup(e.currentTarget, assignment.classNames, assignment.id);
-                
-                // 旋转箭头图标
-                const svg = e.currentTarget.querySelector('svg');
-                svg.style.transform = 'rotate(180deg)';
-            });
+        // 检查是否有作业
+        if (filteredAssignments.length === 0) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.innerHTML = `
+                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                    暂无作业数据
+                </td>
+            `;
+            assignmentsList.appendChild(emptyRow);
+            return;
         }
         
-        // 编辑按钮
-        row.querySelector('.edit-assignment').addEventListener('click', () => {
-            openEditAssignmentModal(assignment);
+        // 添加作业到列表
+        filteredAssignments.forEach(assignment => {
+            const row = document.createElement('tr');
+            row.className = 'assignment-item';
+            
+            const dueDateTime = new Date(assignment.dueDate);
+            const now = new Date();
+            const isExpired = dueDateTime < now;
+            
+            // 格式化截止日期显示
+            const formattedDueDate = dueDateTime.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    ${assignment.classNames.length === 1 ? 
+                        `${assignment.classNames[0]}` : 
+                        `<div class="class-list-container" data-assignment-id="${assignment.id}">
+                            <span class="mr-1">${assignment.classNames.length}个班级</span>
+                            <button class="toggle-class-list text-blue-500 focus:outline-none inline-flex items-center" type="button">
+                                <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                        </div>`
+                    }
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    ${assignment.course}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${assignment.name}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${formattedDueDate}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    ${isExpired ? 
+                        '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">已截止</span>' :
+                        '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">进行中</span>'
+                    }
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${assignment.submissionCount}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button 
+                        class="text-blue-600 hover:text-blue-900 mr-3 edit-assignment" 
+                        data-id="${assignment.id}"
+                    >
+                        编辑
+                    </button>
+                    <button 
+                        class="text-red-600 hover:text-red-900 delete-assignment" 
+                        data-id="${assignment.id}"
+                    >
+                        删除
+                    </button>
+                </td>
+            `;
+            
+            // 添加事件监听器
+            assignmentsList.appendChild(row);
+            
+            // 班级列表展开/折叠按钮
+            const toggleButton = row.querySelector('.toggle-class-list');
+            if (toggleButton && assignment.classNames.length > 1) {
+                toggleButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // 阻止事件冒泡
+                    
+                    // 关闭所有其他弹出的班级列表
+                    closeAllClassLists();
+                    
+                    // 创建弹出列表
+                    createClassListPopup(e.currentTarget, assignment.classNames, assignment.id);
+                    
+                    // 旋转箭头图标
+                    const svg = e.currentTarget.querySelector('svg');
+                    svg.style.transform = 'rotate(180deg)';
+                });
+            }
+            
+            // 编辑按钮
+            row.querySelector('.edit-assignment').addEventListener('click', () => {
+                openEditAssignmentModal(assignment);
+            });
+            
+            // 删除按钮
+            row.querySelector('.delete-assignment').addEventListener('click', () => {
+                deleteAssignment(assignment.id);
+            });
         });
+    }
+
+    // region 创建班级列表弹出窗口
+    function createClassListPopup(buttonElement, classNames, assignmentId) {
+        // 获取按钮位置
+        const buttonRect = buttonElement.getBoundingClientRect();
         
-        // 删除按钮
-        row.querySelector('.delete-assignment').addEventListener('click', () => {
-            deleteAssignment(assignment.id);
-        });
-    });
-}
-
-// 创建班级列表弹出窗口
-function createClassListPopup(buttonElement, classNames, assignmentId) {
-    // 获取按钮位置
-    const buttonRect = buttonElement.getBoundingClientRect();
-    
-    // 创建弹出窗口元素
-    const popup = document.createElement('div');
-    popup.className = 'class-list-popup fixed bg-white rounded shadow-lg p-2 text-sm z-50 transform transition-all duration-200 ease-out';
-    popup.style.width = 'auto';
-    popup.style.minWidth = '150px';
-    popup.dataset.assignmentId = assignmentId;
-    
-    // 添加班级列表内容
-    popup.innerHTML = `
-        <div class="font-medium pb-1 border-b border-gray-100 mb-1">班级列表</div>
-        ${classNames.map(cls => `<div class="py-1">${cls}</div>`).join('')}
-    `;
-    
-    // 添加到文档中
-    document.body.appendChild(popup);
-    
-    // 计算弹出窗口位置
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-    
-    // 默认向下弹出
-    let top = buttonRect.bottom + window.scrollY;
-    let left = buttonRect.left + window.scrollX;
-    
-    // 检查是否需要向上弹出（靠近底部）
-    const popupHeight = popup.offsetHeight;
-    if (buttonRect.bottom + popupHeight > viewportHeight) {
-        top = buttonRect.top + window.scrollY - popupHeight;
-        popup.style.transformOrigin = 'bottom';
-    } else {
-        popup.style.transformOrigin = 'top';
-    }
-    
-    // 确保不会超出右侧边界
-    const popupWidth = popup.offsetWidth;
-    if (left + popupWidth > viewportWidth) {
-        left = viewportWidth - popupWidth - 10; // 10px 的边距
-    }
-    
-    // 设置位置
-    popup.style.top = `${top}px`;
-    popup.style.left = `${left}px`;
-    
-    // 添加出场动画
-    popup.style.opacity = '0';
-    popup.style.transform = 'scaleY(0)';
-    
-    // 触发重排后应用动画
-    setTimeout(() => {
-        popup.style.opacity = '1';
-        popup.style.transform = 'scaleY(1)';
-    }, 10);
-    
-    // 保存当前打开的弹出窗口与按钮的关联
-    buttonElement.dataset.popupOpen = 'true';
-    popup.dataset.buttonId = assignmentId;
-}
-
-// 关闭所有班级列表弹出窗口
-function closeAllClassLists(event) {
-    if (event && event.target.closest('.toggle-class-list')) {
-        // 如果点击的是切换按钮，不关闭
-        return;
-    }
-    
-    const popups = document.querySelectorAll('.class-list-popup');
-    if (popups.length === 0) return;
-    
-    popups.forEach(popup => {
-        // 添加退场动画
+        // 创建弹出窗口元素
+        const popup = document.createElement('div');
+        popup.className = 'class-list-popup fixed bg-white rounded shadow-lg p-2 text-sm z-50 transform transition-all duration-200 ease-out';
+        popup.style.width = 'auto';
+        popup.style.minWidth = '150px';
+        popup.dataset.assignmentId = assignmentId;
+        
+        // 添加班级列表内容
+        popup.innerHTML = `
+            <div class="font-medium pb-1 border-b border-gray-100 mb-1">班级列表</div>
+            ${classNames.map(cls => `<div class="py-1">${cls}</div>`).join('')}
+        `;
+        
+        // 添加到文档中
+        document.body.appendChild(popup);
+        
+        // 计算弹出窗口位置
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        
+        // 默认向下弹出
+        let top = buttonRect.bottom + window.scrollY;
+        let left = buttonRect.left + window.scrollX;
+        
+        // 检查是否需要向上弹出（靠近底部）
+        const popupHeight = popup.offsetHeight;
+        if (buttonRect.bottom + popupHeight > viewportHeight) {
+            top = buttonRect.top + window.scrollY - popupHeight;
+            popup.style.transformOrigin = 'bottom';
+        } else {
+            popup.style.transformOrigin = 'top';
+        }
+        
+        // 确保不会超出右侧边界
+        const popupWidth = popup.offsetWidth;
+        if (left + popupWidth > viewportWidth) {
+            left = viewportWidth - popupWidth - 10; // 10px 的边距
+        }
+        
+        // 设置位置
+        popup.style.top = `${top}px`;
+        popup.style.left = `${left}px`;
+        
+        // 添加出场动画
         popup.style.opacity = '0';
         popup.style.transform = 'scaleY(0)';
         
-        // 重置所有相关按钮的图标
-        const assignmentId = popup.dataset.assignmentId;
-        const buttons = document.querySelectorAll(`.toggle-class-list[data-popup-open="true"]`);
-        buttons.forEach(button => {
-            const svg = button.querySelector('svg');
-            if (svg) svg.style.transform = '';
-            button.dataset.popupOpen = 'false';
-        });
-        
-        // 动画结束后移除元素
+        // 触发重排后应用动画
         setTimeout(() => {
-            popup.remove();
-        }, 200);
-    });
-}
+            popup.style.opacity = '1';
+            popup.style.transform = 'scaleY(1)';
+        }, 10);
+        
+        // 保存当前打开的弹出窗口与按钮的关联
+        buttonElement.dataset.popupOpen = 'true';
+        popup.dataset.buttonId = assignmentId;
+    }
+
+    // 关闭所有班级列表弹出窗口
+    function closeAllClassLists(event) {
+        if (event && event.target.closest('.toggle-class-list')) {
+            // 如果点击的是切换按钮，不关闭
+            return;
+        }
+        
+        const popups = document.querySelectorAll('.class-list-popup');
+        if (popups.length === 0) return;
+        
+        popups.forEach(popup => {
+            // 添加退场动画
+            popup.style.opacity = '0';
+            popup.style.transform = 'scaleY(0)';
+            
+            // 重置所有相关按钮的图标
+            const assignmentId = popup.dataset.assignmentId;
+            const buttons = document.querySelectorAll(`.toggle-class-list[data-popup-open="true"]`);
+            buttons.forEach(button => {
+                const svg = button.querySelector('svg');
+                if (svg) svg.style.transform = '';
+                button.dataset.popupOpen = 'false';
+            });
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                popup.remove();
+            }, 200);
+        });
+    }
+
+    // 处理班级变更
+    function handleClassChange() {
+        if (!classNamesSelect || !courseNameSelect) return;
+        
+        const selectedClass = classNamesSelect.value;
+        
+        // 重置课程下拉框
+        courseNameSelect.innerHTML = '';
+        
+        if (!selectedClass) {
+            // 如果没有选择班级，禁用课程选择框
+            courseNameSelect.disabled = true;
+            
+            // 添加提示选项
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '请先选择班级';
+            courseNameSelect.appendChild(option);
+            return;
+        }
+        
+        // 启用课程选择框
+        courseNameSelect.disabled = false;
+        
+        // 显示加载中
+        const loadingOption = document.createElement('option');
+        loadingOption.value = '';
+        loadingOption.textContent = '加载中...';
+        courseNameSelect.appendChild(loadingOption);
+        
+        // 调用API获取该班级的课程
+        fetch(`/admin/get_courses_by_class?class_name=${encodeURIComponent(selectedClass)}`)
+            .then(response => response.json())
+            .then(data => {
+                // 清空现有选项
+                courseNameSelect.innerHTML = '';
+                
+                // 添加默认选项
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '请选择课程';
+                courseNameSelect.appendChild(defaultOption);
+                
+                // 添加从API获取的课程
+                data.courses.forEach(course => {
+                    const option = document.createElement('option');
+                    option.value = course;
+                    option.textContent = course;
+                    courseNameSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading courses:', error);
+                
+                // 出错时显示提示
+                courseNameSelect.innerHTML = '';
+                const errorOption = document.createElement('option');
+                errorOption.value = '';
+                errorOption.textContent = '加载课程失败，请重试';
+                courseNameSelect.appendChild(errorOption);
+            });
+    }
     
-    // 打开添加作业弹窗
+    // region 打开添加作业弹窗
     function openAddAssignmentModal() {
-        if (!modalTitle || !assignmentId || !assignmentForm) return;
+        console.info('openAddAssignmentModal');
+        console.info(modalTitle, assignmentId, assignmentForm, classNamesSelect, courseNameSelect);
+        if (!modalTitle || !assignmentId || !assignmentForm || !classNamesSelect || !courseNameSelect) return;
         
         modalTitle.textContent = '添加作业';
         assignmentId.value = '';
         assignmentForm.reset();
+        
+        // 重置课程选择框状态
+        courseNameSelect.disabled = true;
+        courseNameSelect.innerHTML = '<option value="">请先选择班级</option>';
         
         // 默认截止日期为一周后
         const nextWeek = new Date();
@@ -567,13 +663,45 @@ function closeAllClassLists(event) {
         }
     }
     
-    // 打开编辑作业弹窗
+    // region 打开编辑作业弹窗
     function openEditAssignmentModal(assignment) {
-        if (!modalTitle || !assignmentId || !courseName || !assignmentName || !dueDate || !assignmentDescription) return;
+        if (!modalTitle || !assignmentId || !classNamesSelect || !courseNameSelect || !assignmentName || !dueDate || !assignmentDescription) return;
         
         modalTitle.textContent = '编辑作业';
         assignmentId.value = assignment.id;
-        courseName.value = assignment.course;
+        
+        // 如果有班级信息，设置选择的班级
+        if (assignment.classNames && assignment.classNames.length > 0) {
+            // 假设我们使用多选时的处理方式（多个checkbox）
+            document.querySelectorAll('input[name="classNames"]').forEach(checkbox => {
+                checkbox.checked = assignment.classNames.includes(checkbox.value);
+            });
+            
+            // 如果使用单选下拉框
+            if (classNamesSelect.tagName === 'SELECT') {
+                classNamesSelect.value = assignment.classNames[0];
+                // 触发班级变更事件，加载课程
+                handleClassChange();
+            }
+        }
+        
+        // 设置课程（需要在班级加载完课程后设置）
+        // 我们需要确保课程已经加载完成后再设置选择的课程
+        const setCourse = () => {
+            // 检查课程选择框是否已经加载完成课程
+            const hasOptions = Array.from(courseNameSelect.options).some(option => option.value === assignment.course);
+            
+            if (hasOptions) {
+                courseNameSelect.value = assignment.course;
+            } else {
+                // 如果还没有加载完成，延迟尝试
+                setTimeout(setCourse, 100);
+            }
+        };
+        
+        // 启动课程设置尝试
+        setTimeout(setCourse, 100);
+        
         assignmentName.value = assignment.name;
         dueDate.value = assignment.dueDate;
         assignmentDescription.value = assignment.description || '';
@@ -620,8 +748,6 @@ function closeAllClassLists(event) {
             return;
         }
         
-        // 在实际应用中，应该发送请求到服务器删除作业
-        // 模拟删除
         fetch(`/admin/assignments/${id}`, {
             method: 'DELETE'
         })
@@ -646,12 +772,12 @@ function closeAllClassLists(event) {
             });
     }
     
-    // 提交作业表单
+    // region 提交作业表单
     function submitAssignmentForm() {
-        if (!assignmentId || !courseName || !assignmentName || !dueDate) return;
+        if (!assignmentId || !courseNameSelect || !assignmentName || !dueDate) return;
         
         const id = assignmentId.value;
-        const course = courseName.value;
+        const course = courseNameSelect.value;
         const name = assignmentName.value;
         const deadline = dueDate.value;
         const description = assignmentDescription ? assignmentDescription.value : '';
@@ -665,10 +791,19 @@ function closeAllClassLists(event) {
         const advancedSettings = collectAdvancedSettings();
         
         // 收集选中的班级
-        const selectedClasses = [];
-        document.querySelectorAll('input[name="classNames"]:checked').forEach(checkbox => {
-            selectedClasses.push(checkbox.value);
-        });
+        let selectedClasses = [];
+        
+        // 处理多选框情况
+        const classCheckboxes = document.querySelectorAll('input[name="classNames"]:checked');
+        if (classCheckboxes.length > 0) {
+            classCheckboxes.forEach(checkbox => {
+                selectedClasses.push(checkbox.value);
+            });
+        } 
+        // 处理下拉框情况
+        else if (classNamesSelect && classNamesSelect.value) {
+            selectedClasses.push(classNamesSelect.value);
+        }
         
         if (selectedClasses.length === 0) {
             showToast('请至少选择一个班级', 'error');
@@ -733,7 +868,7 @@ function closeAllClassLists(event) {
             });
     }
     
-    // 新增功能: 收集高级设置数据
+    // region 收集高级设置数据
     function collectAdvancedSettings() {
         const maxFileCount = document.getElementById('maxFileCount') ? document.getElementById('maxFileCount').value : 10;
         const maxFileSize = document.getElementById('maxFileSize') ? document.getElementById('maxFileSize').value : 256;
@@ -901,7 +1036,7 @@ function closeAllClassLists(event) {
         }
     }
     
-    // 加载提交记录
+    // region 加载提交记录
     function loadSubmissions(course, class_name, assignment) {
         if (!course || !class_name || !assignment) {
             submissionsList.innerHTML = `
@@ -935,7 +1070,7 @@ function closeAllClassLists(event) {
         fetch(`/admin/submissions?course=${encodeURIComponent(course)}&class_name=${encodeURIComponent(class_name)}&assignment=${encodeURIComponent(assignment)}`)
             .then(response => response.json())
             .then(data => {
-                renderSubmissionsList(data.submissions || []);
+                renderSubmissionsList(data.submissions || [], data.stats.className);
                 
                 // 更新统计信息
                 if (data.stats) {
@@ -964,8 +1099,8 @@ function closeAllClassLists(event) {
             });
     }
     
-    // 渲染提交列表
-    function renderSubmissionsList(submissions) {
+    // region 渲染提交列表
+    function renderSubmissionsList(submissions, class_name) {
         if (!submissionsList) return;
         
         // 清空列表
@@ -1019,7 +1154,7 @@ function closeAllClassLists(event) {
                         查看详情
                     </button>
                     <a 
-                        href="/admin/download?course=${encodeURIComponent(submissionCourseFilter.value)}&assignment=${encodeURIComponent(submissionAssignmentFilter.value)}&student=${encodeURIComponent(submission.studentId)}" 
+                        href="/admin/download?class_name=${encodeURIComponent(class_name)}&course=${encodeURIComponent(submissionCourseFilter.value)}&assignment=${encodeURIComponent(submissionAssignmentFilter.value)}&student=${encodeURIComponent(submission.studentId)}" 
                         class="text-green-600 hover:text-green-900"
                     >
                         下载
@@ -1039,7 +1174,7 @@ function closeAllClassLists(event) {
         });
     }
     
-    // 打开提交详情弹窗
+    // region 打开提交详情弹窗
     function openSubmissionDetailModal(submission) {
         if (!submissionDetailModal || !document.getElementById('submissionDetailTitle') || 
             !document.getElementById('detailStudentId') || !document.getElementById('detailStudentName') || 
@@ -1127,7 +1262,7 @@ function closeAllClassLists(event) {
         const downloadBtn = document.getElementById('downloadSubmissionBtn');
         if (downloadBtn) {
             downloadBtn.onclick = () => {
-                window.location.href = `/admin/download?course=${encodeURIComponent(submissionCourseFilter.value)}&assignment=${encodeURIComponent(submissionAssignmentFilter.value)}&student=${encodeURIComponent(submission.studentId)}`;
+                window.location.href = `/admin/download?class_name=${encodeURIComponent(submissionClassFilter.value)}&course=${encodeURIComponent(submissionCourseFilter.value)}&assignment=${encodeURIComponent(submissionAssignmentFilter.value)}&student=${encodeURIComponent(submission.studentId)}`;
             };
         }
         
@@ -1142,8 +1277,9 @@ function closeAllClassLists(event) {
         }
     }
     
-    // 导出提交统计
+    // region 导出提交统计
     function exportSubmissionStats() {
+        const className = submissionClassFilter ? submissionClassFilter.value : '';
         const course = submissionCourseFilter ? submissionCourseFilter.value : '';
         const assignment = submissionAssignmentFilter ? submissionAssignmentFilter.value : '';
         
@@ -1159,7 +1295,7 @@ function closeAllClassLists(event) {
             exportSubmissionsBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>导出中...';
             
             // 构建导出URL
-            const exportUrl = `/admin/export-stats?course=${encodeURIComponent(course)}&assignment=${encodeURIComponent(assignment)}`;
+            const exportUrl = `/admin/export-stats?class_name=${encodeURIComponent(className)}&course=${encodeURIComponent(course)}&assignment=${encodeURIComponent(assignment)}`;
             
             // 下载Excel文件
             window.location.href = exportUrl;
@@ -1172,7 +1308,7 @@ function closeAllClassLists(event) {
         }
     }
     
-    // 事件监听器
+    // region 事件监听器
     
     // 添加作业按钮
     if (addAssignmentBtn) {
@@ -1205,7 +1341,7 @@ function closeAllClassLists(event) {
         courseFilter.addEventListener('change', renderAssignmentsList);
     }
 
-    // 提交情况班级筛选变化
+    // region 提交情况班级筛选变化
     if (submissionClassFilter) {
         submissionClassFilter.addEventListener('change', function() {
             const classValue = this.value;
@@ -1258,7 +1394,7 @@ function closeAllClassLists(event) {
         });
     }
     
-    // 提交情况课程筛选变化
+    // region提交情况课程筛选变化
     if (submissionCourseFilter) {
         // 提交情况加载时级联选择
         submissionCourseFilter.addEventListener('change', function() {
@@ -1337,159 +1473,23 @@ function closeAllClassLists(event) {
         downloadAllBtn.addEventListener('click', () => {
             const courseValue = submissionCourseFilter ? submissionCourseFilter.value : '';
             const assignmentValue = submissionAssignmentFilter ? submissionAssignmentFilter.value : '';
+            const classValue = submissionClassFilter ? submissionClassFilter.value : '';
             
+            console.info("classValue:", classValue);
             if (!courseValue || !assignmentValue) {
                 showToast('请先选择课程和作业名称', 'error');
                 return;
             }
             
-            window.location.href = `/admin/download?course=${encodeURIComponent(courseValue)}&assignment=${encodeURIComponent(assignmentValue)}`;
+            window.location.href = `/admin/download?class_name=${encodeURIComponent(classValue)}&course=${encodeURIComponent(courseValue)}&assignment=${encodeURIComponent(assignmentValue)}&student=all`;
         });
     }
 
-    // 课程选择改变时加载班级
-    courseName.addEventListener('change', function() {
-        const selectedCourse = this.value;
-        const classCheckboxes = document.getElementById('classCheckboxes');
-        
-        // 清空班级选择框
-        classCheckboxes.innerHTML = '';
-        
-        if (!selectedCourse) {
-            classCheckboxes.innerHTML = '<div class="text-sm text-gray-500 p-2">请先选择课程</div>';
-            return;
-        }
-        
-        // 显示加载中
-        classCheckboxes.innerHTML = '<div class="text-sm text-gray-500 p-2">加载班级中...</div>';
-        
-        // 获取班级列表
-        fetch(`/get_classes?course=${encodeURIComponent(selectedCourse)}`)
-            .then(response => response.json())
-            .then(data => {
-                classCheckboxes.innerHTML = '';
-                
-                if (!data.classes || data.classes.length === 0) {
-                    classCheckboxes.innerHTML = '<div class="text-sm text-gray-500 p-2">该课程暂无班级</div>';
-                    return;
-                }
-                
-                // 添加"全选"选项
-                const allCheckbox = document.createElement('div');
-                allCheckbox.className = 'flex items-center';
-                allCheckbox.innerHTML = `
-                    <input type="checkbox" id="selectAllClasses" class="h-4 w-4 text-blue-600 border-gray-300 rounded">
-                    <label for="selectAllClasses" class="ml-2 block text-sm text-gray-900 font-medium">全选</label>
-                `;
-                classCheckboxes.appendChild(allCheckbox);
-                
-                // 添加分隔线
-                const divider = document.createElement('div');
-                divider.className = 'border-t border-gray-200 my-2';
-                classCheckboxes.appendChild(divider);
-                
-                // 添加班级选项
-                data.classes.forEach(classInfo => {
-                    const checkbox = document.createElement('div');
-                    checkbox.className = 'flex items-center';
-                    
-                    const id = `class_${classInfo.name.replace(/\s+/g, '_')}`;
-                    checkbox.innerHTML = `
-                        <input type="checkbox" id="${id}" name="classNames" value="${classInfo.name}" class="class-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded">
-                        <label for="${id}" class="ml-2 block text-sm text-gray-900">
-                            ${classInfo.name}
-                            <span class="text-xs text-gray-500">${classInfo.description || ''}</span>
-                        </label>
-                    `;
-                    
-                    classCheckboxes.appendChild(checkbox);
-                });
-                
-                // 添加全选/取消全选功能
-                const selectAllCheckbox = document.getElementById('selectAllClasses');
-                const classCheckboxInputs = document.querySelectorAll('.class-checkbox');
-                
-                selectAllCheckbox.addEventListener('change', function() {
-                    const isChecked = this.checked;
-                    classCheckboxInputs.forEach(checkbox => {
-                        checkbox.checked = isChecked;
-                    });
-                });
-                
-                // 当单个班级复选框状态变化时，更新"全选"复选框
-                classCheckboxInputs.forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
-                        const allChecked = [...classCheckboxInputs].every(cb => cb.checked);
-                        selectAllCheckbox.checked = allChecked;
-                    });
-                });
-            })
-            .catch(error => {
-                console.error('获取班级列表失败:', error);
-                classCheckboxes.innerHTML = '<div class="text-sm text-red-500 p-2">加载班级失败</div>';
-            });
-    });
-
     //region 班级管理
-    // 新增导航项目 - 在原有导航中添加班级管理标签
-    // const navItems = document.querySelector('.border-b.border-gray-200.mb-6 nav');
-    // const classesTabButton = document.createElement('button');
-    // classesTabButton.id = 'tabClasses';
-    // classesTabButton.className = 'tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-6 border-b-2 border-transparent font-medium text-sm leading-5 focus:outline-none';
-    // classesTabButton.textContent = '班级管理';
-    // navItems.appendChild(classesTabButton);
-
-    // const classesTabButton = document.getElementById('tabClasses');
-    // navItems.appendChild(classesTabButton);
-
-    // 班级相关变量
-    let classesData = [];
-    const classesList = document.getElementById('classesList');
-    const classFilterCourse = document.getElementById('classFilterCourse');
-    const addClassBtn = document.getElementById('addClassBtn');
-    const classModal = document.getElementById('classModal');
-    const classModalTitle = document.getElementById('classModalTitle');
-    const classForm = document.getElementById('classForm');
-    const classId = document.getElementById('classId');
-    const originalClassName = document.getElementById('originalClassName');
-    const originalCourse = document.getElementById('originalCourse');
-    const classCourse = document.getElementById('classCourse');
-    const className = document.getElementById('className');
-    const classDescription = document.getElementById('classDescription');
-    const closeClassModalBtn = document.getElementById('closeClassModalBtn');
-    const cancelClassBtn = document.getElementById('cancelClassBtn');
-    const classStudentsModal = document.getElementById('classStudentsModal');
-    const classStudentsTitle = document.getElementById('classStudentsTitle');
-    const classStudentsList = document.getElementById('classStudentsList');
-    const closeClassStudentsBtn = document.getElementById('closeClassStudentsBtn');
-
-    // 班级管理标签页点击事件
-    // if (classesTabButton) {
-    //     classesTabButton.addEventListener('click', () => {
-    //         // 更新按钮样式
-    //         tabButtons.forEach(btn => {
-    //             btn.classList.remove('text-blue-600', 'border-blue-500');
-    //             btn.classList.add('text-gray-500', 'border-transparent');
-    //         });
-            
-    //         classesTabButton.classList.remove('text-gray-500', 'border-transparent');
-    //         classesTabButton.classList.add('text-blue-600', 'border-blue-500');
-            
-    //         // 切换标签页内容
-    //         tabContents.forEach(content => {
-    //             content.classList.remove('active');
-    //         });
-            
-    //         classesTab.classList.add('active');
-            
-    //         // 加载班级列表
-    //         loadClasses();
-    //     });
-    // }
 
     // 加载班级列表
     function loadClasses() {
-        const courseFilter = classFilterCourse ? classFilterCourse.value : '';
+        const classFilter = classFilterClass ? classFilterClass.value : '';
         
         // 显示加载中
         if (classesList) {
@@ -1512,9 +1512,9 @@ function closeAllClassLists(event) {
             .then(data => {
                 classesData = data.classes || [];
                 
-                // 根据课程筛选
-                const filteredClasses = courseFilter ? 
-                    classesData.filter(c => c.course === courseFilter) : 
+                // 根据班级筛选
+                const filteredClasses = classFilter ? 
+                    classesData.filter(c => c.name === classFilter) : 
                     classesData;
                 
                 renderClassesList(filteredClasses);
@@ -1534,7 +1534,7 @@ function closeAllClassLists(event) {
             });
     }
 
-    // 渲染班级列表
+    // region 渲染班级列表
     function renderClassesList(classes) {
         if (!classesList) return;
         
@@ -1575,9 +1575,6 @@ function closeAllClassLists(event) {
             
             row.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ${classInfo.course}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     ${classInfo.name}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -1749,35 +1746,73 @@ function closeAllClassLists(event) {
     // 打开添加班级弹窗
     function openAddClassModal() {
         if (!classModal || !classModalTitle || !classForm) return;
+
+        const backdrop = classModal.querySelector('.modal-backdrop');
+        const content = classModal.querySelector('.modal-content');
         
         classModalTitle.textContent = '添加班级';
         classId.value = '';
         originalClassName.value = '';
-        originalCourse.value = '';
         classForm.reset();
+
+        // 先显示容器但保持透明
+        classModal.classList.remove('pointer-events-none');
+        classModal.classList.add('pointer-events-auto');
         
-        classModal.classList.remove('hidden');
+        // 延迟一帧后开始动画（确保DOM已更新）
+        requestAnimationFrame(() => {
+            // 开始过渡动画
+            classModal.classList.add('opacity-100');
+            backdrop.classList.add('opacity-100');
+            content.classList.add('opacity-100', 'scale-100');
+            content.classList.remove('scale-95');
+        });
     }
 
     // 打开编辑班级弹窗
     function openEditClassModal(classInfo) {
-        if (!classModal || !classModalTitle || !classForm || !classCourse || !className || !classDescription) return;
+        if (!classModal || !classModalTitle || !classForm || !className || !classDescription) return;
+
+        const backdrop = classModal.querySelector('.modal-backdrop');
+        const content = classModal.querySelector('.modal-content');
         
         classModalTitle.textContent = '编辑班级';
         originalClassName.value = classInfo.name;
-        originalCourse.value = classInfo.course;
         
-        classCourse.value = classInfo.course;
         className.value = classInfo.name;
         classDescription.value = classInfo.description || '';
         
-        classModal.classList.remove('hidden');
+        // 先显示容器但保持透明
+        classModal.classList.remove('pointer-events-none');
+        classModal.classList.add('pointer-events-auto');
+        
+        // 延迟一帧后开始动画（确保DOM已更新）
+        requestAnimationFrame(() => {
+            // 开始过渡动画
+            classModal.classList.add('opacity-100');
+            backdrop.classList.add('opacity-100');
+            content.classList.add('opacity-100', 'scale-100');
+            content.classList.remove('scale-95');
+        });
     }
 
     // 关闭班级弹窗
     function closeClassModal() {
         if (classModal) {
-            classModal.classList.add('hidden');
+            const backdrop = classModal.querySelector('.modal-backdrop');
+            const content = classModal.querySelector('.modal-content');
+            
+            // 开始反向过渡
+            classModal.classList.remove('opacity-100');
+            backdrop.classList.remove('opacity-100');
+            content.classList.remove('opacity-100', 'scale-100');
+            content.classList.add('scale-95');
+            
+            // 等待过渡完成后完全隐藏
+            setTimeout(() => {
+                classModal.classList.add('pointer-events-none');
+                classModal.classList.remove('pointer-events-auto');
+            }, 300); // 持续时间与CSS过渡时间相同
         }
     }
 
@@ -1790,11 +1825,11 @@ function closeAllClassLists(event) {
 
     // 删除班级
     function deleteClass(course, className) {
-        if (!confirm(`确定要删除班级 "${className}" 吗？这将同时删除该班级下的所有提交记录。`)) {
+        if (!confirm(`确定要删除班级 "${className}" 吗？这将同时删除该班级下的所有提交记录，以及学生的所有信息！`)) {
             return;
         }
         
-        fetch(`/admin/classes/${encodeURIComponent(course)}/${encodeURIComponent(className)}`, {
+        fetch(`/admin/classes/${encodeURIComponent(className)}`, {
             method: 'DELETE'
         })
             .then(response => response.json())
@@ -1813,8 +1848,8 @@ function closeAllClassLists(event) {
     }
 
     // 班级筛选变化
-    if (classFilterCourse) {
-        classFilterCourse.addEventListener('change', loadClasses);
+    if (classFilterClass) {
+        classFilterClass.addEventListener('change', loadClasses);
     }
 
     // 添加班级按钮
@@ -1842,24 +1877,22 @@ function closeAllClassLists(event) {
         classForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const course = classCourse.value;
             const name = className.value;
             const description = classDescription.value;
             
-            if (!course || !name) {
-                showToast('课程和班级名称不能为空', 'error');
+            if (!name) {
+                showToast('班级名称不能为空', 'error');
                 return;
             }
             
             const isEdit = originalClassName.value !== '';
             const url = isEdit ? 
-                `/admin/classes/${encodeURIComponent(originalCourse.value)}/${encodeURIComponent(originalClassName.value)}` : 
+                `/admin/classes/${encodeURIComponent(originalClassName.value)}` : 
                 '/admin/classes';
             
             const method = isEdit ? 'PUT' : 'POST';
             
             const data = {
-                course: course,
                 name: name,
                 description: description
             };
