@@ -181,6 +181,7 @@ window.addEventListener('DOMContentLoaded', function() {
                     'tabAssignments': 'assignmentsTab',
                     'tabSubmissions': 'submissionsTab',
                     'tabClasses': 'classesTab',
+                    'tabSettings': 'settingsTab',  // 新增设置标签页
                 };
                 
                 const tabContentId = tabMapping[button.id];
@@ -1919,6 +1920,62 @@ window.addEventListener('DOMContentLoaded', function() {
                     console.error('保存班级失败:', error);
                     showToast('保存班级失败: ' + error.message, 'error');
                 });
+        });
+    }
+
+    // region 管理员设置界面
+
+    // 密码修改表单处理
+    const adminPasswordForm = document.getElementById('adminPasswordForm');
+    if (adminPasswordForm) {
+        adminPasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('current_password').value;
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            // 验证密码
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('请填写所有密码字段', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showToast('新密码与确认密码不匹配', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('新密码长度必须至少为6个字符', 'error');
+                return;
+            }
+            
+            // 提交请求
+            fetch('/admin/change_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // 清空表单
+                    adminPasswordForm.reset();
+                    showToast(data.message || '密码已成功更新', 'success');
+                } else {
+                    showToast(data.message || '密码更新失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('更新密码时出错:', error);
+                showToast('更新密码时发生错误', 'error');
+            });
         });
     }
 });

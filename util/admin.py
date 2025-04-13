@@ -42,6 +42,27 @@ from util.models import load_users, save_users
 
 admin_bp = Blueprint('admin', __name__)
 
+# 添加修改管理员密码的路由
+@admin_bp.route('/change_password', methods=['POST'])
+@admin_required
+def change_admin_password():
+    """修改管理员密码"""
+    data = request.json
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+    
+    if not current_password or not new_password:
+        return jsonify({'status': 'error', 'message': '缺少必要参数'}), 400
+    
+    # 使用管理员认证模块的密码修改函数
+    from util.admin_auth import change_admin_password
+    success, message = change_admin_password(current_user.id, current_password, new_password)
+    
+    if success:
+        return jsonify({'status': 'success', 'message': message})
+    else:
+        return jsonify({'status': 'error', 'message': message}), 400
+
 @admin_bp.route('/dashboard')
 @admin_required
 def dashboard():
@@ -53,19 +74,32 @@ def dashboard():
     course_config = load_course_config()
     
     # 提取所有班级
-    classes = set()
-
+    all_classes = []
     for class_info in course_config.get('classes', []):
         class_name = class_info.get('name', '')
-        classes.add(class_name)
+        all_classes.append(class_name)
     
-    # 转换为列表
-    classes = list(classes)
+    # 获取管理员可管理的班级
+    managed_classes = getattr(current_user, 'managed_classes', [])
+    
+    # 如果是内置管理员（可管理所有班级）
+    from util.config import ADMIN_USERNAME
+    is_super_admin = (current_user.id == ADMIN_USERNAME)
+    
+    # 如果是超级管理员或没有指定管理班级，则可以管理所有班级
+    if is_super_admin or not managed_classes:
+        managed_classes = all_classes
+    else:
+        # 确保所有指定的班级都存在
+        managed_classes = [cls for cls in managed_classes if cls in all_classes]
+
+    logging.info(f"Managed classes for {current_user.id}: {managed_classes}")
     
     return render_template('admin.html', 
-                          classes=classes,
+                          classes=managed_classes,
                           course_config=course_config, 
-                          admin_name=ADMIN_USERNAME)
+                          admin_name=current_user.id,
+                          admin_managed_classes=managed_classes if not is_super_admin else None)
 
 @admin_bp.route('/get_courses_by_class', methods=['GET'])
 @admin_required

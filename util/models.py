@@ -27,13 +27,14 @@ from util.config import USERS_FILE, ADMIN_USERNAME, ADMIN_PASSWORD_HASH
 class User(UserMixin):
     """用户类，扩展了 UserMixin 以支持 Flask-Login 功能"""
     
-    def __init__(self, username, is_admin=False, name=None, email=None, student_id=None, class_name=None):
+    def __init__(self, username, is_admin=False, name=None, email=None, student_id=None, class_name=None, managed_classes=None):
         self.id = username
         self.is_admin = is_admin
         self.name = name
         self.email = email
         self.student_id = student_id
-        self.class_name = class_name  # 新增班级字段
+        self.class_name = class_name  # 学生所在班级
+        self.managed_classes = managed_classes or []  # 管理员管理的班级列表，仅用于管理员
 
     @property
     def is_authenticated(self):
@@ -50,13 +51,49 @@ class User(UserMixin):
     def get_id(self):
         return self.id
     
+    def can_manage_class(self, class_name):
+        """
+        检查管理员是否有权限管理某个班级
+        
+        Args:
+            class_name (str): 班级名称
+        
+        Returns:
+            bool: 是否有权限
+        """
+        if not self.is_admin:
+            return False
+        
+        # 内置管理员(从config导入的)可以管理所有班级
+        from util.config import ADMIN_USERNAME
+        if self.id == ADMIN_USERNAME:
+            return True
+        
+        # 其他管理员只能管理被分配的班级
+        return class_name in self.managed_classes
+    
     @staticmethod
     def load_user(user_id):
         """根据用户ID加载用户对象"""
+        from util.config import ADMIN_USERNAME
+        from util.admin_auth import get_admin_managed_classes
+        
+        # 检查是否是内置管理员
         if user_id == ADMIN_USERNAME:
-            # 确保直接返回管理员用户
-            return User(ADMIN_USERNAME, True)
+            # 内置管理员可以管理所有班级
+            admin = User(ADMIN_USERNAME, True)
+            admin.managed_classes = []  # 空列表表示可以管理所有班级
+            return admin
             
+        # 检查是否是自定义管理员
+        from util.admin_auth import load_admins
+        admins = load_admins()
+        if user_id in admins:
+            admin = User(user_id, True)
+            admin.managed_classes = admins[user_id].get('managed_classes', [])
+            return admin
+        
+        # 普通用户
         users = load_users()
         if user_id in users:
             user_data = users[user_id]
@@ -66,8 +103,9 @@ class User(UserMixin):
                 user_data.get('name'),
                 user_data.get('email'),
                 user_data.get('student_id'),
-                user_data.get('class_name')  # 加载班级信息
+                user_data.get('class_name')
             )
+        
         return None
 
 

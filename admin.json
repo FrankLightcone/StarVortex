@@ -1,0 +1,9 @@
+{
+  "ccs": {
+    "username": "ccs",
+    "password": "scrypt:32768:8:1$PVPuLISdPyj0l9Lr$4c1189599337e5f08345e573ef1bdee48be2473249ec7bb2954e5216b1077ab7fa69f1a02fb6c74938247fc8a9d0947a2e55ad290695b1277ff6144c7daab306",
+    "managed_classes": [
+      "2023级遥感1班"
+    ]
+  }
+}

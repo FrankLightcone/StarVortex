@@ -236,3 +236,60 @@ th {
 .assignment-list th:nth-child(6) {
     min-width: 140px;
 }
+
+/* 在 static/css/admin.css 中添加以下样式，或直接内联到 admin.html 中 */
+
+/* 输入框样式 - 与学生页面一致 */
+.form-input:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    transform: translateY(-1px);
+    outline: none;
+}
+
+/* 输入框悬停效果 */
+.form-input:hover, .form-select:hover {
+    border-color: #93C5FD;
+}
+
+/* 管理员密码表单输入框样式 */
+#adminPasswordForm .form-input {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 1px solid rgba(209, 213, 219, 0.8);
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+/* 提交按钮悬停效果 */
+#adminPasswordForm button[type="submit"] {
+    background-image: linear-gradient(to right, #3b82f6, #2563eb);
+    transition: all 0.3s ease;
+}
+
+#adminPasswordForm button[type="submit"]:hover {
+    background-image: linear-gradient(to right, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+}
+
+/* 输入框的标签文本 */
+#adminPasswordForm label {
+    color: #4B5563;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+/* 整个表单容器的样式 */
+#adminPasswordForm {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #E5E7EB;
+}

@@ -28,6 +28,8 @@ from functools import wraps
 from util.models import User, validate_user, load_users, save_users
 from util.utils import verification_codes, send_verification_email, generate_verification_code, reset_codes, send_reset_password_email, get_all_classes
 from util.config import ADMIN_USERNAME, ADMIN_PASSWORD_HASH
+# 导入新增的管理员认证模块
+from util.admin_auth import validate_admin, get_admin_managed_classes, check_admin_class_permission
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from util.email_config import SMTP_TEST_USERNAME
@@ -49,6 +51,33 @@ def admin_required(f):
             logging.warning(f"Unauthorized access attempt to admin area: {request.path}")
             return redirect(url_for('auth.admin_login'))
         return f(*args, **kwargs)
+    return decorated_function
+
+def class_permission_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # 确保用户是已认证的管理员
+        if not current_user.is_authenticated or not current_user.is_admin:
+            logging.warning(f"Unauthorized access attempt to admin area: {request.path}")
+            return redirect(url_for('auth.admin_login'))
+        
+        # 获取请求中的班级名称
+        class_name = request.args.get('class_name') or kwargs.get('class_name')
+        
+        # 如果请求中没有班级名称，则直接允许访问
+        if not class_name:
+            return f(*args, **kwargs)
+        
+        # 验证班级权限
+        if check_admin_class_permission(current_user.id, class_name):
+            return f(*args, **kwargs)
+        else:
+            logging.warning(f"Admin {current_user.id} attempted to access unauthorized class: {class_name}")
+            return jsonify({
+                'status': 'error', 
+                'message': f'您没有权限管理班级 "{class_name}"'
+            }), 403
+    
     return decorated_function
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -194,15 +223,21 @@ def admin_login():
         
         logging.info(f"Admin login attempt: {username}")
         
-        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
-            # 创建管理员用户实例
-            user = User(ADMIN_USERNAME, True)
-            logging.info(f"Admin login successful: {user.id}, is_admin={user.is_admin}")
+        # 使用新的管理员验证函数
+        if validate_admin(username, password):
+            # 获取管理员可管理的班级
+            managed_classes = get_admin_managed_classes(username)
+            
+            # 创建管理员用户实例，并存储可管理的班级
+            user = User(username, True)
+            user.managed_classes = managed_classes  # 添加可管理班级属性
+            
+            logging.info(f"Admin login successful: {user.id}, is_admin={user.is_admin}, managed_classes={managed_classes}")
             
             # 登录用户
             login_user(user)
             
-            # 确保is_admin属性被正确设置
+            # 确保是否加载各种属性正确
             if not hasattr(current_user, 'is_admin') or not current_user.is_admin:
                 logging.error(f"Admin flag not set correctly after login: {current_user}")
             
