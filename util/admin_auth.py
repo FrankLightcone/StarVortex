@@ -20,7 +20,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from util.config import ADMIN_USERNAME, ADMIN_PASSWORD_HASH
 
 # 管理员文件路径
-ADMIN_FILE = 'admin.json'
+ADMIN_FILE = 'data/admin.json'
 
 def load_admins():
     """
@@ -67,11 +67,12 @@ def validate_admin(username, password):
     Returns:
         bool: 验证是否成功
     """
+    # 检查是否是自定义管理员
+    
     # 首先检查是否是内置管理员
     if username == ADMIN_USERNAME:
         return check_password_hash(ADMIN_PASSWORD_HASH, password)
     
-    # 检查是否是自定义管理员
     admins = load_admins()
     if username in admins:
         return check_password_hash(admins[username]['password'], password)
@@ -90,6 +91,7 @@ def get_admin_managed_classes(username):
     """
     # 如果是内置管理员，返回所有班级
     if username == ADMIN_USERNAME:
+        logging.info(f"内置管理员 {username} 可以管理所有班级")
         from util.utils import load_course_config
         config = load_course_config()
         return [class_info['name'] for class_info in config.get('classes', [])]

@@ -26,7 +26,7 @@ import json
 from werkzeug.security import generate_password_hash
 
 # 管理员文件路径
-ADMIN_FILE = 'admin.json'
+ADMIN_FILE = 'data/admin.json'
 
 def load_admins():
     """

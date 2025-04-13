@@ -277,7 +277,7 @@ def upload_file():
 # 添加用于跟踪每日上传量的函数
 def get_today_upload_size(student_id, date):
     """获取学生当天的上传总量"""
-    upload_record_file = 'daily_uploads.json'
+    upload_record_file = 'data/daily_uploads.json'
     date_str = date.strftime('%Y-%m-%d')
     
     try:

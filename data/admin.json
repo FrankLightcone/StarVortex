@@ -1,0 +1,16 @@
+{
+  "ygeb": {
+    "username": "ygeb",
+    "password": "pbkdf2:sha256:260000$bB5rIICtDuIDXHPS$d8b79128320130a53b6c4c403fd9b102c532ccddeb3ccb0b0ded84cba4ec4203",
+    "managed_classes": [
+      "2023级遥感2班"
+    ]
+  },
+  "ccs": {
+    "username": "ccs",
+    "password": "pbkdf2:sha256:260000$gRpDqY7CAOrHZUvL$3df8bf0146361ed202c2865a6da493cd0dec39ab721eec9127b0b3b8daca8b71",
+    "managed_classes": [
+      "2023级遥感1班"
+    ]
+  }
+}

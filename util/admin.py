@@ -72,15 +72,20 @@ def dashboard():
     
     # 获取课程配置
     course_config = load_course_config()
+    logging.info(f"Course config loaded: {course_config}")
     
     # 提取所有班级
     all_classes = []
     for class_info in course_config.get('classes', []):
         class_name = class_info.get('name', '')
         all_classes.append(class_name)
+
+    logging.info(f"All classes: {all_classes}")
     
     # 获取管理员可管理的班级
     managed_classes = getattr(current_user, 'managed_classes', [])
+
+    logging.warning(f"Managed classes for {current_user.id}: {managed_classes}")
     
     # 如果是内置管理员（可管理所有班级）
     from util.config import ADMIN_USERNAME

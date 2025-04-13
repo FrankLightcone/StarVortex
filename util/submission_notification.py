@@ -24,7 +24,7 @@ from util.config import SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD
 from util.models import load_users
 
 # 存储提交记录的文件
-SUBMISSIONS_RECORD_FILE = 'submissions_record.json'
+SUBMISSIONS_RECORD_FILE = 'data/submissions_record.json'
 
 # 提交冷却时间(秒) - 在此时间内多次上传只会发送一封邮件
 SUBMISSION_COOLDOWN = 120  # 两分钟
