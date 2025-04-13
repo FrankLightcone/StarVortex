@@ -91,8 +91,8 @@ def create_app():
                 save_users({})
                 
             # 确保提交记录文件存在
-            if not os.path.exists('submissions_record.json'):
-                with open('submissions_record.json', 'w', encoding='utf-8') as f:
+            if not os.path.exists('data/submissions_record.json'):
+                with open('data/submissions_record.json', 'w', encoding='utf-8') as f:
                     f.write('{}')
             
             app.logger.info("应用程序初始化完成")
