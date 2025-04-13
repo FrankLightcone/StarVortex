@@ -16,3 +16,5 @@ flask.log
 /desktop/node_modules
 /desktop/dist
 /static/updates
+/instance
+/backups
