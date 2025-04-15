@@ -8,9 +8,7 @@
           "name": "GNSS",
           "assignments": [
             "lab3：广播星历精度评估",
-            "1班的作业",
-            "两个班共同的作业",
-            "实验一(For 遥感1班)"
+            "lab5：GNSS绝对定位(单点定位)数据处理"
           ]
         },
         {
@@ -18,8 +16,19 @@
           "assignments": [
             "lab3：频率域滤波"
           ]
+        },
+        {
+          "name": "地图学原理",
+          "assignments": [
+            "lab3：点阵地图与路网地图制作",
+            "lab4：社会经济类专题地图制作——全国疫情分布图"
+          ]
+        },
+        {
+          "name": "误差理论",
+          "assignments": []
         }
-      ]
+    ]
     },
     {
       "name": "2023级遥感2班",
@@ -28,16 +37,21 @@
         {
           "name": "GNSS",
           "assignments": [
-            "lab3：广播星历精度评估",
-            "两个班共同的作业"
           ]
         },
         {
           "name": "DIP",
           "assignments": [
-            "lab3：频率域滤波",
-            "2班的作业"
           ]
+        },
+        {
+          "name": "地图学原理",
+          "assignments": [
+          ]
+        },
+        {
+          "name": "误差理论",
+          "assignments": []
         }
       ]
     }

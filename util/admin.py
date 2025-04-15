@@ -981,3 +981,22 @@ def get_class_courses(class_name):
         'status': 'error',
         'message': '班级不存在'
     }), 404
+
+@admin_bp.route('/trigger_deadline_check', methods=['POST'])
+@admin_required
+def trigger_deadline_check():
+    """手动触发截止日期检查"""
+    from util.schedule_tasks import immediate_check_deadlines
+    
+    success = immediate_check_deadlines()
+    
+    if success:
+        return jsonify({
+            'status': 'success', 
+            'message': '截止日期检查已触发，将向未提交作业的学生发送提醒邮件'
+        })
+    else:
+        return jsonify({
+            'status': 'error', 
+            'message': '触发截止日期检查失败，请查看日志'
+        }), 500

@@ -26,12 +26,11 @@
       "enableGrading": false,
       "enableFeedback": false
     },
-    "createdAt": "2025-04-09T13:57:51.064123",
-    "updatedAt": "2025-04-09T19:18:34.497008",
     "classNames": [
-      "2023级遥感1班",
-      "2023级遥感2班"
-    ]
+      "2023级遥感1班"
+    ],
+    "createdAt": "2025-04-09T13:57:51.064123",
+    "updatedAt": "2025-04-09T19:18:34.497008"
   },
   {
     "id": "2",
@@ -64,164 +63,17 @@
       "enableGrading": false,
       "enableFeedback": false
     },
-    "createdAt": "2025-04-09T13:58:17.179958",
-    "updatedAt": "2025-04-09T16:11:14.037476",
     "classNames": [
-      "2023级遥感1班",
-      "2023级遥感2班"
-    ]
+      "2023级遥感1班"
+    ],
+    "createdAt": "2025-04-09T13:58:17.179958",
+    "updatedAt": "2025-04-09T16:11:14.037476"
   },
   {
     "id": "3",
     "course": "DIP",
     "name": "lab3：频率域滤波",
-    "dueDate": "2025-04-21T00:00",
-    "description": "",
-    "advancedSettings": {
-      "maxFileCount": 10,
-      "maxFileSize": 256,
-      "fileSizeUnit": "MB",
-      "dailyQuota": 1,
-      "allowedTypes": [
-        "pdf",
-        "doc",
-        "docx",
-        "xls",
-        "xlsx",
-        "ppt",
-        "pptx",
-        "jpg",
-        "jpeg",
-        "png",
-        "gif",
-        "zip",
-        "rar",
-        "txt",
-        "csv"
-      ],
-      "enableGrading": false,
-      "enableFeedback": false
-    },
-    "createdAt": "2025-04-09T16:14:20.911800",
-    "classNames": [
-      "2023级遥感1班",
-      "2023级遥感2班"
-    ]
-  },
-  {
-    "id": "4",
-    "course": "GNSS",
-    "name": "1班的作业",
-    "dueDate": "2025-04-18T21:34",
-    "description": "",
-    "advancedSettings": {
-      "maxFileCount": 10,
-      "maxFileSize": 256,
-      "fileSizeUnit": "MB",
-      "dailyQuota": 1,
-      "allowedTypes": [
-        "pdf",
-        "doc",
-        "docx",
-        "xls",
-        "xlsx",
-        "ppt",
-        "pptx",
-        "jpg",
-        "jpeg",
-        "png",
-        "gif",
-        "zip",
-        "rar",
-        "txt",
-        "csv"
-      ],
-      "enableGrading": false,
-      "enableFeedback": false
-    },
-    "createdAt": "2025-04-11T21:35:10.916912",
-    "classNames": [
-      "2023级遥感1班"
-    ]
-  },
-  {
-    "id": "5",
-    "course": "DIP",
-    "name": "2班的作业",
-    "dueDate": "2025-04-18T21:35",
-    "description": "",
-    "advancedSettings": {
-      "maxFileCount": 10,
-      "maxFileSize": 256,
-      "fileSizeUnit": "MB",
-      "dailyQuota": 1,
-      "allowedTypes": [
-        "pdf",
-        "doc",
-        "docx",
-        "xls",
-        "xlsx",
-        "ppt",
-        "pptx",
-        "jpg",
-        "jpeg",
-        "png",
-        "gif",
-        "zip",
-        "rar",
-        "txt",
-        "csv"
-      ],
-      "enableGrading": false,
-      "enableFeedback": false
-    },
-    "createdAt": "2025-04-11T21:35:38.392520",
-    "classNames": [
-      "2023级遥感2班"
-    ]
-  },
-  {
-    "id": "6",
-    "course": "GNSS",
-    "name": "两个班共同的作业",
-    "dueDate": "2025-04-18T21:35",
-    "description": "",
-    "advancedSettings": {
-      "maxFileCount": 10,
-      "maxFileSize": 256,
-      "fileSizeUnit": "MB",
-      "dailyQuota": 1,
-      "allowedTypes": [
-        "pdf",
-        "doc",
-        "docx",
-        "xls",
-        "xlsx",
-        "ppt",
-        "pptx",
-        "jpg",
-        "jpeg",
-        "png",
-        "gif",
-        "zip",
-        "rar",
-        "txt",
-        "csv"
-      ],
-      "enableGrading": false,
-      "enableFeedback": false
-    },
-    "createdAt": "2025-04-11T21:35:52.632886",
-    "classNames": [
-      "2023级遥感1班",
-      "2023级遥感2班"
-    ]
-  },
-  {
-    "id": "7",
-    "course": "GNSS",
-    "name": "实验一(For 遥感1班)",
-    "dueDate": "2025-04-20T15:23",
+    "dueDate": "2025-04-22T00:00",
     "description": "",
     "advancedSettings": {
       "maxFileCount": 10,
@@ -251,6 +103,74 @@
     "classNames": [
       "2023级遥感1班"
     ],
-    "createdAt": "2025-04-13T15:23:45.401286"
+    "createdAt": "2025-04-09T16:14:20.911800",
+    "updatedAt": "2025-04-09T20:16:35.801257"
+  },
+  {
+    "id": "4",
+    "course": "地图学原理",
+    "name": "lab4：社会经济类专题地图制作——全国疫情分布图",
+    "dueDate": "2025-04-18T17:00",
+    "description": "请上传pdf",
+    "advancedSettings": {
+      "maxFileCount": 10,
+      "maxFileSize": 256,
+      "fileSizeUnit": "MB",
+      "dailyQuota": 1,
+      "allowedTypes": [
+        "pdf",
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "zip",
+        "rar"
+      ],
+      "enableGrading": false,
+      "enableFeedback": false
+    },
+    "classNames": [
+      "2023级遥感1班"
+    ],
+    "createdAt": "2025-04-10T19:21:13.783611",
+    "updatedAt": "2025-04-10T19:23:37.607833"
+  },
+  {
+    "id": "5",
+    "course": "GNSS",
+    "name": "lab5：GNSS绝对定位(单点定位)数据处理",
+    "dueDate": "2025-04-24T00:00",
+    "description": "",
+    "advancedSettings": {
+      "maxFileCount": 10,
+      "maxFileSize": 256,
+      "fileSizeUnit": "MB",
+      "dailyQuota": 1,
+      "allowedTypes": [
+        "pdf",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+        "ppt",
+        "pptx",
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "zip",
+        "rar",
+        "txt",
+        "csv"
+      ],
+      "enableGrading": false,
+      "enableFeedback": false
+    },
+    "classNames": [
+      "2023级遥感1班"
+    ],
+    "createdAt": "2025-04-11T19:14:00.073959",
+    "updatedAt": "2025-04-12T14:02:14.229016"
   }
 ]
+

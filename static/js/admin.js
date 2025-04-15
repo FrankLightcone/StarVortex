@@ -1978,4 +1978,112 @@ window.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    
+});
+
+// region 添加作业截止提醒功能的JavaScript代码
+document.addEventListener('DOMContentLoaded', function() {
+    const triggerReminderBtn = document.getElementById('triggerReminderBtn');
+    const reminderResult = document.getElementById('reminderResult');
+    
+    if (triggerReminderBtn) {
+        triggerReminderBtn.addEventListener('click', function() {
+            // 显示加载状态
+            triggerReminderBtn.disabled = true;
+            triggerReminderBtn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                正在发送提醒...
+            `;
+            
+            // 发送API请求
+            fetch('/admin/trigger_deadline_check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 恢复按钮状态
+                triggerReminderBtn.disabled = false;
+                triggerReminderBtn.innerHTML = `
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    立即发送作业截止提醒
+                `;
+                
+                // 显示结果
+                reminderResult.classList.remove('hidden');
+                
+                if (data.status === 'success') {
+                    reminderResult.innerHTML = `
+                        <div class="flex items-center p-4 bg-green-50 rounded-lg">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-green-700">
+                                    ${data.message}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 5秒后隐藏结果
+                    setTimeout(() => {
+                        reminderResult.classList.add('hidden');
+                    }, 5000);
+                } else {
+                    reminderResult.innerHTML = `
+                        <div class="flex items-center p-4 bg-red-50 rounded-lg">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700">
+                                    ${data.message}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                // 恢复按钮状态
+                triggerReminderBtn.disabled = false;
+                triggerReminderBtn.innerHTML = `
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    立即发送作业截止提醒
+                `;
+                
+                // 显示错误信息
+                reminderResult.classList.remove('hidden');
+                reminderResult.innerHTML = `
+                    <div class="flex items-center p-4 bg-red-50 rounded-lg">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">
+                                触发提醒失败，请查看系统日志或稍后再试。
+                            </p>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+    }
 });

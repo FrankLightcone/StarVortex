@@ -508,3 +508,115 @@
       font-size: 0.75rem;
     }
   }
+
+  /* 作业限制区域样式 */
+#assignmentLimits {
+  transition: all 0.3s ease-in-out;
+}
+
+#assignmentLimits h4 {
+  color: var(--gray-700);
+  display: flex;
+  align-items: center;
+}
+
+#assignmentLimits h4 svg {
+  margin-right: 0.375rem;
+}
+
+/* 文件类型标签样式 */
+#fileTypesTags span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-right: 0.375rem;
+  margin-bottom: 0.375rem;
+  transition: all 0.2s ease;
+  cursor: default;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+#fileTypesTags span:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 为不同类型的标签添加特定样式 */
+#fileTypesTags span[title] {
+  position: relative;
+}
+
+#fileTypesTags span[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(55, 65, 81, 0.9);
+  color: white;
+  border-radius: 0.25rem;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  z-index: 10;
+  margin-bottom: 0.25rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* 为不同类别的标签添加图标 */
+#fileTypesTags span::before {
+  display: inline-block;
+  margin-right: 0.25rem;
+  font-size: 0.7rem;
+}
+
+#fileTypesTags span:nth-child(even) {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 作业描述样式 */
+#assignmentDescription {
+  line-height: 1.5;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  background-color: rgba(59, 130, 246, 0.05);
+  border-left: 3px solid rgba(59, 130, 246, 0.5);
+  transition: all 0.2s ease;
+}
+
+#assignmentDescription.italic {
+  color: var(--gray-500);
+}
+
+/* 限制信息项目悬停效果 */
+#assignmentLimits .flex.items-center {
+  padding: 0.375rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+
+#assignmentLimits .flex.items-center:hover {
+  background-color: rgba(243, 244, 246, 0.5);
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  #assignmentLimits .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  #fileTypesTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+  
+  #fileTypesTags span {
+    margin-right: 0;
+    margin-bottom: 0;
+  }
+}

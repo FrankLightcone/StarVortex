@@ -273,7 +273,8 @@ def get_assignment_settings():
     # 检查当前用户是否为管理员
     if current_user.is_admin:
         return jsonify({'status': 'error', 'message': 'Admin users cannot access student API endpoints'}), 403
-        
+    
+    class_name = request.args.get('class_name')
     course = request.args.get('course')
     assignment = request.args.get('assignment')
     
@@ -282,7 +283,10 @@ def get_assignment_settings():
     
     # 获取作业信息
     assignments = load_assignments()
-    assignment_obj = next((a for a in assignments if a['course'] == course and a['name'] == assignment), None)
+    assignment_obj = next((a for a in assignments 
+                           if a['course'] == course and
+                              a['name'] == assignment and
+                              class_name in a['classNames']), None)
     
     if not assignment_obj:
         return jsonify({'settings': get_default_settings()})
@@ -328,3 +332,40 @@ def get_classes():
         ]
     
     return jsonify({'classes': classes})
+
+@api_bp.route('/get_assignment_details')
+@login_required
+def get_assignment_details():
+    """获取作业的详细信息，包括描述"""
+    # 检查当前用户是否为管理员
+    if current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Admin users cannot access student API endpoints'}), 403
+    
+    class_name = request.args.get('class_name')
+    course = request.args.get('course')
+    assignment = request.args.get('assignment')
+    
+    if not course or not assignment:
+        return jsonify({'status': 'error', 'message': '缺少课程或作业名称'}), 400
+    
+    # 获取作业信息
+    assignments = load_assignments()
+    # print(f"Assignments: {assignments}")
+    assignment_obj = next((a for a in assignments 
+                           if a['course'] == course and
+                              a['name'] == assignment and 
+                              class_name in a['classNames']), None)
+    
+    if not assignment_obj:
+        return jsonify({'status': 'error', 'message': '作业不存在'}), 404
+    
+    # 返回作业详情，包括描述
+    return jsonify({
+        'status': 'success',
+        'assignment': {
+            'course': assignment_obj.get('course', ''),
+            'name': assignment_obj.get('name', ''),
+            'dueDate': assignment_obj.get('dueDate', ''),
+            'description': assignment_obj.get('description', '暂无作业描述'),
+        }
+    })

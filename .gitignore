@@ -18,3 +18,5 @@ flask.log
 /static/updates
 /instance
 /backups
+/data
+.gitignore

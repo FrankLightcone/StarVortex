@@ -591,6 +591,172 @@ if (classSelect) {
 }
 
 // 作业选择事件 - 加载作业统计信息
+// 作业选择事件 - 加载作业统计信息
+/**
+ * 更新作业限制信息显示
+ * @param {Object} settings - 作业高级设置信息
+ */
+function updateAssignmentLimits(settings) {
+    // 更新文件大小限制
+    const maxFileSizeElement = document.getElementById('maxFileSize');
+    if (maxFileSizeElement) {
+        const sizeValue = settings.maxFileSize || 256;
+        const sizeUnit = settings.fileSizeUnit || 'MB';
+        maxFileSizeElement.textContent = `文件大小: 最大 ${sizeValue} ${sizeUnit}`;
+    }
+    
+    // 更新文件数量限制
+    const maxFileCountElement = document.getElementById('maxFileCount');
+    if (maxFileCountElement) {
+        const countValue = settings.maxFileCount || 10;
+        maxFileCountElement.textContent = `文件数量: 最多 ${countValue} 个`;
+    }
+    
+    // 更新每日上传限额
+    const dailyQuotaElement = document.getElementById('dailyQuota');
+    if (dailyQuotaElement) {
+        const quotaValue = settings.dailyQuota || 1;
+        dailyQuotaElement.textContent = `每日限额: ${quotaValue} GB`;
+    }
+    
+    // 更新允许的文件类型
+    const allowedTypesElement = document.getElementById('allowedTypes');
+    const fileTypesTagsElement = document.getElementById('fileTypesTags');
+    
+    if (allowedTypesElement) {
+        allowedTypesElement.textContent = '允许的文件类型';
+    }
+    
+    if (fileTypesTagsElement) {
+        // 清空现有标签
+        fileTypesTagsElement.innerHTML = '';
+        
+        // 添加文件类型标签
+        const allowedTypes = settings.allowedTypes || [];
+        
+        if (allowedTypes.length === 0 || (allowedTypes.length > 20)) {
+            // 如果没有限制文件类型或类型太多，显示"全部类型"
+            const allTypesTag = document.createElement('span');
+            allTypesTag.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800';
+            allTypesTag.textContent = '全部类型';
+            fileTypesTagsElement.appendChild(allTypesTag);
+        } else {
+            // 创建文件类型映射
+            const typeMap = {
+                // 文档类型
+                'pdf': { group: '文档', color: 'bg-red-100 text-red-800' },
+                'doc': { group: '文档', color: 'bg-blue-100 text-blue-800' },
+                'docx': { group: '文档', color: 'bg-blue-100 text-blue-800' },
+                'txt': { group: '文档', color: 'bg-gray-100 text-gray-800' },
+                
+                // 表格类型
+                'xls': { group: '表格', color: 'bg-green-100 text-green-800' },
+                'xlsx': { group: '表格', color: 'bg-green-100 text-green-800' },
+                'csv': { group: '表格', color: 'bg-green-100 text-green-800' },
+                
+                // 演示文稿
+                'ppt': { group: '演示文稿', color: 'bg-orange-100 text-orange-800' },
+                'pptx': { group: '演示文稿', color: 'bg-orange-100 text-orange-800' },
+                
+                // 图片类型
+                'jpg': { group: '图片', color: 'bg-purple-100 text-purple-800' },
+                'jpeg': { group: '图片', color: 'bg-purple-100 text-purple-800' },
+                'png': { group: '图片', color: 'bg-purple-100 text-purple-800' },
+                'gif': { group: '图片', color: 'bg-purple-100 text-purple-800' },
+                'bmp': { group: '图片', color: 'bg-purple-100 text-purple-800' },
+                
+                // 压缩文件
+                'zip': { group: '压缩文件', color: 'bg-yellow-100 text-yellow-800' },
+                'rar': { group: '压缩文件', color: 'bg-yellow-100 text-yellow-800' },
+                '7z': { group: '压缩文件', color: 'bg-yellow-100 text-yellow-800' },
+                
+                // 其他常见格式
+                'py': { group: '代码', color: 'bg-indigo-100 text-indigo-800' },
+                'java': { group: '代码', color: 'bg-indigo-100 text-indigo-800' },
+                'js': { group: '代码', color: 'bg-indigo-100 text-indigo-800' },
+                'html': { group: '代码', color: 'bg-indigo-100 text-indigo-800' },
+                'css': { group: '代码', color: 'bg-indigo-100 text-indigo-800' }
+            };
+            
+            // 创建分组用的集合
+            const groupedTypes = {};
+            
+            // 对类型进行分组
+            allowedTypes.forEach(type => {
+                const typeInfo = typeMap[type] || { group: '其他', color: 'bg-gray-100 text-gray-800' };
+                if (!groupedTypes[typeInfo.group]) {
+                    groupedTypes[typeInfo.group] = {
+                        types: [],
+                        color: typeInfo.color
+                    };
+                }
+                groupedTypes[typeInfo.group].types.push(type);
+            });
+            
+            // 添加分组标签
+            Object.entries(groupedTypes).forEach(([group, info]) => {
+                const tag = document.createElement('span');
+                tag.className = `inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${info.color}`;
+                tag.textContent = group;
+                tag.title = info.types.map(t => `.${t}`).join(', ');
+                fileTypesTagsElement.appendChild(tag);
+                
+                // 为较长的类型列表添加单独的标签
+                if (info.types.length > 5) {
+                    info.types.forEach(type => {
+                        const typeTag = document.createElement('span');
+                        typeTag.className = `inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${info.color}`;
+                        typeTag.textContent = `.${type}`;
+                        fileTypesTagsElement.appendChild(typeTag);
+                    });
+                }
+            });
+            
+            // 对于未分组的类型，单独添加标签
+            const ungroupedTypes = allowedTypes.filter(type => !Object.keys(typeMap).includes(type));
+            ungroupedTypes.forEach(type => {
+                const tag = document.createElement('span');
+                tag.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800';
+                tag.textContent = `.${type}`;
+                fileTypesTagsElement.appendChild(tag);
+            });
+        }
+    }
+}
+
+/**
+ * 对文件类型进行分组
+ * @param {Array} types - 文件类型数组
+ * @returns {Object} - 分组后的文件类型
+ */
+function groupFileTypes(types) {
+    const knownTypes = getKnownFileTypes();
+    const groups = {};
+    
+    // 检查每个分组是否完全包含在允许的类型中
+    Object.entries(knownTypes).forEach(([group, groupTypes]) => {
+        if (groupTypes.every(type => types.includes(type))) {
+            groups[group] = groupTypes;
+        }
+    });
+    
+    return groups;
+}
+
+/**
+ * 获取已知文件类型分组
+ * @returns {Object} - 已知文件类型分组
+ */
+function getKnownFileTypes() {
+    return {
+        '文档': ['pdf', 'doc', 'docx', 'txt'],
+        '表格': ['xls', 'xlsx', 'csv'],
+        '演示文稿': ['ppt', 'pptx'],
+        '图片': ['jpg', 'jpeg', 'png', 'gif', 'bmp'],
+        '压缩文件': ['zip', 'rar', '7z'],
+    };
+}
+
 if (assignmentSelect) {
     assignmentSelect.addEventListener('change', function() {
         const selectedCourse = courseSelect.value;
@@ -637,6 +803,43 @@ if (assignmentSelect) {
                     console.error('获取作业统计信息失败:', error);
                     showToast('获取作业统计信息失败', 'error');
                 });
+            
+        // 获取作业高级设置信息
+        fetch(`/get_assignment_settings?class_name=${classSelect.value}&course=${encodeURIComponent(selectedCourse)}&assignment=${encodeURIComponent(selectedAssignment)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.settings) {
+                    // 更新作业限制信息
+                    updateAssignmentLimits(data.settings);
+                }
+            })
+            .catch(error => {
+                console.error('获取作业设置信息失败:', error);
+            });
+            
+        // 获取作业详细信息（包含描述）
+        fetch(`/get_assignment_details?class_name=${classSelect.value}&course=${encodeURIComponent(selectedCourse)}&assignment=${encodeURIComponent(selectedAssignment)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.assignment && data.assignment.description) {
+                    // 更新作业描述
+                    const descriptionElement = document.getElementById('assignmentDescription');
+                    if (descriptionElement) {
+                        descriptionElement.textContent = data.assignment.description;
+                        descriptionElement.classList.remove('italic');
+                    }
+                } else {
+                    // 如果没有描述，显示默认提示
+                    const descriptionElement = document.getElementById('assignmentDescription');
+                    if (descriptionElement) {
+                        descriptionElement.textContent = '暂无作业描述...';
+                        descriptionElement.classList.add('italic');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('获取作业详情失败:', error);
+            });
         }
         
         // 更新上传按钮状态

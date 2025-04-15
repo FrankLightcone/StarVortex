@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="/static/css/upload.css" rel="stylesheet">
+    <link href="/static/css/feedback.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body class="bg-gray-50 min-h-screen font-sans">
@@ -163,6 +164,48 @@
                             <div class="stat-item">
                                 <div class="text-sm font-medium text-gray-500">我的提交</div>
                                 <div id="mySubmissionStatus" class="stat-value">-</div>
+                            </div>
+                        </div>
+                        <div id="assignmentLimits" class="mt-4 pt-4 border-t border-gray-200">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                <svg class="w-4 h-4 mr-1 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                提交限制
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-1 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <span id="maxFileSize">文件大小: 最大 256 MB</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-1 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <span id="maxFileCount">文件数量: 最多 10 个</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-1 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <span id="dailyQuota">每日限额: 1 GB</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-1 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <span id="allowedTypes">允许的文件类型</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <div id="fileTypesTags" class="flex flex-wrap gap-1.5">
+                                    <!-- 这里将动态添加文件类型标签 -->
+                                </div>
+                            </div>
+                            <div class="mt-3 text-xs text-gray-500 bg-blue-50 p-2 rounded">
+                                <p id="assignmentDescription" class="italic">暂无作业描述...</p>
                             </div>
                         </div>
                     </div>
@@ -596,6 +639,7 @@
     <script src="/static/js/toast.js"></script>
     <script src="/static/js/utils.js"></script>
     <script src="/static/js/upload.js"></script>
+    <script src="/static/js/feedback.js"></script>
     <script>
         // 用户下拉菜单交互
         document.addEventListener('DOMContentLoaded', function() {

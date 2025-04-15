@@ -1,0 +1,288 @@
+/* 反馈按钮和窗口样式 */
+.feedback-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #4f46e5;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.feedback-btn:hover {
+    transform: scale(1.05);
+    background-color: #4338ca;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+.feedback-btn i {
+    font-size: 24px;
+}
+
+.feedback-container {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 350px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.95);
+    overflow: hidden;
+}
+
+.feedback-container.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.feedback-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.feedback-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.feedback-close {
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.2s;
+}
+
+.feedback-close:hover {
+    color: #111827;
+}
+
+.feedback-body {
+    padding: 20px;
+}
+
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.feedback-input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.feedback-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.feedback-textarea {
+    min-height: 120px;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.feedback-textarea:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.feedback-dropzone {
+    padding: 20px;
+    border: 2px dashed #d1d5db;
+    border-radius: 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.feedback-dropzone:hover {
+    border-color: #4f46e5;
+    background-color: rgba(79, 70, 229, 0.05);
+}
+
+.feedback-dropzone.dragover {
+    border-color: #4f46e5;
+    background-color: rgba(79, 70, 229, 0.1);
+}
+
+.feedback-dropzone-icon {
+    font-size: 24px;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.feedback-dropzone-text {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.feedback-img-preview {
+    margin-top: 10px;
+    display: none;
+    position: relative;
+}
+
+.feedback-img-preview.show {
+    display: block;
+}
+
+.feedback-preview-img {
+    width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+.feedback-remove-img {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #ef4444;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.feedback-submit-btn {
+    margin-top: 5px;
+    padding: 10px 15px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.feedback-submit-btn:hover {
+    background-color: #4338ca;
+}
+
+.feedback-submit-btn:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.feedback-success {
+    padding: 30px 20px;
+    text-align: center;
+    display: none;
+}
+
+.feedback-success.show {
+    display: block;
+}
+
+.feedback-success-icon {
+    font-size: 48px;
+    color: #10b981;
+    margin-bottom: 15px;
+}
+
+.feedback-success-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 10px;
+}
+
+.feedback-success-message {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+.feedback-back-btn {
+    padding: 8px 15px;
+    background-color: #f3f4f6;
+    color: #374151;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.feedback-back-btn:hover {
+    background-color: #e5e7eb;
+}
+
+/* 反馈窗口动画 */
+@keyframes feedbackAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes feedbackDisappear {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+}
+
+.feedback-container.show {
+    animation: feedbackAppear 0.3s forwards;
+}
+
+.feedback-container.hide {
+    animation: feedbackDisappear 0.3s forwards;
+}
+
+/* 移动端样式适配 */
+@media (max-width: 640px) {
+    .feedback-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .feedback-container {
+        bottom: 80px;
+        right: 10px;
+        width: calc(100% - 20px);
+        max-width: 350px;
+    }
+}
