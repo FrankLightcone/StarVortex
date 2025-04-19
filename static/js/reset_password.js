@@ -26,7 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
         '/static/img/中大风光/7.jpg',
         '/static/img/中大风光/8.jpg',
         '/static/img/中大风光/9.jpg',
-        '/static/img/中大风光/10.jpg'
+        '/static/img/中大风光/10.jpg',
+        '/static/img/中大风光/11.jpg',
+        '/static/img/中大风光/12.jpg'
     ];
     
     // 随机选择一张图片

@@ -13,6 +13,12 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="/static/css/upload.css" rel="stylesheet">
     <link href="/static/css/feedback.css" rel="stylesheet">
+    
+    {% if current_user.is_authenticated %}
+    <script src="{{ url_for('static', filename='js/marked.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notification.css') }}">
+    <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
+    {% endif %}
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body class="bg-gray-50 min-h-screen font-sans">

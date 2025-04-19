@@ -141,3 +141,53 @@ button:disabled {
         width: 100%;
     }
 }
+/* Background animation options */
+@keyframes slowZoom {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes gentlePan {
+    0% {
+      background-position: 0% 0%;
+    }
+    50% {
+      background-position: 2% 1%;
+    }
+    100% {
+      background-position: 0% 0%;
+    }
+  }
+  
+  /* Apply the animation to background containers */
+  .bg-container {
+      /* Keep your existing styles */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: filter 0.5s ease-in-out, opacity 1s ease;
+      opacity: 0;
+      z-index: 0;
+      
+      /* Add animation */
+      animation: slowZoom 15s infinite ease-in-out;
+      /* Alternative: use gentlePan instead of slowZoom if you prefer */
+      /* animation: gentlePan 40s infinite ease-in-out; */
+  }
+  
+  /* Ensure the animation doesn't interfere with the initial loading */
+  .bg-container.loaded {
+      opacity: 1;
+  }

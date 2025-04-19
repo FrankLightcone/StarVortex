@@ -26,6 +26,8 @@ from util.logging_config import setup_logging  # 导入我们的增强日志配�
 from util.update_api import update_api_bp # 导入更新API模块
 from util.schedule_tasks import setup_scheduler, get_current_schedule
 from util.feedback import feedback_bp
+from util.notification import notification_bp, init_app as init_notification_app
+
 
 def create_app():
     app = Flask(__name__)
@@ -66,6 +68,10 @@ def create_app():
     app.register_blueprint(api_bp)
     app.register_blueprint(update_api_bp, url_prefix='/api/update')
     app.register_blueprint(feedback_bp)
+    app.register_blueprint(notification_bp)
+
+    # 初始化通知系统
+    init_notification_app(app)
     
     # 添加请求日志中间件
     @app.before_request

@@ -297,7 +297,7 @@ def get_today_upload_size(student_id, date):
 
 def update_daily_upload_record(student_id, file_size):
     """更新学生当天的上传记录"""
-    upload_record_file = 'daily_uploads.json'
+    upload_record_file = 'data/daily_uploads.json'
     date_str = date.today().strftime('%Y-%m-%d')
     
     try:

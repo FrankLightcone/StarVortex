@@ -32,7 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
         '/static/img/中大风光/7.jpg',
         '/static/img/中大风光/8.jpg',
         '/static/img/中大风光/9.jpg',
-        '/static/img/中大风光/10.jpg'
+        '/static/img/中大风光/10.jpg',
+        '/static/img/中大风光/11.jpg',
+        '/static/img/中大风光/12.jpg'
     ];
 
 
@@ -44,10 +46,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (bgContainer) {
         bgContainer.style.backgroundImage = `url(${randomBgImage})`;
         
-        // 图片加载完成后添加淡入动画
+        // Image loading and fade-in
         const img = new Image();
         img.onload = function() {
             bgContainer.style.opacity = '1';
+            bgContainer.classList.add('loaded'); // Add loaded class to start animation
         };
         img.src = randomBgImage;
     }
