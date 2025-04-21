@@ -11,6 +11,7 @@
  * - 用户登录表单提交处理
  * - 登录验证和错误提示
  * - 登录成功后的页面跳转
+ * - 记住密码功能
  * 
  * 事件监听器：
  * - DOMContentLoaded: 页面加载完成后初始化登录表单
@@ -37,8 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
         '/static/img/中大风光/12.jpg'
     ];
 
-
-    
     // 随机选择一张图片
     const randomBgImage = campusImages[Math.floor(Math.random() * campusImages.length)];
     const bgContainer = document.getElementById('bgContainer');
@@ -60,6 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginPanel = document.getElementById('loginPanel');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
+    const rememberMeCheckbox = document.getElementById('rememberMe');
+    
+    // 尝试从本地存储中获取保存的用户名和密码
+    tryAutoFillCredentials();
     
     // 移除初始的自动聚焦 - 使用setTimeout确保在浏览器自动聚焦之后执行
     setTimeout(() => {
@@ -109,6 +112,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const form = e.target;
             const formData = new FormData(form);
+            
+            // 检查是否需要记住密码
+            const rememberMe = rememberMeCheckbox && rememberMeCheckbox.checked;
 
             fetch('/login', {
                 method: 'POST',
@@ -116,6 +122,16 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => {
                 if (response.redirected) {
+                    // 如果用户选择记住密码，则保存凭据
+                    if (rememberMe) {
+                        const username = usernameInput.value;
+                        const password = passwordInput.value;
+                        saveCredentials(username, password);
+                    } else {
+                        // 如果不记住密码，清除之前保存的凭据
+                        clearCredentials();
+                    }
+                    
                     // 登录成功，显示成功通知
                     showToast('登录成功，正在跳转...', 'success');
                     
@@ -159,6 +175,57 @@ document.addEventListener('DOMContentLoaded', function() {
         img.src = url;
     });
 });
+
+/**
+ * 保存凭据到本地存储
+ * @param {string} username - 用户名
+ * @param {string} password - 密码
+ */
+function saveCredentials(username, password) {
+    // 使用简单加密方式保存密码（非安全加密，仅作基本保护）
+    const encodedPassword = btoa(password);
+    
+    localStorage.setItem('rememberedUser', username);
+    localStorage.setItem('rememberedPass', encodedPassword);
+    localStorage.setItem('rememberMe', 'true');
+}
+
+/**
+ * 清除保存的凭据
+ */
+function clearCredentials() {
+    localStorage.removeItem('rememberedUser');
+    localStorage.removeItem('rememberedPass');
+    localStorage.removeItem('rememberMe');
+}
+
+/**
+ * 尝试自动填充保存的凭据
+ */
+function tryAutoFillCredentials() {
+    const rememberMe = localStorage.getItem('rememberMe') === 'true';
+    
+    if (rememberMe) {
+        const username = localStorage.getItem('rememberedUser');
+        const encodedPassword = localStorage.getItem('rememberedPass');
+        
+        if (username && encodedPassword) {
+            // 解码密码
+            const password = atob(encodedPassword);
+            
+            // 填充表单
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const rememberMeCheckbox = document.getElementById('rememberMe');
+            
+            if (usernameInput && passwordInput && rememberMeCheckbox) {
+                usernameInput.value = username;
+                passwordInput.value = password;
+                rememberMeCheckbox.checked = true;
+            }
+        }
+    }
+}
 
 /**
  * 显示Toast通知

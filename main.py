@@ -136,6 +136,14 @@ def create_app():
             import traceback
             app.logger.error(traceback.format_exc())
     
+    # Remove or modify the teardown function
+    # Instead of completely removing, let's modify it to only clean resources
+    # but not shut down the scheduler
+    @app.teardown_appcontext
+    def clean_resources(exception=None):
+        # Don't shut down scheduler here
+        pass
+    
     # 全局错误处理
     @app.errorhandler(500)
     def internal_error(error):

@@ -87,13 +87,7 @@ def setup_scheduler(app, reminder_hour=10, reminder_minute=0):
             scheduler.start()
             logging.info("定时任务调度器已启动")
         
-        # 注册关闭函数，确保应用停止时调度器也停止
-        @app.teardown_appcontext
-        def shutdown_scheduler(exception=None):
-            global scheduler
-            if scheduler and scheduler.running:
-                scheduler.shutdown()
-                logging.info("定时任务调度器已关闭")
+        # 不要在这里注册teardown函数
     
     except Exception as e:
         logging.error(f"设置定时任务失败: {e}")

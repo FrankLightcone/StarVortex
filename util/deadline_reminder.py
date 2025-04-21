@@ -350,12 +350,12 @@ def check_upcoming_deadlines():
                     
                     # 检查是否已提交
                     if has_submitted(student_id, username, class_name, course, assignment_name):
-                        logging.debug(f"学生 {username} (学号: {student_id}) 已提交作业")
+                        logging.info(f"学生 {username} (学号: {student_id}) 已提交作业")
                         continue
                     
                     # 检查是否已发送提醒
                     if has_already_reminded(course, assignment_name, student_id, assignment_id):
-                        logging.debug(f"已向学生 {username} (学号: {student_id}) 发送过提醒")
+                        logging.info(f"已向学生 {username} (学号: {student_id}) 发送过提醒")
                         continue
                     
                     logging.info(f"准备向学生 {username} (学号: {student_id}) 发送截止提醒")

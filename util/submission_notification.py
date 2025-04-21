@@ -19,6 +19,7 @@ import time
 from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.utils import formataddr
 
 from util.config import SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD
 from util.models import load_users
@@ -392,7 +393,7 @@ def generate_submission_email(username, student_id, course, assignment, due_date
                 </tbody>
             </table>
             
-            <p>您可以随时登录系统查看提交状态。如有任何问题，请联系您的任课教师。</p>
+            <p>您可以随时登录系统查看提交状态。如有任何问题，请联系学习委员。</p>
             <p>祝学习愉快！</p>
         </div>
         <div class="footer">
@@ -424,7 +425,7 @@ def send_submission_notification(email, username, student_id, course, assignment
     try:
         # 创建邮件
         msg = MIMEMultipart('alternative')
-        msg['From'] = SMTP_USERNAME
+        msg['From'] = formataddr(("Star Vortex", SMTP_USERNAME))
         msg['To'] = email
         msg['Subject'] = f'作业提交确认 - {course} - {assignment}'
         

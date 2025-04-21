@@ -1,0 +1,8 @@
+{
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "sender_email": "lightconefrank@gmail.com",
+    "sender_name": "Ruijie Fan",
+    "password": "bbub ogts cokw rieg",
+    "use_tls": true
+}
