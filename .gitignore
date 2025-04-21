@@ -20,3 +20,7 @@ flask.log
 /backups
 /data
 .gitignore
+/output.log
+/email_config.json
+/daily_uploads.json
+/notifications

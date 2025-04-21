@@ -32,57 +32,57 @@ ASSIGNMENT_NOTIFICATION_HTML = """
     <meta charset="UTF-8">
     <title>新作业发布通知</title>
     <style>
-        body {
+        body {{
             font-family: 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
             color: #333;
             background-color: #f7f7f7;
             margin: 0;
             padding: 0;
-        }
-        .container {
+        }}
+        .container {{
             max-width: 600px;
             margin: 20px auto;
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-        }
-        .header {
+        }}
+        .header {{
             background: linear-gradient(135deg, #4f46e5, #3b82f6);
             color: white;
             padding: 30px 20px;
             text-align: center;
-        }
-        .header h2 {
+        }}
+        .header h2 {{
             margin: 0;
             font-size: 24px;
             font-weight: 700;
-        }
-        .header p {
+        }}
+        .header p {{
             margin: 5px 0 0;
             font-size: 16px;
             opacity: 0.9;
-        }
-        .content {
+        }}
+        .content {{
             padding: 30px 20px;
-        }
-        .assignment-details {
+        }}
+        .assignment-details {{
             background-color: #f0f9ff;
             border-left: 4px solid #3b82f6;
             padding: 15px;
             margin: 20px 0;
             border-radius: 0 4px 4px 0;
-        }
-        .detail-item {
+        }}
+        .detail-item {{
             margin-bottom: 10px;
-        }
-        .detail-label {
+        }}
+        .detail-label {{
             font-weight: bold;
             color: #4f46e5;
             margin-right: 5px;
-        }
-        .due-date {
+        }}
+        .due-date {{
             background-color: #fef3c7;
             border-radius: 4px;
             padding: 8px 12px;
@@ -90,39 +90,39 @@ ASSIGNMENT_NOTIFICATION_HTML = """
             font-weight: bold;
             color: #b45309;
             display: inline-block;
-        }
-        .button-container {
+        }}
+        .button-container {{
             margin: 25px 0;
             text-align: center;
-        }
-        .button {
+        }}
+        .button {{
             display: inline-block;
             background-color: #4f46e5;
-            color: white;
+            color: white !important; /* 强制使用白色，覆盖链接默认颜色 */
             padding: 12px 25px;
             text-decoration: none;
             border-radius: 4px;
             font-weight: 600;
             transition: background-color 0.2s;
-        }
-        .button:hover {
+        }}
+        .button:hover {{
             background-color: #4338ca;
-        }
-        .description {
+        }}
+        .description {{
             background-color: #f9fafb;
             padding: 15px;
             border-radius: 4px;
             margin: 20px 0;
             border: 1px solid #e5e7eb;
-        }
-        .footer {
+        }}
+        .footer {{
             background-color: #f9fafb;
             border-top: 1px solid #e5e7eb;
             padding: 20px;
             text-align: center;
             font-size: 12px;
             color: #6b7280;
-        }
+        }}
     </style>
 </head>
 <body>
@@ -159,10 +159,10 @@ ASSIGNMENT_NOTIFICATION_HTML = """
             </div>
             
             <div class="button-container">
-                <a href="http://172.16.244.156:10099/login" class="button">立即前往提交</a>
+                <a href="http://172.16.244.156:10099/login" class="button">立即前往查看</a>
             </div>
             
-            <p>请在截止日期前完成作业提交。如有任何问题，请联系您的任课教师。</p>
+            <p>请在截止日期前完成作业提交。如有任何问题，请联系管理员或学习委员。</p>
             
             <p>祝学习愉快！</p>
         </div>

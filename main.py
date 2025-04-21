@@ -39,7 +39,7 @@ def create_app():
     # 删除APP_ALREADY_STARTED标志，我们不再需要它
     app.config['ENABLE_SUBMISSION_NOTIFICATIONS'] = True
     app.config['ENABLE_DEADLINE_REMINDERS'] = True
-    app.config['REMINDER_HOUR'] = 12  # 默认为12点，可在配置文件中修改
+    app.config['REMINDER_HOUR'] = 18  # 默认为18点，可在配置文件中修改
     app.config['REMINDER_MINUTE'] = 0  # 0分
     
     # 设置增强的日志配置
