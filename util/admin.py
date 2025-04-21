@@ -40,6 +40,8 @@ from util.utils import (
 from util.config import UPLOAD_FOLDER, ADMIN_USERNAME, COURSE_CONFIG_FILE
 from util.models import load_users, save_users
 
+from util.assignment_notification import send_assignment_notifications
+
 admin_bp = Blueprint('admin', __name__)
 
 # 添加修改管理员密码的路由
@@ -261,12 +263,38 @@ def create_assignment():
             for course_info in class_info.get('courses', []):
                 if course_info['name'] == course and data['name'] not in course_info['assignments']:
                     course_info['assignments'].append(data['name'])
-    
+                    
     # 保存更新后的课程配置
     with open(COURSE_CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
-    
-    return jsonify({'status': 'success', 'assignment': new_assignment})
+
+    # Send notifications to students in the selected classes
+    try:
+        notification_sent = send_assignment_notifications(new_assignment)
+        if notification_sent:
+            # Add notification status to the response
+            return jsonify({
+                'status': 'success', 
+                'assignment': new_assignment,
+                'notification': 'success'
+            })
+        else:
+            # Notification failed but assignment created
+            return jsonify({
+                'status': 'success', 
+                'assignment': new_assignment,
+                'notification': 'failed'
+            })
+    except Exception as e:
+        logging.error(f"发送作业通知失败: {e}")
+        # Assignment created but notification had an error
+        return jsonify({
+            'status': 'success', 
+            'assignment': new_assignment,
+            'notification': 'error',
+            'message': str(e)
+        })
+
 
 @admin_bp.route('/assignments/<assignment_id>', methods=['PUT'])
 @admin_required

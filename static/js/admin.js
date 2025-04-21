@@ -147,28 +147,45 @@ window.addEventListener('DOMContentLoaded', function() {
     }
     
     // region Toast notification
+    /**
+     * Shows a toast notification with the specified message and type
+     * @param {string} message - The message to display
+     * @param {string} type - The type of notification: 'success', 'error', 'warning', or 'info'
+     */
     function showToast(message, type = 'error') {
+        const toast = document.getElementById('toast');
         if (!toast) return;
         
-        // Set the message
-        toast.textContent = message;
+        // Remove any existing classes
+        toast.classList.remove('bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-blue-500');
         
-        // Set the color based on message type
-        if (type === 'success') {
-            toast.classList.remove('bg-red-500');
-            toast.classList.add('bg-green-500');
-        } else if (type === 'error') {
-            toast.classList.remove('bg-green-500');
-            toast.classList.add('bg-red-500');
+        // Add appropriate color based on type
+        switch(type) {
+            case 'success':
+                toast.classList.add('bg-green-500');
+                break;
+            case 'warning':
+                toast.classList.add('bg-yellow-500');
+                break;
+            case 'info':
+                toast.classList.add('bg-blue-500');
+                break;
+            case 'error':
+            default:
+                toast.classList.add('bg-red-500');
+                break;
         }
         
-        // Show the toast
+        // Update message
+        toast.textContent = message;
+        
+        // Show toast
         toast.classList.add('show');
         
-        // Hide the toast after 3 seconds
+        // Hide after 5 seconds
         setTimeout(() => {
             toast.classList.remove('show');
-        }, 3000);
+        }, 5000);
     }
     
     // region 标签页切换
@@ -840,6 +857,17 @@ window.addEventListener('DOMContentLoaded', function() {
                     showToast(id ? '作业已更新' : '作业已添加', 'success');
                 } else {
                     showToast(data.message || '保存失败', 'error');
+                }
+
+                // Check notification status and show appropriate message
+                if (data.notification === 'success') {
+                    showToast('作业创建成功，通知邮件已发送给相关班级的学生', 'success');
+                } else if (data.notification === 'failed') {
+                    showToast('作业已创建，但发送通知邮件失败，请检查日志', 'warning');
+                } else if (data.notification === 'error') {
+                    showToast('作业已创建，但发送通知邮件出错: ' + (data.message || '未知错误'), 'warning');
+                } else {
+                    showToast('作业创建成功', 'success');
                 }
             })
             .catch(error => {
