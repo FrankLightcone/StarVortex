@@ -28,6 +28,7 @@ import random
 import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.utils import formataddr
 
 from util.config import (
     SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD,
@@ -53,7 +54,7 @@ def send_verification_email(email, code):
     try:
         # 创建邮件
         msg = MIMEMultipart('alternative')
-        msg['From'] = SMTP_USERNAME
+        msg['From'] = formataddr(("Star Vortex", SMTP_USERNAME))
         msg['To'] = email
         msg['Subject'] = '作业提交系统 - 注册验证码'
 
@@ -104,7 +105,7 @@ def send_reset_password_email(email, code):
     try:
         # 创建邮件
         msg = MIMEMultipart('alternative')
-        msg['From'] = SMTP_USERNAME
+        msg['From'] = formataddr(("Star Vortex", SMTP_USERNAME))
         msg['To'] = email
         msg['Subject'] = '作业提交系统 - 密码重置验证码'
 

@@ -24,6 +24,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
+from email.utils import formataddr
 
 from util.config import SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD
 from util.models import load_users
@@ -112,7 +113,7 @@ def send_feedback_email(user_info, content, image_file=None):
     try:
         # 创建邮件
         msg = MIMEMultipart('alternative')
-        msg['From'] = SMTP_USERNAME
+        msg['From'] = formataddr(("Star Vortex", SMTP_USERNAME))
         msg['To'] = FEEDBACK_EMAIL
         msg['Subject'] = f'用户反馈: {user_info["name"]} - {user_info["student_id"]}'
         

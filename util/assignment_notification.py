@@ -19,6 +19,7 @@ import threading
 from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.utils import formataddr
 
 from util.config import SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD
 from util.models import load_users
@@ -224,7 +225,7 @@ def send_assignment_notification_email(email, student_name, course_name, assignm
     try:
         # 创建邮件
         msg = MIMEMultipart('alternative')
-        msg['From'] = SMTP_USERNAME
+        msg['From'] = formataddr(("Star Vortex", SMTP_USERNAME))
         msg['To'] = email
         msg['Subject'] = f'【新作业通知】{course_name} - {assignment_name}'
         

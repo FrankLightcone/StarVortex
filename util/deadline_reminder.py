@@ -22,6 +22,7 @@ import threading
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.utils import formataddr
 
 from util.config import SMTP_SERVER, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, UPLOAD_FOLDER
 from util.models import load_users
@@ -220,7 +221,7 @@ def send_reminder_email(email, username, student_id, course, assignment, due_dat
     try:
         # 创建邮件
         msg = MIMEMultipart('alternative')
-        msg['From'] = SMTP_USERNAME
+        msg['From'] = formataddr(("Star Vortex", SMTP_USERNAME))
         msg['To'] = email
         msg['Subject'] = f'【重要提醒】作业即将截止 - {course} - {assignment}'
         
