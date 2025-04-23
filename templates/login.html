@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>作业提交系统 - 登录</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
     <link href="/static/css/login.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -47,6 +48,20 @@
           color: #333;
           font-family: 'Segoe UI', sans-serif;
         }
+
+        /* 添加额外的自定义样式 */
+        .glass-panel {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        /* 调整浮动标签在玻璃面板中的背景 */
+        .glass-panel .floating-label-bg {
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
       </style>
 </head>
 <body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
@@ -54,6 +69,7 @@
         <div class="spinner"></div>
         <div class="loading-text">加载中，请稍候...</div>
     </div>
+    
     <!-- 随机背景图 -->
     <div id="bgContainer" class="bg-container"></div>
     <div class="bg-overlay"></div>
@@ -71,9 +87,9 @@
     
     <div class="w-full max-w-md z-10">
         <!-- Logo -->
-        <div class="flex justify-center mb-8">
-            <div class="logo-container">
-                <img src="/static/img/logo.png" alt="Logo" class="h-14 w-auto">
+        <div class="flex justify-center mb-6">
+            <div class="logo-container bg-white bg-opacity-20 p-4 rounded-full">
+                <img src="/static/img/logo.png" alt="Logo" class="h-16 w-auto">
             </div>
         </div>
         
@@ -83,45 +99,49 @@
         </h1>
         
         <!-- 磨砂登录面板 -->
-        <div id="loginPanel" class="glass-panel p-8">
+        <div id="loginPanel" class="glass-panel p-8 rounded-xl">
             <form id="loginForm" class="space-y-6">
-                <div>
-                    <label for="username" class="block text-sm font-medium text-white">
+                <!-- 用户名浮动标签输入框 -->
+                <div class="relative z-0 mb-5 group">
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-white appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
+                        placeholder=" " 
+                        required 
+                    />
+                    <label 
+                        for="username" 
+                        class="peer-focus:font-medium absolute text-sm text-white duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                    >
                         姓名
                     </label>
-                    <div class="mt-1">
-                        <input 
-                            id="username" 
-                            name="username" 
-                            type="text" 
-                            required 
-                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
-                            placeholder="请输入姓名"
-                        >
-                    </div>
                 </div>
 
-                <div>
-                    <div class="flex items-center justify-between">
-                        <label for="password" class="block text-sm font-medium text-white">
-                            密码
-                        </label>
-                        <div class="text-sm">
-                            <a href="/reset_password" class="font-medium text-blue-100 hover:text-white">
-                                忘记密码?
-                            </a>
-                        </div>
-                    </div>
-                    <div class="mt-1">
-                        <input 
-                            id="password" 
-                            name="password" 
-                            type="password" 
-                            required 
-                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
-                            placeholder="请输入密码"
-                        >
-                    </div>
+                <!-- 密码浮动标签输入框 -->
+                <div class="relative z-0 mb-5 group">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-white appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
+                        placeholder=" " 
+                        required 
+                    />
+                    <label 
+                        for="password" 
+                        class="peer-focus:font-medium absolute text-sm text-white duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                    >
+                        密码
+                    </label>
+                </div>
+                
+                <!-- 忘记密码链接 -->
+                <div class="flex justify-end">
+                    <a href="/reset_password" class="text-sm font-medium text-blue-200 hover:text-white">
+                        忘记密码?
+                    </a>
                 </div>
 
                 <!-- 记住密码选项 -->
@@ -130,9 +150,9 @@
                         id="rememberMe" 
                         name="rememberMe" 
                         type="checkbox" 
-                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                     >
-                    <label for="rememberMe" class="ml-2 block text-sm text-white">
+                    <label for="rememberMe" class="ml-2 text-sm text-white">
                         记住我的账号
                     </label>
                 </div>
@@ -140,7 +160,7 @@
                 <div>
                     <button 
                         type="submit" 
-                        class="btn-login w-full flex justify-center py-3 px-4 rounded-lg shadow-sm text-sm font-medium focus:outline-none"
+                        class="btn-login w-full flex justify-center items-center py-2.5 px-5 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300"
                     >
                         登录
                     </button>
@@ -154,22 +174,21 @@
                     <div class="flex-grow border-t border-gray-300 opacity-50"></div>
                 </div>
                 
-                <div>
+                <div class="space-y-3">
                     <a 
-                        href="/register" 
-                        class="w-full flex justify-center py-3 px-4 border border-white border-opacity-30 rounded-lg shadow-sm text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10"
+                    href="/register" 
+                    class="w-full flex justify-center py-2.5 px-5 border border-white border-opacity-30 rounded-lg text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10 hover:text-black transition-colors"
                     >
-                        立即注册
+                    立即注册
                     </a>
-                </div>
-                
-                <div class="mt-4">
+
                     <a 
-                        href="/admin" 
-                        class="w-full flex justify-center py-3 px-4 border border-white border-opacity-30 rounded-lg shadow-sm text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10"
+                    href="/admin" 
+                    class="w-full flex justify-center py-2.5 px-5 border border-white border-opacity-30 rounded-lg text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10 hover:text-black transition-colors"
                     >
-                        管理员登录
+                    管理员登录
                     </a>
+
                 </div>
             </div>
         </div>
@@ -186,6 +205,7 @@
           setTimeout(() => loading.remove(), 800); // 过渡后移除节点，防止影响页面交互
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
     <script src="/static/js/login.js"></script>
 </body>
 </html>
