@@ -137,25 +137,28 @@
                     </label>
                 </div>
                 
-                <!-- 忘记密码链接 -->
-                <div class="flex justify-end">
-                    <a href="/reset_password" class="text-sm font-medium text-blue-200 hover:text-white">
-                        忘记密码?
-                    </a>
+                <div class="flex justify-between items-center">
+                    <!-- 记住密码选项 -->
+                    <div class="flex items-center">
+                        <input 
+                            id="rememberMe" 
+                            name="rememberMe" 
+                            type="checkbox" 
+                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                        >
+                        <label for="rememberMe" class="ml-2 text-sm text-white">
+                            记住我的账号
+                        </label>
+                    </div>
+                
+                    <!-- 忘记密码链接 -->
+                    <div>
+                        <a href="/reset_password" class="text-sm font-medium text-blue-200 hover:text-white">
+                            忘记密码?
+                        </a>
+                    </div>
                 </div>
-
-                <!-- 记住密码选项 -->
-                <div class="flex items-center">
-                    <input 
-                        id="rememberMe" 
-                        name="rememberMe" 
-                        type="checkbox" 
-                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                    >
-                    <label for="rememberMe" class="ml-2 text-sm text-white">
-                        记住我的账号
-                    </label>
-                </div>
+                
 
                 <div>
                     <button 

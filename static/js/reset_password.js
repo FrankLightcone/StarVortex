@@ -2,6 +2,7 @@
  * reset_password.js - 密码重置模块
  * 
  * 处理用户密码重置流程，包括邮箱验证、验证码输入和密码重置。
+ * 优化图片加载，只加载随机选择的一张背景图片。
  * 修复了验证码验证成功后切换到密码重置步骤时的抖动问题。
  * 
  * @module reset_password
@@ -15,7 +16,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 随机背景图
+    // 随机背景图配置
     const campusImages = [
         '/static/img/中大风光/1.jpg',
         '/static/img/中大风光/2.jpg',
@@ -31,19 +32,22 @@ document.addEventListener('DOMContentLoaded', function() {
         '/static/img/中大风光/12.jpg'
     ];
     
-    // 随机选择一张图片
-    const randomBgImage = campusImages[Math.floor(Math.random() * campusImages.length)];
+    // 只随机选择一张图片
+    const randomIndex = Math.floor(Math.random() * campusImages.length);
+    const selectedBackgroundImage = campusImages[randomIndex];
     const bgContainer = document.getElementById('bgContainer');
     
     if (bgContainer) {
-        bgContainer.style.backgroundImage = `url(${randomBgImage})`;
+        // 为提高性能，先设置容器为不可见
+        bgContainer.style.opacity = '0';
+        bgContainer.style.backgroundImage = `url(${selectedBackgroundImage})`;
         
-        // 图片加载完成后添加淡入动画
+        // 图片加载完成后淡入显示
         const img = new Image();
         img.onload = function() {
             bgContainer.style.opacity = '1';
         };
-        img.src = randomBgImage;
+        img.src = selectedBackgroundImage;
     }
     
     // 获取DOM元素
@@ -561,10 +565,4 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // 模拟预加载背景图片
-    campusImages.forEach(url => {
-        const img = new Image();
-        img.src = url;
-    });
 });

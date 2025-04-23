@@ -3,26 +3,20 @@
  * 
  * 处理用户登录表单和登录逻辑，管理登录请求和响应处理。
  * 使用fetch API发送异步请求，处理登录成功和失败的情况。
+ * 优化图片加载，只加载随机选择的一张背景图片。
  * 
  * @module login
- * @requires toast.js
  * 
  * 主要功能：
  * - 用户登录表单提交处理
  * - 登录验证和错误提示
  * - 登录成功后的页面跳转
  * - 记住密码功能
- * 
- * 事件监听器：
- * - DOMContentLoaded: 页面加载完成后初始化登录表单
- * - submit: 监听登录表单提交事件，拦截默认行为，实现AJAX登录
- * 
- * Fetch请求：
- * - POST /login: 发送用户名和密码进行登录验证
+ * - 优化的随机背景图片加载
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 随机背景图
+    // 随机背景图路径配置
     const campusImages = [
         '/static/img/中大风光/1.jpg',
         '/static/img/中大风光/2.jpg',
@@ -38,20 +32,23 @@ document.addEventListener('DOMContentLoaded', function() {
         '/static/img/中大风光/12.jpg'
     ];
 
-    // 随机选择一张图片
-    const randomBgImage = campusImages[Math.floor(Math.random() * campusImages.length)];
+    // 只随机选择一张图片
+    const randomIndex = Math.floor(Math.random() * campusImages.length);
+    const selectedBackgroundImage = campusImages[randomIndex];
     const bgContainer = document.getElementById('bgContainer');
     
     if (bgContainer) {
-        bgContainer.style.backgroundImage = `url(${randomBgImage})`;
+        // 为提高性能，先显示容器再设置背景图
+        bgContainer.style.opacity = '0';
+        bgContainer.style.backgroundImage = `url(${selectedBackgroundImage})`;
         
-        // Image loading and fade-in
+        // 图片加载完成后淡入显示
         const img = new Image();
         img.onload = function() {
             bgContainer.style.opacity = '1';
-            bgContainer.classList.add('loaded'); // Add loaded class to start animation
+            bgContainer.classList.add('loaded'); // 添加loaded类以触发动画
         };
-        img.src = randomBgImage;
+        img.src = selectedBackgroundImage;
     }
     
     // 获取DOM元素
@@ -168,12 +165,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // 模拟预加载背景图片
-    campusImages.forEach(url => {
-        const img = new Image();
-        img.src = url;
-    });
 });
 
 /**

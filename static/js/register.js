@@ -2,6 +2,7 @@
  * register.js - 用户注册模块
  * 
  * 处理用户注册流程，包括表单验证、验证码发送与验证，以及注册请求的提交。
+ * 优化图片加载，只加载随机选择的一张背景图片。
  * 
  * @module register
  * @requires toast.js
@@ -15,18 +16,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 获取页面元素
-    const nameInput = document.getElementById('name');
-    const emailInput = document.getElementById('email');
-    const studentIdInput = document.getElementById('student_id');
-    const passwordInput = document.getElementById('password');
-    const sendVerifyCodeBtn = document.getElementById('sendVerifyCodeBtn');
-    const verifyCodeInput = document.getElementById('verify_code');
-    const registerBtn = document.getElementById('registerBtn');
-    const registerForm = document.getElementById('registerForm');
-    const registerPanel = document.getElementById('registerPanel');
-    
-    // 随机背景图
+    // 随机背景图配置
     const campusImages = [
         '/static/img/中大风光/1.jpg',
         '/static/img/中大风光/2.jpg',
@@ -42,20 +32,34 @@ document.addEventListener('DOMContentLoaded', function() {
         '/static/img/中大风光/12.jpg'
     ];
     
-    // 随机选择一张图片
-    const randomBgImage = campusImages[Math.floor(Math.random() * campusImages.length)];
+    // 只随机选择一张图片
+    const randomIndex = Math.floor(Math.random() * campusImages.length);
+    const selectedBackgroundImage = campusImages[randomIndex];
     const bgContainer = document.getElementById('bgContainer');
     
     if (bgContainer) {
-        bgContainer.style.backgroundImage = `url(${randomBgImage})`;
+        // 为提高性能，先显示容器再设置背景图
+        bgContainer.style.opacity = '0';
+        bgContainer.style.backgroundImage = `url(${selectedBackgroundImage})`;
         
-        // 图片加载完成后添加淡入动画
+        // 图片加载完成后淡入显示
         const img = new Image();
         img.onload = function() {
             bgContainer.style.opacity = '1';
         };
-        img.src = randomBgImage;
+        img.src = selectedBackgroundImage;
     }
+    
+    // 获取页面元素
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const studentIdInput = document.getElementById('student_id');
+    const passwordInput = document.getElementById('password');
+    const sendVerifyCodeBtn = document.getElementById('sendVerifyCodeBtn');
+    const verifyCodeInput = document.getElementById('verify_code');
+    const registerBtn = document.getElementById('registerBtn');
+    const registerForm = document.getElementById('registerForm');
+    const registerPanel = document.getElementById('registerPanel');
     
     // 添加输入框焦点事件 - 背景模糊效果
     const inputs = document.querySelectorAll('.form-input');
@@ -378,12 +382,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
-    // 模拟预加载背景图片
-    campusImages.forEach(url => {
-        const img = new Image();
-        img.src = url;
-    });
     
     /**
      * 显示Toast通知

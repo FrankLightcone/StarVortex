@@ -1,262 +1,87 @@
 nohup: ignoring input
-2025-04-23 11:48:15,384 - INFO - logging_config - setup_logging - 日志系统初始化完成
-2025-04-23 11:48:15,384 - INFO - logging_config - setup_logging - 日志系统初始化完成
+2025-04-23 12:01:47,817 - INFO - logging_config - setup_logging - 日志系统初始化完成
+2025-04-23 12:01:47,817 - INFO - logging_config - setup_logging - 日志系统初始化完成
 /data2/vortex/StarVortex/util/notification.py:731: UserWarning: The name 'notification' is already registered for this blueprint. Use 'name=' to provide a unique name. This will become an error in Flask 2.1.
   app.register_blueprint(notification_bp, url_prefix='')
-2025-04-23 11:48:15,425 - INFO - notification - init_app - 通知系统已初始化
-2025-04-23 11:48:15,427 - INFO - schedule_tasks - init_scheduler - 已初始化新的调度器
-2025-04-23 11:48:15,427 - INFO - base - add_job - Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2025-04-23 11:48:15,427 - INFO - schedule_tasks - setup_scheduler - 已设置截止日期提醒任务，将在每天 18:00 执行
-2025-04-23 11:48:15,427 - INFO - base - _real_add_job - Added job "截止日期提醒" to job store "default"
-2025-04-23 11:48:15,427 - INFO - base - start - Scheduler started
-2025-04-23 11:48:15,428 - INFO - schedule_tasks - setup_scheduler - 定时任务调度器已启动
-2025-04-23 11:48:15,428 - INFO - main - create_app - 截止日期提醒功能已启用，设置为每天 18:00
-2025-04-23 11:48:15,428 - INFO - main - create_app - 截止日期提醒功能已启用，设置为每天 18:00
+2025-04-23 12:01:47,858 - INFO - notification - init_app - 通知系统已初始化
+2025-04-23 12:01:47,860 - INFO - schedule_tasks - init_scheduler - 已初始化新的调度器
+2025-04-23 12:01:47,860 - INFO - base - add_job - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-04-23 12:01:47,860 - INFO - schedule_tasks - setup_scheduler - 已设置截止日期提醒任务，将在每天 18:00 执行
+2025-04-23 12:01:47,860 - INFO - base - _real_add_job - Added job "截止日期提醒" to job store "default"
+2025-04-23 12:01:47,861 - INFO - base - start - Scheduler started
+2025-04-23 12:01:47,861 - INFO - schedule_tasks - setup_scheduler - 定时任务调度器已启动
+2025-04-23 12:01:47,861 - INFO - main - create_app - 截止日期提醒功能已启用，设置为每天 18:00
+2025-04-23 12:01:47,861 - INFO - main - create_app - 截止日期提醒功能已启用，设置为每天 18:00
  * Serving Flask app 'main' (lazy loading)
  * Environment: production
    WARNING: This is a development server. Do not use it in a production deployment.
    Use a production WSGI server instead.
  * Debug mode: off
-2025-04-23 11:48:15,430 - WARNING - _internal - _log -  * Running on all addresses.
+2025-04-23 12:01:47,863 - WARNING - _internal - _log -  * Running on all addresses.
    WARNING: This is a development server. Do not use it in a production deployment.
-2025-04-23 11:48:15,430 - WARNING - _internal - _log -  * Running on all addresses.
+2025-04-23 12:01:47,863 - WARNING - _internal - _log -  * Running on all addresses.
    WARNING: This is a development server. Do not use it in a production deployment.
-2025-04-23 11:48:15,430 - INFO - _internal - _log -  * Running on http://172.16.244.156:10099/ (Press CTRL+C to quit)
-2025-04-23 11:48:15,430 - INFO - _internal - _log -  * Running on http://172.16.244.156:10099/ (Press CTRL+C to quit)
-2025-04-23 11:50:54,916 - INFO - main - initialize_app - 应用程序初始化完成
-2025-04-23 11:50:54,916 - INFO - main - initialize_app - 应用程序初始化完成
-2025-04-23 11:50:54,918 - WARNING - main - not_found_error - Page not found: /favicon.ico
-2025-04-23 11:50:54,918 - WARNING - main - not_found_error - Page not found: /favicon.ico
-2025-04-23 11:50:54,920 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:54] "[33mGET /favicon.ico?t=1745380253670 HTTP/1.1[0m" 404 -
-2025-04-23 11:50:54,920 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:54] "[33mGET /favicon.ico?t=1745380253670 HTTP/1.1[0m" 404 -
-2025-04-23 11:50:54,932 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:54] "[32mHEAD / HTTP/1.1[0m" 302 -
-2025-04-23 11:50:54,932 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:54] "[32mHEAD / HTTP/1.1[0m" 302 -
-2025-04-23 11:50:54,950 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:54] "HEAD /login?next=%2F HTTP/1.1" 200 -
-2025-04-23 11:50:54,950 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:54] "HEAD /login?next=%2F HTTP/1.1" 200 -
-2025-04-23 11:50:54,966 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:54] "[32mGET / HTTP/1.1[0m" 302 -
-2025-04-23 11:50:54,966 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:54] "[32mGET / HTTP/1.1[0m" 302 -
-2025-04-23 11:50:54,977 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:54] "GET /login?next=%2F HTTP/1.1" 200 -
-2025-04-23 11:50:54,977 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:54] "GET /login?next=%2F HTTP/1.1" 200 -
-2025-04-23 11:50:55,018 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:55] "GET /static/img/logo.png HTTP/1.1" 200 -
-2025-04-23 11:50:55,018 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:55] "GET /static/css/login.css HTTP/1.1" 200 -
-2025-04-23 11:50:55,018 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:55] "GET /static/img/logo.png HTTP/1.1" 200 -
-2025-04-23 11:50:55,018 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:55] "GET /static/css/login.css HTTP/1.1" 200 -
-2025-04-23 11:50:55,081 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:55] "GET /static/js/login.js HTTP/1.1" 200 -
-2025-04-23 11:50:55,081 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:55] "GET /static/js/login.js HTTP/1.1" 200 -
-2025-04-23 11:50:58,775 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:58] "GET /api/update/check_update?platform=windows&version=1.4.2 HTTP/1.1" 200 -
-2025-04-23 11:50:58,775 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:58] "GET /api/update/check_update?platform=windows&version=1.4.2 HTTP/1.1" 200 -
-2025-04-23 11:50:58,918 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:58] "GET /api/update/check_update?platform=windows&version=1.4.2 HTTP/1.1" 200 -
-2025-04-23 11:50:58,918 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:58] "GET /api/update/check_update?platform=windows&version=1.4.2 HTTP/1.1" 200 -
-2025-04-23 11:50:59,782 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/2.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,782 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/2.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,787 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/1.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,790 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/8.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,787 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/1.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,796 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/4.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,790 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/8.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,797 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/3.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,796 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/4.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,800 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/5.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,797 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/3.jpg HTTP/1.1" 200 -
-2025-04-23 11:50:59,800 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:50:59] "GET /static/img/中大风光/5.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:01,988 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:01] "GET /static/img/中大风光/6.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:01,988 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:01] "GET /static/img/中大风光/6.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:02,162 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:02] "GET /static/img/中大风光/7.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:02,162 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:02] "GET /static/img/中大风光/7.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:02,884 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:02] "GET /static/img/中大风光/9.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:02,884 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:02] "GET /static/img/中大风光/9.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:03,021 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:03] "GET /static/img/中大风光/10.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:03,021 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:03] "GET /static/img/中大风光/10.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:03,334 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:03] "GET /static/img/中大风光/11.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:03,334 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:03] "GET /static/img/中大风光/11.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:03,888 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:03] "GET /static/img/中大风光/12.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:03,888 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:03] "GET /static/img/中大风光/12.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:21,920 - INFO - models - validate_user - Validating user: 范睿捷
-2025-04-23 11:51:22,114 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:22] "[32mPOST /login HTTP/1.1[0m" 302 -
-2025-04-23 11:51:22,114 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:22] "[32mPOST /login HTTP/1.1[0m" 302 -
-2025-04-23 11:51:22,152 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:22] "GET / HTTP/1.1" 200 -
-2025-04-23 11:51:22,152 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:22] "GET / HTTP/1.1" 200 -
-2025-04-23 11:51:23,178 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET / HTTP/1.1" 200 -
-2025-04-23 11:51:23,178 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET / HTTP/1.1" 200 -
-2025-04-23 11:51:23,204 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/css/upload.css HTTP/1.1" 200 -
-2025-04-23 11:51:23,204 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/css/upload.css HTTP/1.1" 200 -
-2025-04-23 11:51:23,207 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/notification.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,207 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/notification.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,212 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/css/notification.css HTTP/1.1" 200 -
-2025-04-23 11:51:23,212 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/css/notification.css HTTP/1.1" 200 -
-2025-04-23 11:51:23,219 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:51:23,221 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/marked.min.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,222 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/css/feedback.css HTTP/1.1" 200 -
-2025-04-23 11:51:23,219 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:51:23,221 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/marked.min.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,222 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/css/feedback.css HTTP/1.1" 200 -
-2025-04-23 11:51:23,227 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/toast.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,227 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/toast.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,241 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/utils.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,241 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/utils.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,246 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/upload.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,246 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/upload.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,255 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/feedback.js HTTP/1.1" 200 -
-2025-04-23 11:51:23,255 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:23] "GET /static/js/feedback.js HTTP/1.1" 200 -
-2025-04-23 11:51:24,599 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:24] "GET /get_notifications HTTP/1.1" 200 -
-2025-04-23 11:51:24,599 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:24] "GET /get_notifications HTTP/1.1" 200 -
-2025-04-23 11:51:33,590 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "[32mGET /logout HTTP/1.1[0m" 302 -
-2025-04-23 11:51:33,590 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "[32mGET /logout HTTP/1.1[0m" 302 -
-2025-04-23 11:51:33,611 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /login HTTP/1.1" 200 -
-2025-04-23 11:51:33,611 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /login HTTP/1.1" 200 -
-2025-04-23 11:51:33,628 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/css/login.css HTTP/1.1" 200 -
-2025-04-23 11:51:33,629 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:51:33,628 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/css/login.css HTTP/1.1" 200 -
-2025-04-23 11:51:33,629 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:51:33,638 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/js/login.js HTTP/1.1" 200 -
-2025-04-23 11:51:33,638 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/js/login.js HTTP/1.1" 200 -
-2025-04-23 11:51:33,922 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/2.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,925 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/6.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,922 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/2.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,931 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/5.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,931 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/3.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,925 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/6.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,933 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/4.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,935 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/1.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,931 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/5.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,931 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/3.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,933 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/4.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:33,935 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:33] "GET /static/img/中大风光/1.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:36,250 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:36] "GET /static/img/中大风光/7.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:36,250 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:36] "GET /static/img/中大风光/7.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:36,284 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:36] "GET /static/img/中大风光/8.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:36,284 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:36] "GET /static/img/中大风光/8.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:36,611 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:36] "GET /static/img/中大风光/9.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:36,611 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:36] "GET /static/img/中大风光/9.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:37,679 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:37] "GET /static/img/中大风光/10.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:37,679 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:37] "GET /static/img/中大风光/10.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:37,681 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:37] "GET /static/img/中大风光/11.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:37,681 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:37] "GET /static/img/中大风光/11.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:37,931 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:37] "GET /static/img/中大风光/12.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:37,931 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:37] "GET /static/img/中大风光/12.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:54,679 - INFO - models - validate_user - Validating user: 范睿捷
-2025-04-23 11:51:54,875 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:54] "[32mPOST /login HTTP/1.1[0m" 302 -
-2025-04-23 11:51:54,875 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:54] "[32mPOST /login HTTP/1.1[0m" 302 -
-2025-04-23 11:51:54,883 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:54] "GET / HTTP/1.1" 200 -
-2025-04-23 11:51:54,883 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:54] "GET / HTTP/1.1" 200 -
-2025-04-23 11:51:55,912 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET / HTTP/1.1" 200 -
-2025-04-23 11:51:55,912 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET / HTTP/1.1" 200 -
-2025-04-23 11:51:55,938 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/marked.min.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,939 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/css/notification.css HTTP/1.1" 200 -
-2025-04-23 11:51:55,938 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/marked.min.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,939 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/css/notification.css HTTP/1.1" 200 -
-2025-04-23 11:51:55,946 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/notification.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,946 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/css/upload.css HTTP/1.1" 200 -
-2025-04-23 11:51:55,948 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:51:55,946 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/notification.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,946 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/css/upload.css HTTP/1.1" 200 -
-2025-04-23 11:51:55,948 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:51:55,952 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/css/feedback.css HTTP/1.1" 200 -
-2025-04-23 11:51:55,952 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/css/feedback.css HTTP/1.1" 200 -
-2025-04-23 11:51:55,968 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/toast.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,969 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/utils.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,968 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/toast.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,969 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/utils.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,986 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/upload.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,987 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/feedback.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,986 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/upload.js HTTP/1.1" 200 -
-2025-04-23 11:51:55,987 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:55] "GET /static/js/feedback.js HTTP/1.1" 200 -
-2025-04-23 11:51:56,417 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:56] "GET /get_notifications HTTP/1.1" 200 -
-2025-04-23 11:51:56,417 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:56] "GET /get_notifications HTTP/1.1" 200 -
-2025-04-23 11:51:58,169 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "[32mGET /logout HTTP/1.1[0m" 302 -
-2025-04-23 11:51:58,169 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "[32mGET /logout HTTP/1.1[0m" 302 -
-2025-04-23 11:51:58,180 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /login HTTP/1.1" 200 -
-2025-04-23 11:51:58,180 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /login HTTP/1.1" 200 -
-2025-04-23 11:51:58,202 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
-2025-04-23 11:51:58,202 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
-2025-04-23 11:51:58,205 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/css/login.css HTTP/1.1" 200 -
-2025-04-23 11:51:58,206 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:51:58,205 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/css/login.css HTTP/1.1" 200 -
-2025-04-23 11:51:58,206 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:51:58,453 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/2.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,455 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/1.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,453 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/2.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,455 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/1.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,465 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/10.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,465 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/10.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,470 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "[36mGET /static/img/中大风光/6.jpg HTTP/1.1[0m" 304 -
-2025-04-23 11:51:58,471 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/3.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,470 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "[36mGET /static/img/中大风光/6.jpg HTTP/1.1[0m" 304 -
-2025-04-23 11:51:58,471 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/3.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,474 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/4.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,474 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/4.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,502 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/5.jpg HTTP/1.1" 200 -
-2025-04-23 11:51:58,502 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:51:58] "GET /static/img/中大风光/5.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:00,500 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:00] "GET /static/img/中大风光/7.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:00,500 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:00] "GET /static/img/中大风光/7.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:00,635 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:00] "GET /static/img/中大风光/8.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:00,635 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:00] "GET /static/img/中大风光/8.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:00,902 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:00] "GET /static/img/中大风光/9.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:00,902 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:00] "GET /static/img/中大风光/9.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:02,358 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:02] "GET /static/img/中大风光/11.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:02,358 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:02] "GET /static/img/中大风光/11.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:03,523 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:03] "GET /static/img/中大风光/12.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:03,523 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:03] "GET /static/img/中大风光/12.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:14,845 - INFO - models - validate_user - Validating user: 范睿捷
-2025-04-23 11:52:15,044 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:15] "[32mPOST /login HTTP/1.1[0m" 302 -
-2025-04-23 11:52:15,044 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:15] "[32mPOST /login HTTP/1.1[0m" 302 -
-2025-04-23 11:52:15,062 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:15] "GET / HTTP/1.1" 200 -
-2025-04-23 11:52:15,062 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:15] "GET / HTTP/1.1" 200 -
-2025-04-23 11:52:16,087 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET / HTTP/1.1" 200 -
-2025-04-23 11:52:16,087 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET / HTTP/1.1" 200 -
-2025-04-23 11:52:16,107 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/css/upload.css HTTP/1.1" 200 -
-2025-04-23 11:52:16,107 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/css/upload.css HTTP/1.1" 200 -
-2025-04-23 11:52:16,114 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/css/feedback.css HTTP/1.1" 200 -
-2025-04-23 11:52:16,114 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/css/feedback.css HTTP/1.1" 200 -
-2025-04-23 11:52:16,119 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/css/notification.css HTTP/1.1" 200 -
-2025-04-23 11:52:16,119 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/notification.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,119 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/css/notification.css HTTP/1.1" 200 -
-2025-04-23 11:52:16,122 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/marked.min.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,119 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/notification.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,125 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:52:16,122 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/marked.min.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,125 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:52:16,130 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/toast.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,130 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/toast.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,157 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/upload.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,158 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/utils.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,157 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/upload.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,158 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/utils.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,174 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/feedback.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,174 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /static/js/feedback.js HTTP/1.1" 200 -
-2025-04-23 11:52:16,738 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /get_notifications HTTP/1.1" 200 -
-2025-04-23 11:52:16,738 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:16] "GET /get_notifications HTTP/1.1" 200 -
-2025-04-23 11:52:18,827 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:18] "[32mGET /logout HTTP/1.1[0m" 302 -
-2025-04-23 11:52:18,827 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:18] "[32mGET /logout HTTP/1.1[0m" 302 -
-2025-04-23 11:52:18,837 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:18] "GET /login HTTP/1.1" 200 -
-2025-04-23 11:52:18,837 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:18] "GET /login HTTP/1.1" 200 -
-2025-04-23 11:52:18,855 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:18] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:52:18,857 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:18] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
-2025-04-23 11:52:18,855 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:18] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 11:52:18,857 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:18] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
-2025-04-23 11:52:18,859 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:18] "GET /static/css/login.css HTTP/1.1" 200 -
-2025-04-23 11:52:18,859 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:18] "GET /static/css/login.css HTTP/1.1" 200 -
-2025-04-23 11:52:19,256 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/3.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,257 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/5.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,256 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/3.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,257 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/5.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,261 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/2.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,268 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/4.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,261 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/2.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,268 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/4.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,271 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/6.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,273 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/1.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,271 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/6.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:19,273 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:19] "GET /static/img/中大风光/1.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:21,151 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:21] "GET /static/img/中大风光/7.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:21,151 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:21] "GET /static/img/中大风光/7.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:21,484 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:21] "GET /static/img/中大风光/8.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:21,484 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:21] "GET /static/img/中大风光/8.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:21,716 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:21] "GET /static/img/中大风光/9.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:21,716 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:21] "GET /static/img/中大风光/9.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:22,767 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:22] "GET /static/img/中大风光/10.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:22,767 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:22] "GET /static/img/中大风光/10.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:22,996 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:22] "GET /static/img/中大风光/11.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:22,996 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:22] "GET /static/img/中大风光/11.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:24,089 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:24] "GET /static/img/中大风光/12.jpg HTTP/1.1" 200 -
-2025-04-23 11:52:24,089 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 11:52:24] "GET /static/img/中大风光/12.jpg HTTP/1.1" 200 -
+2025-04-23 12:01:47,863 - INFO - _internal - _log -  * Running on http://172.16.244.156:10099/ (Press CTRL+C to quit)
+2025-04-23 12:01:47,863 - INFO - _internal - _log -  * Running on http://172.16.244.156:10099/ (Press CTRL+C to quit)
+2025-04-23 12:01:57,136 - INFO - main - initialize_app - 应用程序初始化完成
+2025-04-23 12:01:57,136 - INFO - main - initialize_app - 应用程序初始化完成
+2025-04-23 12:01:57,137 - WARNING - main - not_found_error - Page not found: /favicon.ico
+2025-04-23 12:01:57,137 - WARNING - main - not_found_error - Page not found: /favicon.ico
+2025-04-23 12:01:57,139 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[33mGET /favicon.ico?t=1745380915882 HTTP/1.1[0m" 404 -
+2025-04-23 12:01:57,139 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[33mGET /favicon.ico?t=1745380915882 HTTP/1.1[0m" 404 -
+2025-04-23 12:01:57,151 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[32mHEAD / HTTP/1.1[0m" 302 -
+2025-04-23 12:01:57,151 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[32mHEAD / HTTP/1.1[0m" 302 -
+2025-04-23 12:01:57,171 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "HEAD /login?next=%2F HTTP/1.1" 200 -
+2025-04-23 12:01:57,171 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "HEAD /login?next=%2F HTTP/1.1" 200 -
+2025-04-23 12:01:57,183 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-23 12:01:57,183 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[32mGET / HTTP/1.1[0m" 302 -
+2025-04-23 12:01:57,196 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "GET /login?next=%2F HTTP/1.1" 200 -
+2025-04-23 12:01:57,196 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "GET /login?next=%2F HTTP/1.1" 200 -
+2025-04-23 12:01:57,224 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-23 12:01:57,224 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-23 12:01:57,228 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-23 12:01:57,228 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-23 12:01:57,237 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
+2025-04-23 12:01:57,237 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
+2025-04-23 12:01:57,250 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/img/中大风光/7.jpg HTTP/1.1[0m" 304 -
+2025-04-23 12:01:57,250 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/img/中大风光/7.jpg HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,453 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "GET /admin HTTP/1.1" 200 -
+2025-04-23 12:02:16,453 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "GET /admin HTTP/1.1" 200 -
+2025-04-23 12:02:16,476 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,479 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/admin_login.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,476 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,479 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/admin_login.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,483 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,484 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/forms.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,483 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,484 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/forms.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,498 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,499 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/js/admin_login.js HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,498 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-23 12:02:16,499 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/js/admin_login.js HTTP/1.1[0m" 304 -
+2025-04-23 12:02:18,168 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "GET /login HTTP/1.1" 200 -
+2025-04-23 12:02:18,168 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "GET /login HTTP/1.1" 200 -
+2025-04-23 12:02:18,185 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-23 12:02:18,185 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-23 12:02:18,187 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
+2025-04-23 12:02:18,189 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:18,187 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
+2025-04-23 12:02:18,189 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:18,206 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/img/中大风光/2.jpg HTTP/1.1[0m" 304 -
+2025-04-23 12:02:18,206 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/img/中大风光/2.jpg HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,685 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "GET /register HTTP/1.1" 200 -
+2025-04-23 12:02:21,685 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "GET /register HTTP/1.1" 200 -
+2025-04-23 12:02:21,698 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,698 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,703 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/register.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,703 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/register.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,705 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,705 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,712 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,712 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,725 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,725 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,727 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "GET /static/js/register.js HTTP/1.1" 200 -
+2025-04-23 12:02:21,727 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "GET /static/js/register.js HTTP/1.1" 200 -
+2025-04-23 12:02:21,751 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/img/中大风光/8.jpg HTTP/1.1[0m" 304 -
+2025-04-23 12:02:21,751 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/img/中大风光/8.jpg HTTP/1.1[0m" 304 -
