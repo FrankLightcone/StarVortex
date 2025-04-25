@@ -198,6 +198,7 @@ window.addEventListener('DOMContentLoaded', function() {
                     'tabAssignments': 'assignmentsTab',
                     'tabSubmissions': 'submissionsTab',
                     'tabClasses': 'classesTab',
+                    'tabMaterialsManagement': 'materialsManagementTab',
                     'tabSettings': 'settingsTab',  // 新增设置标签页
                 };
                 

@@ -13,6 +13,9 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="/static/css/upload.css" rel="stylesheet">
     <link href="/static/css/feedback.css" rel="stylesheet">
+    <link href="/static/css/course_materials.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+
     
     {% if current_user.is_authenticated %}
     <script src="{{ url_for('static', filename='js/marked.min.js') }}"></script>
@@ -78,9 +81,13 @@
                 <button id="tabSubmissions" class="tab-button">
                     <i class="fas fa-history mr-2"></i>我的提交
                 </button>
+                <button id="tabMaterials" class="tab-button">
+                    <i class="fas fa-book mr-2"></i>课程资料
+                </button>
                 <button id="tabProfile" class="tab-button">
                     <i class="fas fa-user-cog mr-2"></i>个人设置
                 </button>
+                
             </nav>
         </div>
 
@@ -299,30 +306,31 @@
                     </div>
                 </div>
                 <div class="px-6 py-5">
-                    <div class="overflow-hidden rounded-lg border border-gray-200">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3">
                                         课程
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3">
                                         作业名称
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3">
                                         截止日期
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3">
                                         状态
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3">
                                         提交情况
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-right">
                                         操作
                                     </th>
                                 </tr>
                             </thead>
+                            <tbody id="assignmentsListBodyWrapper">
                             <tbody id="assignmentsListBody" class="bg-white divide-y divide-gray-200">
                                 <tr>
                                     <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
@@ -333,7 +341,18 @@
                                     </td>
                                 </tr>
                             </tbody>
+                        </tbody>
                         </table>
+                        <!-- Pagination can be added here if needed -->
+                        <!-- 分页导航 -->
+                        <nav id="assignmentPagination" class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-6 hidden" aria-label="Table navigation">
+                            <span class="page-info text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm">
+                                显示 <span class="font-semibold text-blue-600 dark:text-blue-400">1-10</span> 共 <span class="font-semibold text-blue-600 dark:text-blue-400">20</span> 条记录
+                            </span>
+                            <ul class="pagination-list inline-flex rounded-md shadow-sm">
+                                <!-- 页码将由JavaScript动态添加 -->
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -403,6 +422,141 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Course Materials Tab Content -->
+        <div id="materialsTab" class="tab-content">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg leading-6 font-semibold text-gray-900 flex items-center">
+                <i class="fas fa-book mr-2 text-blue-500"></i>课程资料
+                </h3>
+                <div class="flex space-x-2">
+                <div class="relative">
+                    <select 
+                    id="materialsCourseFilter" 
+                    class="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    >
+                    <option value="">选择课程</option>
+                    <!-- 课程选项将通过JavaScript动态添加 -->
+                    </select>
+                </div>
+                </div>
+            </div>
+            <div class="px-6 py-5">
+                <!-- 加载状态 -->
+                <div id="materialsLoading" class="flex flex-col items-center justify-center py-10">
+                <svg class="animate-spin h-10 w-10 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="text-gray-500">加载资料中...</p>
+                </div>
+                
+                <!-- 没有资料时显示 -->
+                <div id="materialsEmpty" class="hidden flex flex-col items-center justify-center py-10">
+                <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-gray-500 text-lg">暂无课程资料</p>
+                <p class="text-gray-400 text-sm mt-1">请选择其他课程或联系教师上传资料</p>
+                </div>
+                
+                <!-- 课程卡片容器 -->
+                <div id="courseCardContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 卡片将通过JavaScript动态添加 -->
+                </div>
+            </div>
+            </div>
+        </div>
+        
+        <!-- 资料查看模态框 -->
+        <div id="courseAssetsModal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            <div class="relative p-4 w-full max-w-6xl max-h-full">
+            <!-- 模态框内容 -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- 模态框头部 -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 id="courseAssetsTitle" class="text-xl font-semibold text-gray-900 dark:text-white">
+                    课程资料
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="courseAssetsModal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">关闭</span>
+                </button>
+                </div>
+                
+                <!-- 模态框主体 -->
+                <div class="p-4 md:p-5">
+                <div id="courseAssetsDescription" class="text-sm text-gray-600 mb-5 bg-gray-50 p-3 rounded-lg">
+                    课程描述将显示在这里...
+                </div>
+                
+                <h4 class="text-base font-medium text-gray-900 mb-3 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    可用资料
+                </h4>
+                
+                <!-- 资料列表 -->
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg mb-4">
+                    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                        <th scope="col" class="px-6 py-3">
+                            文件名
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            类型
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            大小
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            上传日期
+                        </th>
+                        <th scope="col" class="px-12 py-3">
+                            操作
+                        </th>
+                        </tr>
+                    </thead>
+                    <tbody id="courseAssetsList">
+                        <!-- 资料项将通过JavaScript动态添加 -->
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            加载中...
+                        </td>
+                        <td class="px-6 py-4">
+                            -
+                        </td>
+                        <td class="px-6 py-4">
+                            -
+                        </td>
+                        <td class="px-6 py-4">
+                            -
+                        </td>
+                        <td class="px-6 py-4">
+                            -
+                        </td>
+                        </tr>
+                    </tbody>
+                    </table>
+                    
+                    <div id="paginationControls" class="flex justify-between items-center px-4 pb-4">
+                        <nav class="flex items-center space-x-1">
+                        <button id="prevPageBtn" class="px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-100">上一页</button>
+                        <span id="paginationInfo" class="text-sm text-gray-600">第 1 页</span>
+                        <button id="nextPageBtn" class="px-3 py-1 text-sm text-gray-500 bg-white border border-gray-300 rounded hover:bg-gray-100">下一页</button>
+                        </nav>
+                    </div>
+                    
+                </div>
+                </div>
+            </div>
             </div>
         </div>
 
@@ -646,6 +800,7 @@
     <script src="/static/js/utils.js"></script>
     <script src="/static/js/upload.js"></script>
     <script src="/static/js/feedback.js"></script>
+    <script src="/static/js/course_materials.js"></script>
     <script>
         // 用户下拉菜单交互
         document.addEventListener('DOMContentLoaded', function() {

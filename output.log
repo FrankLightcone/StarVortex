@@ -1,87 +1,178 @@
 nohup: ignoring input
-2025-04-23 12:01:47,817 - INFO - logging_config - setup_logging - 日志系统初始化完成
-2025-04-23 12:01:47,817 - INFO - logging_config - setup_logging - 日志系统初始化完成
+2025-04-25 21:49:02,409 - INFO - logging_config - setup_logging - 日志系统初始化完成
+2025-04-25 21:49:02,409 - INFO - logging_config - setup_logging - 日志系统初始化完成
 /data2/vortex/StarVortex/util/notification.py:731: UserWarning: The name 'notification' is already registered for this blueprint. Use 'name=' to provide a unique name. This will become an error in Flask 2.1.
   app.register_blueprint(notification_bp, url_prefix='')
-2025-04-23 12:01:47,858 - INFO - notification - init_app - 通知系统已初始化
-2025-04-23 12:01:47,860 - INFO - schedule_tasks - init_scheduler - 已初始化新的调度器
-2025-04-23 12:01:47,860 - INFO - base - add_job - Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2025-04-23 12:01:47,860 - INFO - schedule_tasks - setup_scheduler - 已设置截止日期提醒任务，将在每天 18:00 执行
-2025-04-23 12:01:47,860 - INFO - base - _real_add_job - Added job "截止日期提醒" to job store "default"
-2025-04-23 12:01:47,861 - INFO - base - start - Scheduler started
-2025-04-23 12:01:47,861 - INFO - schedule_tasks - setup_scheduler - 定时任务调度器已启动
-2025-04-23 12:01:47,861 - INFO - main - create_app - 截止日期提醒功能已启用，设置为每天 18:00
-2025-04-23 12:01:47,861 - INFO - main - create_app - 截止日期提醒功能已启用，设置为每天 18:00
+2025-04-25 21:49:02,453 - INFO - notification - init_app - 通知系统已初始化
+/data2/vortex/StarVortex/util/materials.py:418: UserWarning: The name 'materials' is already registered for this blueprint. Use 'name=' to provide a unique name. This will become an error in Flask 2.1.
+  app.register_blueprint(materials_bp)
+2025-04-25 21:49:02,456 - INFO - materials - init_app - 课程资料模块已初始化
+2025-04-25 21:49:02,457 - INFO - schedule_tasks - init_scheduler - 已初始化新的调度器
+2025-04-25 21:49:02,458 - INFO - base - add_job - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-04-25 21:49:02,458 - INFO - schedule_tasks - setup_scheduler - 已设置截止日期提醒任务，将在每天 18:00 执行
+2025-04-25 21:49:02,458 - INFO - base - _real_add_job - Added job "截止日期提醒" to job store "default"
+2025-04-25 21:49:02,459 - INFO - base - start - Scheduler started
+2025-04-25 21:49:02,459 - INFO - schedule_tasks - setup_scheduler - 定时任务调度器已启动
+2025-04-25 21:49:02,459 - INFO - main - create_app - 截止日期提醒功能已启用，设置为每天 18:00
+2025-04-25 21:49:02,459 - INFO - main - create_app - 截止日期提醒功能已启用，设置为每天 18:00
  * Serving Flask app 'main' (lazy loading)
  * Environment: production
    WARNING: This is a development server. Do not use it in a production deployment.
    Use a production WSGI server instead.
  * Debug mode: off
-2025-04-23 12:01:47,863 - WARNING - _internal - _log -  * Running on all addresses.
+2025-04-25 21:49:02,461 - WARNING - _internal - _log -  * Running on all addresses.
    WARNING: This is a development server. Do not use it in a production deployment.
-2025-04-23 12:01:47,863 - WARNING - _internal - _log -  * Running on all addresses.
+2025-04-25 21:49:02,461 - WARNING - _internal - _log -  * Running on all addresses.
    WARNING: This is a development server. Do not use it in a production deployment.
-2025-04-23 12:01:47,863 - INFO - _internal - _log -  * Running on http://172.16.244.156:10099/ (Press CTRL+C to quit)
-2025-04-23 12:01:47,863 - INFO - _internal - _log -  * Running on http://172.16.244.156:10099/ (Press CTRL+C to quit)
-2025-04-23 12:01:57,136 - INFO - main - initialize_app - 应用程序初始化完成
-2025-04-23 12:01:57,136 - INFO - main - initialize_app - 应用程序初始化完成
-2025-04-23 12:01:57,137 - WARNING - main - not_found_error - Page not found: /favicon.ico
-2025-04-23 12:01:57,137 - WARNING - main - not_found_error - Page not found: /favicon.ico
-2025-04-23 12:01:57,139 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[33mGET /favicon.ico?t=1745380915882 HTTP/1.1[0m" 404 -
-2025-04-23 12:01:57,139 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[33mGET /favicon.ico?t=1745380915882 HTTP/1.1[0m" 404 -
-2025-04-23 12:01:57,151 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[32mHEAD / HTTP/1.1[0m" 302 -
-2025-04-23 12:01:57,151 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[32mHEAD / HTTP/1.1[0m" 302 -
-2025-04-23 12:01:57,171 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "HEAD /login?next=%2F HTTP/1.1" 200 -
-2025-04-23 12:01:57,171 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "HEAD /login?next=%2F HTTP/1.1" 200 -
-2025-04-23 12:01:57,183 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[32mGET / HTTP/1.1[0m" 302 -
-2025-04-23 12:01:57,183 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[32mGET / HTTP/1.1[0m" 302 -
-2025-04-23 12:01:57,196 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "GET /login?next=%2F HTTP/1.1" 200 -
-2025-04-23 12:01:57,196 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "GET /login?next=%2F HTTP/1.1" 200 -
-2025-04-23 12:01:57,224 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
-2025-04-23 12:01:57,224 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
-2025-04-23 12:01:57,228 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 12:01:57,228 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 12:01:57,237 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
-2025-04-23 12:01:57,237 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
-2025-04-23 12:01:57,250 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/img/中大风光/7.jpg HTTP/1.1[0m" 304 -
-2025-04-23 12:01:57,250 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:01:57] "[36mGET /static/img/中大风光/7.jpg HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,453 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "GET /admin HTTP/1.1" 200 -
-2025-04-23 12:02:16,453 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "GET /admin HTTP/1.1" 200 -
-2025-04-23 12:02:16,476 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,479 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/admin_login.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,476 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,479 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/admin_login.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,483 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,484 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/forms.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,483 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,484 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/css/forms.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,498 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,499 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/js/admin_login.js HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,498 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 12:02:16,499 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:16] "[36mGET /static/js/admin_login.js HTTP/1.1[0m" 304 -
-2025-04-23 12:02:18,168 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "GET /login HTTP/1.1" 200 -
-2025-04-23 12:02:18,168 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "GET /login HTTP/1.1" 200 -
-2025-04-23 12:02:18,185 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 12:02:18,185 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 12:02:18,187 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
-2025-04-23 12:02:18,189 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:18,187 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
-2025-04-23 12:02:18,189 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:18,206 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/img/中大风光/2.jpg HTTP/1.1[0m" 304 -
-2025-04-23 12:02:18,206 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:18] "[36mGET /static/img/中大风光/2.jpg HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,685 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "GET /register HTTP/1.1" 200 -
-2025-04-23 12:02:21,685 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "GET /register HTTP/1.1" 200 -
-2025-04-23 12:02:21,698 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,698 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,703 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/register.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,703 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/register.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,705 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,705 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,712 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,712 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,725 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,725 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,727 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "GET /static/js/register.js HTTP/1.1" 200 -
-2025-04-23 12:02:21,727 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "GET /static/js/register.js HTTP/1.1" 200 -
-2025-04-23 12:02:21,751 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/img/中大风光/8.jpg HTTP/1.1[0m" 304 -
-2025-04-23 12:02:21,751 - INFO - _internal - _log - 172.27.32.74 - - [23/Apr/2025 12:02:21] "[36mGET /static/img/中大风光/8.jpg HTTP/1.1[0m" 304 -
+2025-04-25 21:49:02,461 - INFO - _internal - _log -  * Running on http://172.16.244.156:10099/ (Press CTRL+C to quit)
+2025-04-25 21:49:02,461 - INFO - _internal - _log -  * Running on http://172.16.244.156:10099/ (Press CTRL+C to quit)
+2025-04-25 21:49:07,462 - INFO - main - initialize_app - 应用程序初始化完成
+2025-04-25 21:49:07,462 - INFO - main - initialize_app - 应用程序初始化完成
+2025-04-25 21:49:07,464 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:07,464 - INFO - admin - dashboard - Admin dashboard accessed by: admin
+2025-04-25 21:49:07,465 - INFO - admin - dashboard - Course config loaded: {'classes': [{'name': '2023级遥感1班', 'description': '中山大学测绘科学与技术学院2023级遥感科学与技术专业教学1班', 'courses': [{'name': 'GNSS', 'assignments': ['lab3：广播星历精度评估', 'lab5：GNSS绝对定位(单点定位)数据处理']}, {'name': 'DIP', 'assignments': ['lab3：频率域滤波', '第5章课后作业', 'lab4：图像复原与重建']}, {'name': '地图学原理', 'assignments': ['lab3：点阵地图与路网地图制作', 'lab4：社会经济类专题地图制作——全国疫情分布图', 'lab5：地图数据生产与精细化制图——中国年降水量分布图制作']}, {'name': '误差理论', 'assignments': []}]}, {'name': '2023级遥感2班', 'description': '中山大学测绘科学与技术学院2023级遥感科学与技术专业教学2班', 'courses': [{'name': 'GNSS', 'assignments': []}, {'name': 'DIP', 'assignments': []}, {'name': '地图学原理', 'assignments': []}, {'name': '误差理论', 'assignments': []}]}]}
+2025-04-25 21:49:07,465 - INFO - admin - dashboard - All classes: ['2023级遥感1班', '2023级遥感2班']
+2025-04-25 21:49:07,466 - WARNING - admin - dashboard - Managed classes for admin: []
+2025-04-25 21:49:07,466 - INFO - admin - dashboard - Managed classes for admin: ['2023级遥感1班', '2023级遥感2班']
+2025-04-25 21:49:07,498 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "GET /admin/dashboard HTTP/1.1" 200 -
+2025-04-25 21:49:07,498 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "GET /admin/dashboard HTTP/1.1" 200 -
+2025-04-25 21:49:07,536 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "[36mGET /static/css/tailwind.min.css HTTP/1.1[0m" 304 -
+2025-04-25 21:49:07,537 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:49:07,539 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "[36mGET /static/js/admin_materials.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:07,536 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "[36mGET /static/css/tailwind.min.css HTTP/1.1[0m" 304 -
+2025-04-25 21:49:07,537 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:49:07,539 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "[36mGET /static/js/admin_materials.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:07,544 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "[36mGET /static/js/admin.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:07,544 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "[36mGET /static/js/admin.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:07,590 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:07,592 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:07,594 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:07,596 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "GET /admin/classes HTTP/1.1" 200 -
+2025-04-25 21:49:07,596 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "GET /admin/classes HTTP/1.1" 200 -
+2025-04-25 21:49:07,597 - INFO - admin - get_courses_by_class - 获取所有课程
+2025-04-25 21:49:07,598 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "GET /admin/get_courses_by_class?class_name=all HTTP/1.1" 200 -
+2025-04-25 21:49:07,598 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "GET /admin/get_courses_by_class?class_name=all HTTP/1.1" 200 -
+2025-04-25 21:49:07,607 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "GET /admin/assignments HTTP/1.1" 200 -
+2025-04-25 21:49:07,607 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:07] "GET /admin/assignments HTTP/1.1" 200 -
+2025-04-25 21:49:11,028 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:11,030 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:11] "GET /admin/get_courses_by_class?class_name=2023级遥感1班 HTTP/1.1" 200 -
+2025-04-25 21:49:11,030 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:11] "GET /admin/get_courses_by_class?class_name=2023级遥感1班 HTTP/1.1" 200 -
+2025-04-25 21:49:11,968 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:11] "GET /get_course_assets_by_name_and_class?class_name=2023级遥感1班&course=GNSS HTTP/1.1" 200 -
+2025-04-25 21:49:11,968 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:11] "GET /get_course_assets_by_name_and_class?class_name=2023级遥感1班&course=GNSS HTTP/1.1" 200 -
+2025-04-25 21:49:14,592 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:14] "GET /get_course_assets_by_name_and_class?class_name=2023级遥感1班&course=DIP HTTP/1.1" 200 -
+2025-04-25 21:49:14,592 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:14] "GET /get_course_assets_by_name_and_class?class_name=2023级遥感1班&course=DIP HTTP/1.1" 200 -
+2025-04-25 21:49:15,889 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:15] "GET /get_course_assets_by_name_and_class?class_name=2023级遥感1班&course=地图学原理 HTTP/1.1" 200 -
+2025-04-25 21:49:15,889 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:15] "GET /get_course_assets_by_name_and_class?class_name=2023级遥感1班&course=地图学原理 HTTP/1.1" 200 -
+2025-04-25 21:49:17,086 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:17] "GET /get_course_assets_by_name_and_class?class_name=2023级遥感1班&course=误差理论 HTTP/1.1" 200 -
+2025-04-25 21:49:17,086 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:17] "GET /get_course_assets_by_name_and_class?class_name=2023级遥感1班&course=误差理论 HTTP/1.1" 200 -
+2025-04-25 21:49:18,652 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:18,653 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:18] "GET /admin/classes HTTP/1.1" 200 -
+2025-04-25 21:49:18,653 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:18] "GET /admin/classes HTTP/1.1" 200 -
+2025-04-25 21:49:18,663 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:18,664 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:18,666 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:18] "GET /admin/class_students/2023级遥感1班 HTTP/1.1" 200 -
+2025-04-25 21:49:18,668 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:18] "GET /admin/class_students/2023级遥感2班 HTTP/1.1" 200 -
+2025-04-25 21:49:18,666 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:18] "GET /admin/class_students/2023级遥感1班 HTTP/1.1" 200 -
+2025-04-25 21:49:18,668 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:18] "GET /admin/class_students/2023级遥感2班 HTTP/1.1" 200 -
+2025-04-25 21:49:19,543 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:19,545 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:19] "GET /admin/class_students/2023级遥感1班 HTTP/1.1" 200 -
+2025-04-25 21:49:19,545 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:19] "GET /admin/class_students/2023级遥感1班 HTTP/1.1" 200 -
+2025-04-25 21:49:23,271 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:23,272 - INFO - admin - dashboard - Admin dashboard accessed by: admin
+2025-04-25 21:49:23,272 - INFO - admin - dashboard - Course config loaded: {'classes': [{'name': '2023级遥感1班', 'description': '中山大学测绘科学与技术学院2023级遥感科学与技术专业教学1班', 'courses': [{'name': 'GNSS', 'assignments': ['lab3：广播星历精度评估', 'lab5：GNSS绝对定位(单点定位)数据处理']}, {'name': 'DIP', 'assignments': ['lab3：频率域滤波', '第5章课后作业', 'lab4：图像复原与重建']}, {'name': '地图学原理', 'assignments': ['lab3：点阵地图与路网地图制作', 'lab4：社会经济类专题地图制作——全国疫情分布图', 'lab5：地图数据生产与精细化制图——中国年降水量分布图制作']}, {'name': '误差理论', 'assignments': []}]}, {'name': '2023级遥感2班', 'description': '中山大学测绘科学与技术学院2023级遥感科学与技术专业教学2班', 'courses': [{'name': 'GNSS', 'assignments': []}, {'name': 'DIP', 'assignments': []}, {'name': '地图学原理', 'assignments': []}, {'name': '误差理论', 'assignments': []}]}]}
+2025-04-25 21:49:23,273 - INFO - admin - dashboard - All classes: ['2023级遥感1班', '2023级遥感2班']
+2025-04-25 21:49:23,273 - WARNING - admin - dashboard - Managed classes for admin: []
+2025-04-25 21:49:23,273 - INFO - admin - dashboard - Managed classes for admin: ['2023级遥感1班', '2023级遥感2班']
+2025-04-25 21:49:23,275 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "GET /admin/dashboard HTTP/1.1" 200 -
+2025-04-25 21:49:23,275 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "GET /admin/dashboard HTTP/1.1" 200 -
+2025-04-25 21:49:23,302 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "[36mGET /static/css/tailwind.min.css HTTP/1.1[0m" 304 -
+2025-04-25 21:49:23,302 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "[36mGET /static/css/tailwind.min.css HTTP/1.1[0m" 304 -
+2025-04-25 21:49:23,308 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:49:23,309 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "[36mGET /static/js/admin_materials.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:23,308 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:49:23,309 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "[36mGET /static/js/admin_materials.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:23,314 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "[36mGET /static/js/admin.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:23,314 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "[36mGET /static/js/admin.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:23,368 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:23,369 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:23,370 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:23,371 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "GET /admin/classes HTTP/1.1" 200 -
+2025-04-25 21:49:23,372 - INFO - admin - get_courses_by_class - 获取所有课程
+2025-04-25 21:49:23,371 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "GET /admin/classes HTTP/1.1" 200 -
+2025-04-25 21:49:23,374 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "GET /admin/get_courses_by_class?class_name=all HTTP/1.1" 200 -
+2025-04-25 21:49:23,374 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "GET /admin/get_courses_by_class?class_name=all HTTP/1.1" 200 -
+2025-04-25 21:49:23,383 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "GET /admin/assignments HTTP/1.1" 200 -
+2025-04-25 21:49:23,383 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:23] "GET /admin/assignments HTTP/1.1" 200 -
+2025-04-25 21:49:35,420 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:35,422 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:35] "GET /admin/get_courses_by_class?class_name=2023级遥感1班 HTTP/1.1" 200 -
+2025-04-25 21:49:35,422 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:35] "GET /admin/get_courses_by_class?class_name=2023级遥感1班 HTTP/1.1" 200 -
+2025-04-25 21:49:37,204 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:37,205 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:37] "GET /admin/classes HTTP/1.1" 200 -
+2025-04-25 21:49:37,205 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:37] "GET /admin/classes HTTP/1.1" 200 -
+2025-04-25 21:49:37,217 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:37,218 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:37,220 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:37] "GET /admin/class_students/2023级遥感2班 HTTP/1.1" 200 -
+2025-04-25 21:49:37,222 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:37] "GET /admin/class_students/2023级遥感1班 HTTP/1.1" 200 -
+2025-04-25 21:49:37,220 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:37] "GET /admin/class_students/2023级遥感2班 HTTP/1.1" 200 -
+2025-04-25 21:49:37,222 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:37] "GET /admin/class_students/2023级遥感1班 HTTP/1.1" 200 -
+2025-04-25 21:49:38,320 - INFO - auth - decorated_function - Admin check: authenticated=True, is_admin=True
+2025-04-25 21:49:38,322 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:38] "GET /admin/class_students/2023级遥感2班 HTTP/1.1" 200 -
+2025-04-25 21:49:38,322 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:38] "GET /admin/class_students/2023级遥感2班 HTTP/1.1" 200 -
+2025-04-25 21:49:42,114 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "[32mGET /logout HTTP/1.1[0m" 302 -
+2025-04-25 21:49:42,114 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "[32mGET /logout HTTP/1.1[0m" 302 -
+2025-04-25 21:49:42,128 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "GET /login HTTP/1.1" 200 -
+2025-04-25 21:49:42,128 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "GET /login HTTP/1.1" 200 -
+2025-04-25 21:49:42,166 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:49:42,167 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-25 21:49:42,166 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:49:42,170 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:42,167 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-25 21:49:42,170 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:42,188 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "[36mGET /static/img/中大风光/6.jpg HTTP/1.1[0m" 304 -
+2025-04-25 21:49:42,188 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:42] "[36mGET /static/img/中大风光/6.jpg HTTP/1.1[0m" 304 -
+2025-04-25 21:49:52,021 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "GET /register HTTP/1.1" 200 -
+2025-04-25 21:49:52,021 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "GET /register HTTP/1.1" 200 -
+2025-04-25 21:49:52,048 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-25 21:49:52,048 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-25 21:49:52,053 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "GET /static/css/register.css HTTP/1.1" 200 -
+2025-04-25 21:49:52,053 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "GET /static/css/register.css HTTP/1.1" 200 -
+2025-04-25 21:49:52,060 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:49:52,061 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:52,060 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:49:52,061 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2025-04-25 21:49:52,066 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "GET /static/js/register.js HTTP/1.1" 200 -
+2025-04-25 21:49:52,066 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "GET /static/js/register.js HTTP/1.1" 200 -
+2025-04-25 21:49:52,085 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "[36mGET /static/img/中大风光/6.jpg HTTP/1.1[0m" 304 -
+2025-04-25 21:49:52,085 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:49:52] "[36mGET /static/img/中大风光/6.jpg HTTP/1.1[0m" 304 -
+2025-04-25 21:50:09,834 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:09] "GET /login HTTP/1.1" 200 -
+2025-04-25 21:50:09,834 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:09] "GET /login HTTP/1.1" 200 -
+2025-04-25 21:50:09,873 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:09] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-25 21:50:09,873 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:09] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-25 21:50:09,880 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:09] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:50:09,880 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:09] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:50:09,882 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:09] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
+2025-04-25 21:50:09,882 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:09] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
+2025-04-25 21:50:09,910 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:09] "[36mGET /static/img/中大风光/12.jpg HTTP/1.1[0m" 304 -
+2025-04-25 21:50:09,910 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:09] "[36mGET /static/img/中大风光/12.jpg HTTP/1.1[0m" 304 -
+2025-04-25 21:50:23,067 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "GET /reset_password HTTP/1.1" 200 -
+2025-04-25 21:50:23,067 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "GET /reset_password HTTP/1.1" 200 -
+2025-04-25 21:50:23,095 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-25 21:50:23,095 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-25 21:50:23,106 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "GET /static/css/reset_password.css HTTP/1.1" 200 -
+2025-04-25 21:50:23,108 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:50:23,108 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "GET /static/js/reset_password.js HTTP/1.1" 200 -
+2025-04-25 21:50:23,106 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "GET /static/css/reset_password.css HTTP/1.1" 200 -
+2025-04-25 21:50:23,108 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:50:23,108 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "GET /static/js/reset_password.js HTTP/1.1" 200 -
+2025-04-25 21:50:23,118 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "[36mGET /static/img/中大风光/2.jpg HTTP/1.1[0m" 304 -
+2025-04-25 21:50:23,118 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:23] "[36mGET /static/img/中大风光/2.jpg HTTP/1.1[0m" 304 -
+2025-04-25 21:50:31,833 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:31] "GET /login HTTP/1.1" 200 -
+2025-04-25 21:50:31,833 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:31] "GET /login HTTP/1.1" 200 -
+2025-04-25 21:50:31,873 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:31] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-25 21:50:31,873 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:31] "[36mGET /static/css/login.css HTTP/1.1[0m" 304 -
+2025-04-25 21:50:31,881 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:31] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:50:31,882 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:31] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
+2025-04-25 21:50:31,881 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:31] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-04-25 21:50:31,882 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:31] "[36mGET /static/js/login.js HTTP/1.1[0m" 304 -
+2025-04-25 21:50:31,893 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:31] "[36mGET /static/img/中大风光/4.jpg HTTP/1.1[0m" 304 -
+2025-04-25 21:50:31,893 - INFO - _internal - _log - 172.16.79.59 - - [25/Apr/2025 21:50:31] "[36mGET /static/img/中大风光/4.jpg HTTP/1.1[0m" 304 -

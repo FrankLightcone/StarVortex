@@ -3,13 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <title>作业提交系统 - 注册</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="/static/css/toast.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
     <link href="/static/css/login.css" rel="stylesheet">
     <link href="/static/css/register.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        #loading-screen {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: linear-gradient(135deg, #ffffff, #f0f0f0);
+          z-index: 9999;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          transition: opacity 0.6s ease;
+        }
+      
+        #loading-screen.fade-out {
+          opacity: 0;
+          pointer-events: none;
+        }
+      
+        .spinner {
+          width: 60px;
+          height: 60px;
+          border: 6px solid rgba(0,0,0,0.1);
+          border-top: 6px solid #3498db;
+          border-radius: 50%;
+          animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+        }
+      
+        @keyframes spin {
+          0%   { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      
+        .loading-text {
+          margin-top: 15px;
+          font-size: 1.2em;
+          color: #333;
+          font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* 添加额外的自定义样式 */
+        .glass-panel {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        /* 浮动标签样式修复 */
+        .relative.z-0 input:focus ~ label,
+        .relative.z-0 input:not(:placeholder-shown) ~ label {
+            transform: translateY(-1.5rem) scale(0.75);
+            color: #93c5fd;
+        }
+
+        /* 验证码输入框样式 */
+        .verification-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .verify-code-btn {
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: white;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .verify-code-btn:hover {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        .verify-code-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 输入框验证样式 */
+        .form-input.input-error {
+            border-color: #ef4444 !important;
+        }
+
+        .form-input.input-success {
+            border-color: #10b981 !important;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        /* 动画效果 */
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+            40%, 60% { transform: translate3d(3px, 0, 0); }
+        }
+
+        .success-animation {
+            animation: success-pulse 1s ease-in-out;
+        }
+
+        @keyframes success-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.8s forwards;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+        
+        /* 下拉菜单定制样式 */
+        .dropdown-class-button {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid white;
+            border-radius: 0;
+            color: white;
+            text-align: left;
+            padding: 0.5rem 0;
+            width: 100%;
+            font-size: 0.875rem;
+        }
+        
+        .dropdown-class-button:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .dropdown-class-menu {
+            background-color: rgba(141, 141, 141, 0.9); /* 提高不透明度 */
+            backdrop-filter: blur(20px); /* 加强磨砂效果 */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border-radius: 0.5rem;
+            width: 100%;
+        }
+
+        
+        .dropdown-class-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #f0f0f0;
+            backdrop-filter: blur(20px); /* 加强磨砂效果 */
+        }
+        
+        .dropdown-class-item:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+      </style>
 </head>
 <body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <div class="loading-text">加载中，请稍候...</div>
+    </div>
+    
     <!-- 随机背景图 -->
     <div id="bgContainer" class="bg-container"></div>
     <div class="bg-overlay"></div>
@@ -27,8 +200,8 @@
     
     <div class="w-full max-w-md z-10">
         <!-- Logo -->
-        <div class="flex justify-center mb-8">
-            <div class="logo-container">
+        <div class="flex justify-center mb-6">
+            <div class="logo-container bg-white bg-opacity-20 p-4 rounded-full">
                 <img src="/static/img/logo.png" alt="Logo" class="h-14 w-auto">
             </div>
         </div>
@@ -39,118 +212,140 @@
         </h1>
         
         <!-- 磨砂注册面板 -->
-        <div id="registerPanel" class="glass-panel p-8">
+        <div id="registerPanel" class="glass-panel p-8 rounded-xl">
             <form id="registerForm" class="space-y-6">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-white">
+                <!-- 姓名输入框 -->
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-transparent border-0 border-b-2 border-white appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
+                        placeholder=" " 
+                        required 
+                    />
+                    <label 
+                        for="name" 
+                        class="absolute text-sm text-white duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4"
+                    >
                         姓名
                     </label>
-                    <div class="mt-1">
-                        <input 
-                            id="name" 
-                            name="name" 
-                            type="text" 
-                            required 
-                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
-                            placeholder="请输入姓名"
-                        >
-                    </div>
                 </div>
 
-                <div>
-                    <label for="student_id" class="block text-sm font-medium text-white">
+                <!-- 学号输入框 -->
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="student_id" 
+                        name="student_id" 
+                        class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-transparent border-0 border-b-2 border-white appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
+                        placeholder=" " 
+                        required 
+                    />
+                    <label 
+                        for="student_id" 
+                        class="absolute text-sm text-white duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4"
+                    >
                         学号
                     </label>
-                    <div class="mt-1">
-                        <input 
-                            id="student_id" 
-                            name="student_id" 
-                            type="text" 
-                            required 
-                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
-                            placeholder="请输入学号"
-                        >
-                    </div>
                 </div>
 
-                <div>
-                    <label for="class_name" class="block text-sm font-medium text-white">
-                        班级
-                    </label>
-                    <div class="mt-1">
-                        <select 
-                            id="class_name" 
-                            name="class_name" 
-                            required 
-                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
-                        >
-                            <option value="">请选择班级</option>
+                <!-- 班级下拉菜单 -->
+                <div class="relative">
+                    <label for="class_dropdown" class="block text-sm font-medium text-white mb-1">班级</label>
+                    <button 
+                        id="dropdownClassButton" 
+                        data-dropdown-toggle="dropdown_class" 
+                        class="dropdown-class-button flex justify-between items-center w-full" 
+                        type="button">
+                        <span id="selected_class">请选择班级</span>
+                        <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                        </svg>
+                    </button>
+                    <!-- 隐藏的实际表单字段 -->
+                    <input type="hidden" id="class_name" name="class_name" required>
+                    
+                    <!-- 下拉菜单内容 -->
+                    <div id="dropdown_class" class="dropdown-class-menu z-11 hidden divide-y divide-gray-100 rounded-lg shadow w-full">
+                        <ul class="py-2 text-sm text-gray-700" aria-labelledby="dropdownClassButton">
                             {% for class_info in classes %}
-                            <option value="{{ class_info.name }}">{{ class_info.name }}</option>
+                            <li>
+                                <a href="#" class="dropdown-class-item block px-4 py-2 hover:bg-gray-100" data-value="{{ class_info.name }}">{{ class_info.name }}</a>
+                            </li>
                             {% endfor %}
-                        </select>
+                        </ul>
                     </div>
                 </div>
 
-                <div>
-                    <label for="email" class="block text-sm font-medium text-white">
-                        邮箱
+                <!-- 邮箱输入框 -->
+                <div class="relative">
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-transparent border-0 border-b-2 border-white appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
+                        placeholder=" " 
+                        required 
+                    />
+                    <label 
+                        for="email" 
+                        class="absolute text-sm text-white duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4"
+                    >
+                        邮箱（请使用校园邮箱）
                     </label>
-                    <div class="mt-1">
-                        <input 
-                            id="email" 
-                            name="email" 
-                            type="email" 
-                            required 
-                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
-                            placeholder="请输入邮箱（请使用校园邮箱）"
-                        >
-                    </div>
                 </div>
 
-                <div>
-                    <label for="password" class="block text-sm font-medium text-white">
-                        密码
+                <!-- 密码输入框 -->
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-transparent border-0 border-b-2 border-white appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
+                        placeholder=" " 
+                        required 
+                    />
+                    <label 
+                        for="password" 
+                        class="absolute text-sm text-white duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4"
+                    >
+                        密码（至少6位）
                     </label>
-                    <div class="mt-1">
-                        <input 
-                            id="password" 
-                            name="password" 
-                            type="password" 
-                            required 
-                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm"
-                            placeholder="请设置密码（至少6位）"
-                        >
-                    </div>
                 </div>
 
-                <div>
-                    <label for="verify_code" class="block text-sm font-medium text-white">
-                        邮箱验证码
-                    </label>
-                    <div class="verification-container mt-1 flex">
+                <!-- 邮箱验证码 -->
+                <div class="flex space-x-2">
+                    <div class="relative flex-grow">
                         <input 
+                            type="text" 
                             id="verify_code" 
                             name="verify_code" 
-                            type="text" 
-                            class="form-input appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none sm:text-sm mr-2"
-                            placeholder="请输入验证码"
+                            class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-white bg-transparent border-0 border-b-2 border-white appearance-none focus:outline-none focus:ring-0 focus:border-blue-400 peer" 
+                            placeholder=" " 
+                            required 
+                        />
+                        <label 
+                            for="verify_code" 
+                            class="absolute text-sm text-white duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4"
                         >
-                        <button 
-                            type="button" 
-                            id="sendVerifyCodeBtn"
-                            class="verify-code-btn px-4 py-2 text-white rounded-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
-                        >
-                            发送验证码
-                        </button>
+                            邮箱验证码
+                        </label>
                     </div>
+                    <button 
+                        type="button" 
+                        id="sendVerifyCodeBtn"
+                        class="verify-code-btn px-4 py-2.5 text-white rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-300 whitespace-nowrap self-end mb-0.5"
+                    >
+                        发送验证码
+                    </button>
                 </div>
 
-                <div class="mt-6">
+                <div class="mt-8">
                     <button 
                         type="button" 
                         id="registerBtn"
-                        class="btn-register w-full flex justify-center py-3 px-4 rounded-lg shadow-sm text-sm font-medium focus:outline-none"
+                        class="btn-register w-full flex justify-center items-center py-2.5 px-5 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300"
                     >
                         注册
                     </button>
@@ -167,7 +362,7 @@
                 <div>
                     <a 
                         href="/login" 
-                        class="w-full flex justify-center py-3 px-4 border border-white border-opacity-30 rounded-lg shadow-sm text-sm font-medium text-white bg-transparent hover:bg-white hover:bg-opacity-10"
+                        class="w-full flex justify-center py-2.5 px-5 border border-white border-opacity-30 rounded-lg text-sm font-medium text-white bg-transparent hover:bg-white hover:text-black hover:bg-opacity-10 transition-colors"
                     >
                         返回登录
                     </a>
@@ -181,6 +376,39 @@
         </div>
     </div>
 
+    <script>
+        window.addEventListener('load', function () {
+          const loading = document.getElementById('loading-screen');
+          loading.classList.add('fade-out');
+          setTimeout(() => loading.remove(), 800);
+        });
+        
+        // 添加班级下拉菜单的选择功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为班级下拉项添加点击事件
+            const classItems = document.querySelectorAll('.dropdown-class-item');
+            const selectedClassText = document.getElementById('selected_class');
+            const classNameInput = document.getElementById('class_name');
+            
+            classItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const value = this.getAttribute('data-value');
+                    const text = this.textContent;
+                    
+                    // 更新隐藏输入字段和显示文本
+                    classNameInput.value = value;
+                    selectedClassText.textContent = text;
+                    selectedClassText.classList.add('text-blue-300');
+                    
+                    // 触发change事件
+                    const event = new Event('change');
+                    classNameInput.dispatchEvent(event);
+                });
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
     <script src="/static/js/toast.js"></script>
     <script src="/static/js/register.js"></script>
 </body>

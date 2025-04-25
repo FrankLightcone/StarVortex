@@ -24,3 +24,5 @@ flask.log
 /email_config.json
 /daily_uploads.json
 /notifications
+/static/materials
+/static/img/course

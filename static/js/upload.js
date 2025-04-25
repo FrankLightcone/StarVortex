@@ -102,16 +102,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileNewPassword = document.getElementById('profile_new_password');
     const profileConfirmPassword = document.getElementById('profile_confirm_password');
     
-    // 文件列表数组
-    let selectedFiles = [];
-    
-    // 当前查看的提交详情
-    let currentSubmissionDetail = null;
-
     //region 加载课程和作业信息
     // ===== 作业列表相关事件处理 =====
     const refreshAssignmentsBtn = document.getElementById('refreshAssignmentsBtn');
     const assignmentStatusFilter = document.getElementById('assignmentStatusFilter');
+    // 添加分页变量
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let totalAssignments = 0;
 
     if (refreshAssignmentsBtn) {
         console.log("添加刷新按钮点击事件");
@@ -119,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.error("找不到刷新按钮元素");
     }
-    
+
     if (assignmentStatusFilter) {
         console.log("添加状态筛选器变化事件");
         assignmentStatusFilter.addEventListener('change', loadAllAssignments);
@@ -130,219 +128,265 @@ document.addEventListener('DOMContentLoaded', function() {
      * 加载所有作业列表
      * 获取所有课程的作业，并按照截止日期、提交状态等进行展示
      */
-    // 修改代码部分 - 在loadAllAssignments函数中的fetch调用
     function loadAllAssignments() {
         const statusFilter = document.getElementById('assignmentStatusFilter').value;
-        
-        // 显示加载中状态
         const assignmentsListBody = document.getElementById('assignmentsListBody');
+        
         if (!assignmentsListBody) {
             console.error("找不到 assignmentsListBody 元素");
             return;
         }
-        
-        assignmentsListBody.innerHTML = `
-            <tr>
-                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                    <svg class="animate-spin h-5 w-5 mx-auto text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span class="mt-2 block">加载中...</span>
-                </td>
-            </tr>
-        `;
-        
-        console.log("开始加载作业列表...");
-        
-        // 从服务器获取所有作业数据
-        fetch('/all_assignments')
-            .then(response => {
-                console.log("API响应状态:", response.status);
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        throw new Error(`API返回错误: ${errData.message || '未知错误'}`);
-                    }).catch(e => {
-                        throw new Error(`API返回错误状态: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("获取到作业数据:", data);
-                
-                if (!data.assignments || data.assignments.length === 0) {
-                    assignmentsListBody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                                暂无作业数据
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                // 过滤作业
-                let filteredAssignments = data.assignments;
-                if (statusFilter !== 'all') {
-                    filteredAssignments = filteredAssignments.filter(assignment => {
-                        if (statusFilter === 'pending' && !assignment.isExpired) {
-                            return true;
-                        } else if (statusFilter === 'expired' && assignment.isExpired) {
-                            return true;
-                        } else if (statusFilter === 'submitted' && assignment.hasSubmitted) {
-                            return true;
-                        } else if (statusFilter === 'unsubmitted' && !assignment.hasSubmitted) {
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-                
-                console.log("过滤后的作业数:", filteredAssignments.length);
-                
-                // 按截止日期排序，未截止的排在前面，相同情况下截止日期近的排前面
-                filteredAssignments.sort((a, b) => {
-                    // 首先按照是否截止排序
-                    if (a.isExpired !== b.isExpired) {
-                        return a.isExpired ? 1 : -1;
-                    }
-                    
-                    // 其次按照截止日期排序
-                    const dateA = new Date(a.dueDate);
-                    const dateB = new Date(b.dueDate);
-                    return dateA - dateB;
-                });
-                
-                // 清空列表并添加作业
-                assignmentsListBody.innerHTML = '';
-                
-                if (filteredAssignments.length === 0) {
-                    assignmentsListBody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                                没有匹配的作业
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                filteredAssignments.forEach(assignment => {
-                    const row = document.createElement('tr');
-                    row.className = 'assignment-row hover:bg-gray-50';
-                    
-                    // 格式化截止日期
-                    const dueDate = new Date(assignment.dueDate);
-                    const formattedDueDate = dueDate.toLocaleString('zh-CN', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    
-                    // 计算剩余时间或已过期时间
-                    const now = new Date();
-                    const timeDiff = dueDate - now;
-                    let timeStatus = '';
-                    
-                    if (timeDiff > 0) {
-                        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-                        const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        if (days > 0) {
-                            timeStatus = `剩余 ${days} 天 ${hours} 小时`;
-                        } else {
-                            timeStatus = `剩余 ${hours} 小时`;
-                        }
-                    } else {
-                        const days = Math.floor(Math.abs(timeDiff) / (1000 * 60 * 60 * 24));
-                        if (days > 0) {
-                            timeStatus = `已过期 ${days} 天`;
-                        } else {
-                            timeStatus = `已过期`;
-                        }
-                    }
-                    
-                    // 设置状态样式和文本
-                    let statusClass, statusText;
-                    if (assignment.isExpired) {
-                        statusClass = 'bg-red-100 text-red-800';
-                        statusText = '已截止';
-                    } else {
-                        statusClass = 'bg-blue-100 text-blue-800';
-                        statusText = '进行中';
-                    }
-                    
-                    // 设置提交情况样式和文本
-                    let submissionClass, submissionText;
-                    if (assignment.hasSubmitted) {
-                        submissionClass = 'bg-green-100 text-green-800';
-                        submissionText = '已提交';
-                    } else {
-                        submissionClass = 'bg-red-100 text-red-800';
-                        submissionText = '未提交';
-                    }
 
-                    
-                    row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            ${assignment.course}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${assignment.name}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${formattedDueDate}
-                            <div class="text-xs ${assignment.isExpired ? 'text-red-500' : 'text-green-500'}">
-                                ${timeStatus}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
-                                ${statusText}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${submissionClass}">
-                                ${submissionText}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button 
-                                class="text-blue-600 hover:text-blue-900 go-to-submit"
-                                data-course="${assignment.course}"
-                                data-assignment="${assignment.name}"
-                            >
-                                ${assignment.hasSubmitted ? '查看提交' : '立即提交'}
-                            </button>
-                        </td>
-                    `;
-                    
-                    assignmentsListBody.appendChild(row);
-                    
-                    // 添加提交按钮点击事件
-                    const submitBtn = row.querySelector('.go-to-submit');
-                    submitBtn.addEventListener('click', () => {
-                        goToSubmitAssignment(assignment.course, assignment.name);
-                    });
-                });
+        const loadStartTime = Date.now();
+        
+        // 清空当前内容
+        assignmentsListBody.innerHTML = '';
+        assignmentsListBody.classList.add('skeleton-loading');
+
+        // 添加固定数量的骨架屏行
+        for (let i = 0; i < 5; i++) {
+            const row = document.createElement('tr');
+            row.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 animate-pulse skeleton-row';
+            row.innerHTML = `
+                <td class="px-6 py-4"><div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div></td>
+                <td class="px-6 py-4"><div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-32 mb-2.5"></div></td>
+                <td class="px-6 py-4"><div class="h-2.5 bg-gray-300 rounded-full dark:bg-gray-600 w-24 mb-2.5"></div><div class="h-2 bg-gray-200 dark:bg-gray-700 w-16 rounded-full"></div></td>
+                <td class="px-6 py-4"><div class="h-2.5 bg-gray-300 dark:bg-gray-600 rounded-full w-12"></div></td>
+                <td class="px-6 py-4"><div class="h-2.5 bg-gray-300 dark:bg-gray-600 rounded-full w-12"></div></td>
+                <td class="px-6 py-4 text-right"><div class="h-2.5 bg-gray-300 dark:bg-gray-600 rounded-full w-12 ml-auto"></div></td>
+            `;
+            assignmentsListBody.appendChild(row);
+        }
+
+        fetch('/all_assignments')
+            .then(res => res.ok ? res.json() : res.json().then(err => { throw new Error(err.message); }))
+            .then(data => {
+                const loadTime = Date.now() - loadStartTime;
+                const minLoadTime = 800;
+
+                // Ensure minimum loading time for better UX
+                const renderTimeout = Math.max(0, minLoadTime - loadTime);
+                
+                setTimeout(() => {
+                    // Clear skeleton rows and render actual data
+                    assignmentsListBody.innerHTML = '';
+                    assignmentsListBody.classList.remove('skeleton-loading');
+                    renderActualAssignments(data, statusFilter);
+                }, renderTimeout);
             })
             .catch(error => {
-                console.error('加载作业列表失败:', error);
+                console.error('Loading error:', error);
+                
+                // Clear skeleton and show error
+                assignmentsListBody.innerHTML = '';
+                assignmentsListBody.classList.remove('skeleton-loading');
+                
                 assignmentsListBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-sm text-red-500">
+                    <tr class="fade-in-row bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <td colspan="6" class="px-6 py-4 text-center text-sm text-red-500 dark:text-red-400">
                             加载失败: ${error.message}
                         </td>
-                    </tr>
-                `;// 显示系统提示
+                    </tr>`;
+                
+                updatePagination(0);
+                
                 if (typeof showToast === 'function') {
                     showToast(`加载作业列表失败: ${error.message}`, 'error');
                 }
             });
     }
 
+    function renderActualAssignments(data, statusFilter) {
+        const assignmentsListBody = document.getElementById('assignmentsListBody');
+        if (!assignmentsListBody) return;
+
+        let filtered = data.assignments || [];
+        if (statusFilter !== 'all') {
+            filtered = filtered.filter(a => {
+                return (statusFilter === 'pending' && !a.isExpired) ||
+                    (statusFilter === 'expired' && a.isExpired) ||
+                    (statusFilter === 'submitted' && a.hasSubmitted) ||
+                    (statusFilter === 'unsubmitted' && !a.hasSubmitted);
+            });
+        }
+
+        // Sort by expiration and due date
+        filtered.sort((a, b) => {
+            if (a.isExpired !== b.isExpired) return a.isExpired ? 1 : -1;
+            return new Date(a.dueDate) - new Date(b.dueDate);
+        });
+
+        totalAssignments = filtered.length;
+        
+        // Handle pagination
+        const start = (currentPage - 1) * itemsPerPage;
+        const pageData = filtered.slice(start, start + itemsPerPage);
+
+        if (pageData.length === 0) {
+            assignmentsListBody.innerHTML = `
+                <tr class="fade-in-row bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                        没有匹配的作业
+                    </td>
+                </tr>`;
+            updatePagination(0);
+            return;
+        }
+
+        // Clear previous content and render new items with fade-in animations
+        assignmentsListBody.innerHTML = '';
+        pageData.forEach((assignment, index) => {
+            renderAssignmentItem(assignment, assignmentsListBody, index);
+        });
+
+        updatePagination(totalAssignments);
+    }
+
+    function renderAssignmentItem(assignment, container, index) {
+        const row = document.createElement('tr');
+        row.className = 'fade-in-row bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600';
+        row.style.animationDelay = `${index * 50}ms`;
+
+        const due = new Date(assignment.dueDate);
+        const dueStr = due.toLocaleString('zh-CN', {year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'});
+        const now = new Date(), diff = due - now;
+        const timeStatus = diff > 0
+            ? (Math.floor(diff / 86400000) > 0 ? `剩余 ${Math.floor(diff / 86400000)} 天 ${Math.floor((diff % 86400000) / 3600000)} 小时` : `剩余 ${Math.floor(diff / 3600000)} 小时`)
+            : (Math.floor(-diff / 86400000) > 0 ? `已过期 ${Math.floor(-diff / 86400000)} 天` : '已过期');
+
+        const statusClass = assignment.isExpired ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+        const submissionClass = assignment.hasSubmitted ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+
+        row.innerHTML = `
+            <td class="px-6 py-4">${assignment.course}</td>
+            <td class="px-6 py-4">${assignment.name}</td>
+            <td class="px-6 py-4">${dueStr}<div class="text-xs ${assignment.isExpired ? 'text-red-500' : 'text-green-500'}">${timeStatus}</div></td>
+            <td class="px-6 py-4"><span class="inline-flex items-center ${statusClass} text-xs font-medium px-2.5 py-0.5 rounded-full">${assignment.isExpired ? '已截止' : '进行中'}</span></td>
+            <td class="px-6 py-4"><span class="inline-flex items-center ${submissionClass} text-xs font-medium px-2.5 py-0.5 rounded-full">${assignment.hasSubmitted ? '已提交' : '未提交'}</span></td>
+            <td class="px-6 py-4 text-right"><button class="go-to-submit text-blue-600 hover:text-blue-900 dark:text-blue-500 dark:hover:text-blue-700" data-course="${assignment.course}" data-assignment="${assignment.name}">${assignment.hasSubmitted ? '查看提交' : '立即提交'}</button></td>`;
+        
+        container.appendChild(row);
+
+        const btn = row.querySelector('.go-to-submit');
+        btn.addEventListener('click', () => {
+            goToSubmitAssignment(assignment.course, assignment.name);
+        });
+    }
+
+    // 添加分页导航更新函数
+    function updatePagination(totalItems) {
+        const paginationElement = document.getElementById('assignmentPagination');
+        if (!paginationElement) return;
+        
+        // 如果没有数据，隐藏分页
+        if (totalItems === 0) {
+            paginationElement.classList.add('hidden');
+            return;
+        }
+        
+        // 计算总页数
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        
+        // 更新分页信息
+        const startItem = (currentPage - 1) * itemsPerPage + 1;
+        const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+        
+        // 更新显示信息
+        const pageInfoElement = paginationElement.querySelector('.page-info');
+        if (pageInfoElement) {
+            pageInfoElement.innerHTML = `显示 <span class="font-semibold text-gray-900 dark:text-white">${startItem}-${endItem}</span> 共 <span class="font-semibold text-gray-900 dark:text-white">${totalItems}</span>`;
+        }
+        
+        // 更新页码列表
+        const pageListElement = paginationElement.querySelector('.pagination-list');
+        if (pageListElement) {
+            let pageHTML = `
+                <li>
+                    <a href="#" class="page-prev flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-600 bg-white border border-gray-300 rounded-l-lg hover:bg-blue-50 hover:text-blue-700 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-colors duration-150 ease-in-out dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
+                        <svg class="w-3.5 h-3.5 me-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4"/>
+                        </svg>
+                        上一页
+                    </a>
+                </li>
+            `;
+            
+            // 生成页码
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+            
+            if (endPage - startPage + 1 < maxPagesToShow) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const isActive = i === currentPage;
+                pageHTML += `
+                    <li>
+                        <a href="#" data-page="${i}" class="page-num flex items-center justify-center px-4 h-10 leading-tight ${isActive 
+                            ? 'text-white bg-blue-600 border border-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 dark:bg-blue-600 dark:border-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800' 
+                            : 'text-gray-600 bg-white border border-gray-300 hover:bg-blue-50 hover:text-blue-700 focus:ring-2 focus:ring-blue-100 focus:outline-none dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'}" 
+                            ${isActive ? 'aria-current="page"' : ''}>
+                            ${i}
+                        </a>
+                    </li>
+                `;
+            }
+            
+            pageHTML += `
+                <li>
+                    <a href="#" class="page-next flex items-center justify-center px-4 h-10 leading-tight text-gray-600 bg-white border border-gray-300 rounded-r-lg hover:bg-blue-50 hover:text-blue-700 focus:ring-2 focus:ring-blue-100 focus:outline-none transition-colors duration-150 ease-in-out dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}">
+                        下一页
+                        <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                        </svg>
+                    </a>
+                </li>
+            `;
+            
+            pageListElement.innerHTML = pageHTML;
+            
+            // 添加页码点击事件
+            const pageNumLinks = pageListElement.querySelectorAll('.page-num');
+            pageNumLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageNum = parseInt(this.dataset.page, 10);
+                    if (pageNum !== currentPage) {
+                        currentPage = pageNum;
+                        loadAllAssignments();
+                    }
+                });
+            });
+            
+            // 添加上一页/下一页按钮事件
+            const prevButton = pageListElement.querySelector('.page-prev');
+            if (prevButton) {
+                prevButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (currentPage > 1) {
+                        currentPage--;
+                        loadAllAssignments();
+                    }
+                });
+            }
+            
+            const nextButton = pageListElement.querySelector('.page-next');
+            if (nextButton) {
+                nextButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        loadAllAssignments();
+                    }
+                });
+            }
+        }
+        
+        // 显示分页
+        paginationElement.classList.remove('hidden');
+    }
     //region跳转到作业提交页面
     /**
      * @param {string} course - 课程名称
@@ -401,7 +445,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 'tabUpload': 'uploadTab',
                 'tabAssignmentsList': 'assignmentsListTab',
                 'tabSubmissions': 'submissionsTab',
-                'tabProfile': 'profileTab'
+                'tabProfile': 'profileTab',
+                'tabMaterials': 'materialsTab',
             };
             
             const tabContentId = tabMapping[button.id];
@@ -2130,5 +2175,4 @@ document.addEventListener('DOMContentLoaded', function() {
       fileListObserver.observe(fileList, { childList: true });
     }
 
-    
   });
