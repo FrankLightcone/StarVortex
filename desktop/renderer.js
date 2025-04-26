@@ -399,24 +399,46 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // 注入脚本来处理预览按钮的点击
+  webview.addEventListener('did-finish-load', () => {
+    if (!webview.src.startsWith('data:') && !webview.src.includes('loading.html')) {
+      // 注入处理预览按钮点击的代码
+      webview.executeJavaScript(`
+        document.addEventListener('click', (event) => {
+          if (event.target.classList.contains('preview-btn') || 
+              event.target.closest('.preview-btn')) {
+            event.preventDefault();
+            
+            // 获取文件路径和名称
+            const button = event.target.classList.contains('preview-btn') ? 
+                          event.target : event.target.closest('.preview-btn');
+            const filePath = button.dataset.filePath;
+            const fileName = button.dataset.fileName;
+            
+            if (filePath && fileName) {
+              // 构建预览URL
+              const previewUrl = \`/preview?file_path=\${encodeURIComponent(filePath)}&file_name=\${encodeURIComponent(fileName)}\`;
+              
+              // 通知主进程打开PDF
+              window.postMessage({
+                type: 'preview-pdf',
+                url: previewUrl
+              }, '*');
+            }
+          }
+        });
+      `);
+    }
+  });
+
+  // 接收来自webview的消息
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'preview-pdf') {
+      // 在当前webview中加载PDF
+      webview.src = event.data.url;
+    }
+  });
+  
 });
 
-// 当用户点击网页视图时隐藏面板
-// 由于webview的特性，需要在加载完成后通过JS注入来监听点击
-webview.addEventListener('did-finish-load', () => {
-  if (!webview.src.startsWith('data:') && !webview.src.includes('loading.html')) {
-    // 注入点击监听代码
-    webview.executeJavaScript(`
-      document.addEventListener('click', () => {
-        window.postMessage('webview-clicked', '*');
-      });
-    `);
-  }
-});
-
-// 接收来自webview的消息
-window.addEventListener('message', (event) => {
-  if (event.data === 'webview-clicked' && panelsVisible && pageLoaded) {
-    togglePanels();
-  }
-});

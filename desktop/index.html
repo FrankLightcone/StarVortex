@@ -13,9 +13,11 @@
     <button id="toggleBtn" class="toggle-button" title="显示/隐藏控制面板">≡</button>
     
     <!-- 主要网页视图 -->
-    <div id="webviewContainer">
-      <webview id="webview" src="loading.html" allowpopups webpreferences="allowRunningInsecureContent=yes, javascript=yes" useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"></webview>
-    </div>
+    <webview id="webview" src="loading.html" 
+         allowpopups 
+         plugins 
+         webpreferences="allowRunningInsecureContent=yes, javascript=yes, plugins=yes" 
+         useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"></webview>
     
     <!-- 控制面板 -->
     <div id="controlPanel" class="panel">

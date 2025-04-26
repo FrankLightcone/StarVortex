@@ -177,3 +177,24 @@ ipcMain.handle('get-loading-path', () => {
 ipcMain.handle('check-updates-manually', async () => {
   return await checkForUpdates();
 });
+
+// 在 main.js 中添加
+ipcMain.handle('open-pdf', async (event, pdfUrl) => {
+  try {
+    // 创建一个新窗口用于 PDF 预览
+    let pdfWindow = new BrowserWindow({
+      width: 1000,
+      height: 800,
+      webPreferences: {
+        plugins: true
+      }
+    });
+    
+    // 加载 PDF URL
+    await pdfWindow.loadURL(pdfUrl);
+    return { success: true };
+  } catch (error) {
+    console.error('Error opening PDF:', error);
+    return { success: false, error: error.message };
+  }
+});

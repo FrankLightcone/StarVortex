@@ -125,5 +125,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onShowUpdateSuccess: (callback) => {
     ipcRenderer.on('show-update-success', (_, version) => callback(version));
     return () => ipcRenderer.removeListener('show-update-success', callback);
+  },
+
+  // 在 preload.js 中添加
+  openPdf: async (pdfUrl) => {
+    try {
+      return await ipcRenderer.invoke('open-pdf', pdfUrl);
+    } catch (error) {
+      console.error('Error opening PDF:', error);
+      return { success: false, error: error.message };
+    }
   }
 });
