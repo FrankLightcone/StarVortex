@@ -12,29 +12,35 @@
 </head>
 <body>
   <div id="app">
-    <!-- 自定义标题栏 -->
-    <div id="titleBar" class="title-bar">
-      <div class="title-bar-drag-area">
-        <div class="title-bar-icon">
-          <img src="resource/icon-small.png" alt="Logo" class="title-icon" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\'><path fill=\'%23FFFFFF\' d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z\'/></svg>'">
+      <!-- 亮色主题下的自定义标题栏 -->
+      <div id="titleBar" class="title-bar light-theme">
+        <div class="title-bar-drag-area">
+          <div class="title-bar-icon">
+            <img
+              src="resource/icon-small.png"
+              alt="Logo"
+              class="title-icon"
+              onerror="this.src='data:image/svg+xml;utf8,\<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 24 24&quot;>\<path fill=&quot;%23333333&quot; d=&quot;M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z&quot;/></svg>'">
+          </div>
         </div>
-        <div class="title-bar-text">作业提交系统</div>
+        <div class="title-bar-text-container">
+          <div class="title-bar-text">作业提交系统</div>
+        </div>
+        <div class="title-bar-controls">
+          <button id="minimizeBtn" class="title-bar-button" title="最小化">
+            <i class="fas fa-window-minimize"></i>
+          </button>
+          <button id="maximizeBtn" class="title-bar-button" title="最大化">
+            <i class="fas fa-window-maximize"></i>
+          </button>
+          <button id="restoreBtn" class="title-bar-button hidden" title="还原">
+            <i class="fas fa-window-restore"></i>
+          </button>
+          <button id="closeBtn" class="title-bar-button close-button" title="关闭">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
       </div>
-      <div class="title-bar-controls">
-        <button id="minimizeBtn" class="title-bar-button" title="最小化">
-          <i class="fas fa-window-minimize"></i>
-        </button>
-        <button id="maximizeBtn" class="title-bar-button" title="最大化">
-          <i class="fas fa-window-maximize"></i>
-        </button>
-        <button id="restoreBtn" class="title-bar-button hidden" title="还原">
-          <i class="fas fa-window-restore"></i>
-        </button>
-        <button id="closeBtn" class="title-bar-button close-button" title="关闭">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-    </div>
 
     <!-- 浮动按钮，用于显示/隐藏面板 -->
     <button id="toggleBtn" class="toggle-button" title="显示/隐藏控制面板">≡</button>

@@ -23,7 +23,7 @@ body, html {
 }
 /* 面板样式 */
 .panel {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(240, 240, 245, 0.25);
   border-radius: 8px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
@@ -57,13 +57,15 @@ body, html {
 #controlPanel label {
   margin-right: 12px;
   font-weight: 500;
-  color: #333;
+  color: #dfdfdf;
   white-space: nowrap;
 }
 
 #serverUrl {
+  background-color: rgba(240, 240, 245, 0.15);
+  color: #dfdfdf;
   flex: 1;
-  border: 1px solid #e1e4e8;
+  border: 1px solid #f3f3f3;
   border-radius: 6px;
   padding: 8px 12px;
   margin-right: 12px;
@@ -82,29 +84,6 @@ body, html {
   z-index: 100; /* Ensure it stays above webview */
 }
 
-/* 更新检查按钮 */
-.update-check-button {
-  background-color: #10b981;
-  border: none;
-  border-radius: 6px;
-  color: white;
-  padding: 8px 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-left: 8px;
-}
-
-.update-check-button:hover {
-  background-color: #059669;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.update-check-button:active {
-  transform: translateY(1px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
 
 /* 确保状态面板内容正确对齐 */
 #statusLabel {
@@ -126,27 +105,82 @@ body, html {
   flex: 1;
 }
 
-/* 刷新按钮 */
-#refreshBtn {
-  background-color: #4dabf7;
-  border: none;
-  border-radius: 6px;
-  color: white;
-  padding: 8px 16px;
+#refreshBtn, .update-check-button {
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-weight: 500;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  background-color: rgba(240, 240, 245, 0.3);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+#refreshBtn {
+  color: rgba(30, 64, 175, 0.85);
+}
+
+.update-check-button {
+  color: rgba(4, 120, 87, 0.85);
+  margin-left: 10px;
+}
+
+#refreshBtn:hover, .update-check-button:hover {
+  background-color: rgba(240, 240, 245, 0.5);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+#refreshBtn:active, .update-check-button:active {
+  background-color: rgba(240, 240, 245, 0.65);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
+}
+
+#refreshBtn:active, .update-check-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Add subtle glow effect on hover */
+#refreshBtn:hover, .update-check-button:hover {
+  transform: translateY(-1px);
 }
 
 #refreshBtn:hover {
-  background-color: #339af0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 8px rgba(95, 125, 205, 0.25);
+  color: rgba(30, 64, 175, 1);
 }
 
-#refreshBtn:active {
-  transform: translateY(1px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+.update-check-button:hover {
+  box-shadow: 0 0 8px rgba(0, 150, 136, 0.25);
+  color: rgba(4, 120, 87, 1);
+}
+
+/* Add subtle icons to buttons for better visual cues */
+#refreshBtn::before, .update-check-button::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  margin-right: 8px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+#refreshBtn::before {
+  content: "\f021"; /* refresh icon */
+}
+
+.update-check-button::before {
+  content: "\f062"; /* arrow-up icon - more appropriate for update */
 }
 
 /* 增强浮动按钮 - 调整位置以考虑标题栏 */
@@ -207,25 +241,6 @@ webview {
   background-color: rgb(255, 255, 255);
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
-}
-
-/* Adjust the title bar to take full width */
-.title-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 36px;
-  background: linear-gradient(to right, #3a7bd5, #00d2ff);
-  color: white;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  z-index: 1000;
-  -webkit-app-region: drag;
-  user-select: none;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 webview.ready {

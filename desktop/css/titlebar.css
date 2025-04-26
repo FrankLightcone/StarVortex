@@ -5,8 +5,9 @@
     align-items: center;
     justify-content: space-between;
     height: 36px;
-    background: linear-gradient(to right, #3a7bd5, #00d2ff);
-    color: white;
+    background-color: rgba(240, 240, 245, 0.85);
+    color: #333;
+    /* color: white; */
     position: fixed;
     top: 0;
     left: 0;
@@ -14,22 +15,24 @@
     z-index: 1000;
     -webkit-app-region: drag; /* 允许拖动窗口 */
     user-select: none;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(5px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px) !important; /* 磨砂玻璃效果 */
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0px 0px;
+    padding-left: 10px;
   }
   
   .title-bar-drag-area {
     display: flex;
     align-items: center;
-    flex: 1;
+    width: 25%; /* 左侧区域占比 */
     height: 100%;
-    padding-left: 10px;
   }
   
   .title-bar-icon {
     display: flex;
     align-items: center;
-    margin-right: 8px;
+    margin-right: 10px;
   }
   
   .title-icon {
@@ -38,18 +41,31 @@
     object-fit: contain;
   }
   
+  .title-bar-text-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    height: 100%;
+    -webkit-app-region: drag;
+  }
+  
   .title-bar-text {
     font-size: 14px;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
+    letter-spacing: 0.3px;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
   .title-bar-controls {
     display: flex;
+    width: 25%; /* 右侧区域占比 */
     height: 100%;
+    justify-content: flex-end;
     -webkit-app-region: no-drag; /* 控制按钮不可拖动 */
   }
   
@@ -58,27 +74,27 @@
     height: 100%;
     border: none;
     background-color: transparent;
-    color: white;
+    color: rgba(255, 255, 255, 0.75);
     font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     cursor: pointer;
     outline: none;
+    -webkit-app-region: no-drag;
   }
   
   .title-bar-button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 1);
   }
   
   .title-bar-button.close-button:hover {
     background-color: #e74c3c;
+    color: white;
   }
-/*   
-
-*/
-
+  
   /* 调整切换按钮位置，避免与标题栏重叠 */
   .toggle-button {
     top: 52px; /* 标题栏高度 + 原来的 16px */
@@ -119,3 +135,26 @@
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.3);
   }
+
+  .title-bar.light-theme .title-bar-icon img,
+.title-bar.light-theme .title-icon {
+  /* 如果是白色 PNG，请替换成深色版本，或者去除任何反色滤镜 */
+  filter: none;
+}
+
+.title-bar.light-theme .title-bar-text {
+  color: inherit;                  /* 继承 .title-bar 的文字色 */
+}
+
+.title-bar.light-theme .title-bar-button i {
+  color: #333333;                  /* 按钮图标用深色 */
+  -webkit-app-region: no-drag;     /* 按钮区域不可拖 */
+}
+
+.title-bar.light-theme .title-bar-button:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* 悬浮时浅色高亮 */
+}
+
+.title-bar.light-theme .close-button:hover {
+  background-color: rgba(255, 0, 0, 0.2); /* 关闭按钮悬浮时提示红色 */
+}

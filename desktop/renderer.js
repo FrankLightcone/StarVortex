@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 设置初始按钮位置
   setTimeout(() => {
     const panelHeight = controlPanel.offsetHeight;
-    toggleBtn.style.top = `${panelHeight + 16}px`;
+    toggleBtn.style.top = `${panelHeight + 48}px`;
   }, 100);
   
   // 允许回车键提交
