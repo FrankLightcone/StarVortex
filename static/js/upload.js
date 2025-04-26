@@ -111,6 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let itemsPerPage = 10;
     let totalAssignments = 0;
 
+    let selectedFiles = [];
+
     if (refreshAssignmentsBtn) {
         console.log("添加刷新按钮点击事件");
         refreshAssignmentsBtn.addEventListener('click', loadAllAssignments);
@@ -260,17 +262,73 @@ document.addEventListener('DOMContentLoaded', function() {
         row.innerHTML = `
             <td class="px-6 py-4">${assignment.course}</td>
             <td class="px-6 py-4">${assignment.name}</td>
-            <td class="px-6 py-4">${dueStr}<div class="text-xs ${assignment.isExpired ? 'text-red-500' : 'text-green-500'}">${timeStatus}</div></td>
-            <td class="px-6 py-4"><span class="inline-flex items-center ${statusClass} text-xs font-medium px-2.5 py-0.5 rounded-full">${assignment.isExpired ? '已截止' : '进行中'}</span></td>
-            <td class="px-6 py-4"><span class="inline-flex items-center ${submissionClass} text-xs font-medium px-2.5 py-0.5 rounded-full">${assignment.hasSubmitted ? '已提交' : '未提交'}</span></td>
-            <td class="px-6 py-4 text-right"><button class="go-to-submit text-blue-600 hover:text-blue-900 dark:text-blue-500 dark:hover:text-blue-700" data-course="${assignment.course}" data-assignment="${assignment.name}">${assignment.hasSubmitted ? '查看提交' : '立即提交'}</button></td>`;
-        
+            <td class="px-6 py-4">${dueStr}
+            <div class="text-xs ${assignment.isExpired ? 'text-red-500' : 'text-green-500'}">
+                ${timeStatus}
+            </div>
+            </td>
+            <td class="px-6 py-4">
+            <span class="inline-flex items-center ${statusClass} text-xs font-medium px-2.5 py-0.5 rounded-full">
+                ${assignment.isExpired ? '已截止' : '进行中'}
+            </span>
+            </td>
+            <td class="px-6 py-4">
+            <span class="inline-flex items-center ${submissionClass} text-xs font-medium px-2.5 py-0.5 rounded-full">
+                ${assignment.hasSubmitted ? '已提交' : '未提交'}
+            </span>
+            </td>
+            <!-- 留一个空的 actions-cell -->
+            <td class="px-6 py-4 text-right actions-cell"></td>
+        `;
         container.appendChild(row);
-
-        const btn = row.querySelector('.go-to-submit');
-        btn.addEventListener('click', () => {
+        
+        // —— 2. 生成唯一 ID，用于 popover & chart 容器 —— 
+        const assignmentId = `ass-${Date.now()}-${index}`;
+        const popoverId    = `pop-${assignmentId}`;
+        const chartId      = `chart-${assignmentId}`;
+        
+        // —— 3. 创建并插入“图表按钮” & 隐藏的 popover —— 
+        const actionsCell = row.querySelector('.actions-cell');
+        const chartBtn = createChartButton(popoverId);
+        const popover  = createPopoverContent(
+            chartId, popoverId,
+            assignment.course,
+            assignment.name,
+            assignment.submittedCount || 0,
+            assignment.totalStudents  || 0
+        );
+        actionsCell.appendChild(chartBtn);
+        document.body.appendChild(popover);
+        
+        // —— 4. 绑定 hover 事件：定位 + 显示 + 发请求渲染图表 —— 
+        chartBtn.addEventListener('mouseenter', () => {
+            positionPopover(popover, chartBtn);
+            popover.classList.remove('hidden');
+            setTimeout(() => {
+            popover.style.opacity = '1';
+            popover.style.visibility = 'visible';
+            }, 50);
+            fetchAndRenderChart(chartId, assignment.course, assignment.name, /* className */);
+        });
+        chartBtn.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+            if (!isMouseOverElement(popover)) hidePopover(popover);
+            }, 100);
+        });
+        popover.addEventListener('mouseleave', () => {
+            if (!isMouseOverElement(chartBtn)) hidePopover(popover);
+        });
+        
+        // —— 5. 再插“去提交/查看提交”按钮 —— 
+        const submitBtn = document.createElement('button');
+        submitBtn.className = 'go-to-submit text-blue-600 hover:text-blue-900';
+        submitBtn.textContent = assignment.hasSubmitted ? '查看提交' : '立即提交';
+        submitBtn.dataset.course     = assignment.course;
+        submitBtn.dataset.assignment = assignment.name;
+        submitBtn.addEventListener('click', () => {
             goToSubmitAssignment(assignment.course, assignment.name);
         });
+        actionsCell.appendChild(submitBtn);
     }
 
     // 添加分页导航更新函数

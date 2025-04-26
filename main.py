@@ -28,6 +28,7 @@ from util.schedule_tasks import setup_scheduler, get_current_schedule
 from util.feedback import feedback_bp
 from util.notification import notification_bp, init_app as init_notification_app
 from util.materials import materials_bp, init_app as init_materials
+from util.stats_api import stats_api_bp, init_app as init_stats_api
 
 
 def create_app():
@@ -71,10 +72,12 @@ def create_app():
     app.register_blueprint(feedback_bp)
     app.register_blueprint(notification_bp)
     app.register_blueprint(materials_bp)  # 添加课程资料蓝图
+    app.register_blueprint(stats_api_bp)  # 添加统计API蓝图
 
     # 初始化通知系统
     init_notification_app(app)
     init_materials(app)  # 初始化课程资料模块
+    init_stats_api(app)  # 初始化统计API模块
     
     # 添加请求日志中间件
     @app.before_request
