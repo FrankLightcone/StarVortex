@@ -9,6 +9,9 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     overflow: hidden;
     background-color: #f8f9fa;
+    color: #495057;
+    text-align: center;
+    overflow: hidden;
   }
   
   #app {
@@ -16,6 +19,7 @@
     width: 100%;
     height: 100vh;
     overflow: hidden;
+    padding-top: 36px; /* 添加标题栏高度的顶部内边距 */
   }
   
  /* 面板样式 */
@@ -142,17 +146,17 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
- /* 增强浮动按钮 */
+/* 增强浮动按钮 - 调整位置以考虑标题栏 */
  .toggle-button {
     position: fixed;
-    top: 16px;
+  top: 52px; /* 原来的16px加上标题栏的36px */
     left: 16px;
     width: 40px;
     height: 40px;
     border: none;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.2); /* 提高透明度 */
-    color: rgba(51, 51, 51, 0.3); /* 提高文字透明度 */
+  background-color: rgba(255, 255, 255, 0.2);
+  color: rgba(51, 51, 51, 0.3);
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
@@ -162,7 +166,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(2px); /* 添加模糊效果使按钮更好辨识 */
+  backdrop-filter: blur(2px);
   }
   
   .toggle-button:hover {
@@ -176,7 +180,7 @@
     transform: scale(0.98);
   }
   
-  /* 网页视图容器 */
+/* 网页视图容器 - 调整高度以考虑标题栏 */
  #webviewContainer {
     position: absolute;
     top: 0;
@@ -190,7 +194,7 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     background-color: white;
     width: calc(100% - 16px);
-    height: calc(100vh - 16px);
+  height: calc(100vh - 36px - 16px); /* 减去标题栏高度和边距 */
   }
   
   webview {
@@ -270,3 +274,49 @@
       margin-top: 8px;
     }
   }
+
+/* Add these styles to your styles.css file */
+
+/* PDF mode specific styles */
+#webviewContainer.pdf-mode {
+  background-color: white !important;
+}
+
+.pdf-mode webview {
+  background-color: white !important;
+  opacity: 1 !important;
+}
+
+body.pdf-viewing,
+html.pdf-viewing {
+  background-color: white !important;
+}
+
+/* Ensure proper colors for PDF viewing */
+body.pdf-viewing #webviewContainer,
+html.pdf-viewing #webviewContainer {
+  background-color: white !important;
+  border: none !important;
+}
+
+/* Ensure proper button visibility during PDF viewing */
+body.pdf-viewing .toggle-button,
+html.pdf-viewing .toggle-button {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
+body.pdf-viewing .toggle-button:hover,
+html.pdf-viewing .toggle-button:hover {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* Modify webview's background */
+webview {
+  transition: background-color 0.3s ease;
+}
+
+webview.pdf-viewing {
+  background-color: white !important;
+}

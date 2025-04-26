@@ -6,18 +6,47 @@
   <title>作业提交系统</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/update-css.css">
+  <link rel="stylesheet" href="css/titlebar.css">
+
 </head>
 <body>
   <div id="app">
+    <!-- 自定义标题栏 -->
+    <div id="titleBar" class="title-bar">
+      <div class="title-bar-drag-area">
+        <div class="title-bar-icon">
+          <img src="resource/icon-small.png" alt="Logo" class="title-icon"/>
+        </div>
+        <div class="title-bar-text">作业提交系统</div>
+      </div>
+      <div class="title-bar-controls">
+        <button id="minimizeBtn" class="title-bar-button" title="最小化">
+          <i class="fas fa-window-minimize"></i>
+        </button>
+        <button id="maximizeBtn" class="title-bar-button" title="最大化">
+          <i class="fas fa-window-maximize"></i>
+        </button>
+        <button id="restoreBtn" class="title-bar-button hidden" title="还原">
+          <i class="fas fa-window-restore"></i>
+        </button>
+        <button id="closeBtn" class="title-bar-button close-button" title="关闭">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
     <!-- 浮动按钮，用于显示/隐藏面板 -->
     <button id="toggleBtn" class="toggle-button" title="显示/隐藏控制面板">≡</button>
     
     <!-- 主要网页视图 -->
-    <webview id="webview" src="loading.html" 
-         allowpopups 
-         plugins 
-         webpreferences="allowRunningInsecureContent=yes, javascript=yes, plugins=yes" 
-         useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"></webview>
+    <webview id="webview" 
+        src="loading.html" 
+        allowpopups 
+        plugins 
+        webpreferences="allowRunningInsecureContent=yes, javascript=yes, plugins=yes" 
+        useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"
+        partition="persist:main">
+      </webview>
     
     <!-- 控制面板 -->
     <div id="controlPanel" class="panel">
@@ -166,5 +195,6 @@
   
   <script src="renderer.js"></script>
   <script src="js/update-ui.js"></script>
+  <script src="js/titlebar.js"></script>
 </body>
 </html>

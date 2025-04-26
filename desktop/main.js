@@ -5,6 +5,9 @@ const fs = require('fs');
 const Store = require('electron-store');
 const updater = require('./js/updater'); // 导入更新模块
 
+// Keep track of PDF windows
+let pdfWindows = new Map();
+
 // 配置schema以确保正确存储
 const schema = {
   remoteUrl: {
@@ -24,20 +27,24 @@ let mainWindow;
 let updaterInstance; // 存储更新器实例
 
 function createWindow() {
-    // 创建浏览器窗口
-    mainWindow = new BrowserWindow({
-      width: 1560,
-      height: 980,
-      icon: path.join(__dirname, 'resource/icon.ico'), // 添加应用图标
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-        webviewTag: true, // 确保webview标签可用
-        preload: path.join(__dirname, 'js/preload.js')
-      },
-      // 设置背景色，使加载过程更平滑
-      backgroundColor: '#f8f9fa'
-    });
+  // Create the browser window.
+  mainWindow = new BrowserWindow({
+    width: 1560,
+    height: 980,
+    icon: path.join(__dirname, 'resource/icon.ico'),
+    frame: false, // 无边框窗口
+    transparent: false, // 是否透明
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      webviewTag: true, // Ensure webview tag is enabled
+      webSecurity: false, // This allows loading local resources with different schemes
+      allowRunningInsecureContent: true, // Allow running content from different sources
+      plugins: true, // Important for PDF plugin support
+      preload: path.join(__dirname, 'js/preload.js')
+    },
+    backgroundColor: '#f8f9fa'
+  });
 
   // 隐藏菜单栏
   Menu.setApplicationMenu(null);
@@ -112,19 +119,25 @@ async function checkForUpdates() {
 
 // 应用准备就绪时创建窗口
 app.whenReady().then(() => {
-  // 设置CSP策略
+  // Set up session to allow PDF plugins and cross-origin requests
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
         ...details.responseHeaders,
-        'Content-Security-Policy': ["default-src 'self' * 'unsafe-inline' 'unsafe-eval' data: blob:"]
+        'Access-Control-Allow-Origin': ['*'],
+        'Content-Security-Policy': [
+          "default-src 'self' * 'unsafe-inline' 'unsafe-eval' data: blob:; " +
+          "object-src 'self' *; " +
+          "plugin-types application/pdf; " +
+          "frame-src 'self' * data: blob:;"
+        ]
       }
     });
   });
   globalShortcut.register('CommandOrControl+Shift+i', function () {
-    mainWindow.webContents.openDevTools()
-  })
-  
+      mainWindow.webContents.openDevTools()
+    })
+  // Create window after setting up session
   createWindow();
 });
 
@@ -178,6 +191,35 @@ ipcMain.handle('check-updates-manually', async () => {
   return await checkForUpdates();
 });
 
+// 窗口控制 - 添加IPC处理器
+ipcMain.handle('window-minimize', () => {
+  if (mainWindow) mainWindow.minimize();
+  return { success: true };
+});
+
+ipcMain.handle('window-maximize', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  }
+  return { success: true, isMaximized: mainWindow ? mainWindow.isMaximized() : false };
+});
+
+ipcMain.handle('window-close', () => {
+  if (mainWindow) mainWindow.close();
+  return { success: true };
+});
+
+// 获取窗口状态
+ipcMain.handle('get-window-state', () => {
+  if (!mainWindow) return { isMaximized: false };
+  return { isMaximized: mainWindow.isMaximized() };
+});
+
+
 // 在 main.js 中添加
 ipcMain.handle('open-pdf', async (event, pdfUrl) => {
   try {
@@ -197,4 +239,123 @@ ipcMain.handle('open-pdf', async (event, pdfUrl) => {
     console.error('Error opening PDF:', error);
     return { success: false, error: error.message };
   }
+});
+
+// Handle PDF window opened event
+ipcMain.on('pdf-window-opened', (event, data) => {
+  const { url, title } = data;
+  
+  // Store the URL and title
+  setTimeout(() => {
+    // Look for recently created windows that might be PDF windows
+    BrowserWindow.getAllWindows().forEach(win => {
+      if (win !== mainWindow && !pdfWindows.has(win.id)) {
+        // This might be our new PDF window
+        win.setTitle(title || '课件文档');
+        
+        // Set the icon for the window
+        win.setIcon(path.join(__dirname, 'resource/icon.ico'));
+        
+        // Store this window
+        pdfWindows.set(win.id, { win, url, title });
+        
+        // Listen for window close to clean up our records
+        win.on('closed', () => {
+          pdfWindows.delete(win.id);
+        });
+        
+        // Inject title-setting script
+        win.webContents.executeJavaScript(`
+          document.title = "${title || '课件文档'}";
+          
+          // Also try to set favicon
+          const favicon = document.createElement('link');
+          favicon.rel = 'icon';
+          favicon.href = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="%23F44336" d="M14,2H6C4.9,2,4,4.9,4,4v16c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V8L14,2z M14,4l5,5h-5V4z M9,15v-2h6v2H9z M9,11V9h6v2H9z"/></svg>';
+          document.head.appendChild(favicon);
+        `).catch(err => console.error('Error injecting title script:', err));
+      }
+    });
+  }, 500);
+});
+
+// Handle direct title setting from renderer
+ipcMain.on('set-window-title', (event, title) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win) {
+    win.setTitle(title || '课件文档');
+  }
+});
+
+// Monitor new windows to set custom titles and icons
+app.on('browser-window-created', (event, win) => {
+  // Wait a bit for window to load
+  setTimeout(() => {
+    const url = win.webContents.getURL();
+    
+    // Check if this is likely a PDF window
+    if (url.includes('preview_asset') && 
+        (url.includes('.pdf') || url.toLowerCase().includes('pdf'))) {
+      
+      // Extract a title from the URL
+      let title = '课件文档';
+      try {
+        const urlObj = new URL(url);
+        const fileName = urlObj.searchParams.get('file_name');
+        if (fileName) {
+          title = decodeURIComponent(fileName);
+        }
+      } catch (e) {
+        console.error('Error parsing PDF URL:', e);
+      }
+      
+      // Set window title
+      win.setTitle(title);
+      
+      // Set window icon
+      win.setIcon(path.join(__dirname, 'resource/icon.ico'));
+      
+      // Store this window
+      pdfWindows.set(win.id, { win, url, title });
+      
+      // Clean up when window closes
+      win.on('closed', () => {
+        pdfWindows.delete(win.id);
+      });
+    }
+  }, 300);
+});
+
+// Optionally add a custom handler for new-window events from webview
+// This can be used if the above approach doesn't work consistently
+app.on('web-contents-created', (event, contents) => {
+  contents.on('new-window', (event, url, frameName, disposition, options) => {
+    if (url.includes('preview_asset') && 
+        (url.includes('.pdf') || url.toLowerCase().includes('pdf'))) {
+      
+      console.log('Intercepted PDF new window:', url);
+      
+      // Extract a title from the URL
+      let title = '课件文档';
+      try {
+        const urlObj = new URL(url);
+        const fileName = urlObj.searchParams.get('file_name');
+        if (fileName) {
+          title = decodeURIComponent(fileName);
+        }
+      } catch (e) {
+        console.error('Error parsing PDF URL:', e);
+      }
+      
+      // Set window options
+      Object.assign(options, {
+        title: title,
+        icon: path.join(__dirname, 'resource/icon.ico'),
+        webPreferences: {
+          ...options.webPreferences,
+          plugins: true
+        }
+      });
+    }
+  });
 });

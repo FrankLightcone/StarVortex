@@ -127,6 +127,47 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener('show-update-success', callback);
   },
 
+  // ===== Window Control APIs =====
+  // Minimize window
+  minimizeWindow: async () => {
+    try {
+      return await ipcRenderer.invoke('window-minimize');
+    } catch (error) {
+      console.error('Error minimizing window:', error);
+      return { success: false, error: error.message };
+    }
+  },
+  
+  // Maximize/Restore window
+  maximizeWindow: async () => {
+    try {
+      return await ipcRenderer.invoke('window-maximize');
+    } catch (error) {
+      console.error('Error maximizing window:', error);
+      return { success: false, error: error.message };
+    }
+  },
+  
+  // Close window
+  closeWindow: async () => {
+    try {
+      return await ipcRenderer.invoke('window-close');
+    } catch (error) {
+      console.error('Error closing window:', error);
+      return { success: false, error: error.message };
+    }
+  },
+  
+  // Get window state
+  getWindowState: async () => {
+    try {
+      return await ipcRenderer.invoke('get-window-state');
+    } catch (error) {
+      console.error('Error getting window state:', error);
+      return { isMaximized: false, error: error.message };
+    }
+  },
+
   // 在 preload.js 中添加
   openPdf: async (pdfUrl) => {
     try {
@@ -135,5 +176,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       console.error('Error opening PDF:', error);
       return { success: false, error: error.message };
     }
+  },
+
+  notifyPdfWindowOpened: (url, title) => {
+    ipcRenderer.send('pdf-window-opened', { url, title });
+  },
+  
+  // Optional: Add a method to set window title directly from renderer
+  setWindowTitle: (title) => {
+    ipcRenderer.send('set-window-title', title);
   }
 });

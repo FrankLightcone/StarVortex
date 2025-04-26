@@ -442,3 +442,223 @@ document.addEventListener('DOMContentLoaded', () => {
   
 });
 
+// Add this to your renderer.js file
+
+// Function to check if a URL is for a PDF
+function isPdfUrl(url) {
+  if (!url) return false;
+  return (
+    (url.includes('preview_asset') && 
+     (url.includes('.pdf') || url.toLowerCase().includes('pdf'))) ||
+    url.endsWith('.pdf') || 
+    url.includes('content-type=application/pdf')
+  );
+}
+
+// Add a CSS style element to fix PDF display
+const styleElement = document.createElement('style');
+styleElement.textContent = `
+  .pdf-mode {
+    background-color: white !important;
+  }
+  .pdf-mode webview {
+    background-color: white !important;
+  }
+`;
+document.head.appendChild(styleElement);
+
+// Monitor navigation events to handle PDFs
+webview.addEventListener('did-start-navigation', (event) => {
+  const url = event.url || webview.src;
+  if (isPdfUrl(url)) {
+    console.log('Detected PDF navigation:', url);
+    
+    // Add PDF mode class to container
+    webviewContainer.classList.add('pdf-mode');
+    document.body.classList.add('pdf-viewing');
+    
+    // Set PDF plugin parameters through executeJavaScript
+    setTimeout(() => {
+      webview.executeJavaScript(`
+        // Force white background for PDF viewer
+        document.body.style.backgroundColor = 'white';
+        document.documentElement.style.backgroundColor = 'white';
+        
+        // Find any PDF viewers and style them
+        const pdfElements = document.querySelectorAll('embed[type="application/pdf"], object[type="application/pdf"], iframe');
+        pdfElements.forEach(element => {
+          element.style.backgroundColor = 'white';
+          element.style.width = '100%';
+          element.style.height = '100%';
+          element.style.border = 'none';
+        });
+      `).catch(err => console.error('Error injecting PDF styles:', err));
+    }, 500); // Small delay to ensure the page has started loading
+  } else {
+    // Remove PDF mode class for non-PDF content
+    webviewContainer.classList.remove('pdf-mode');
+    document.body.classList.remove('pdf-viewing');
+  }
+});
+
+// Additional handler for when the PDF is fully loaded
+webview.addEventListener('did-finish-load', () => {
+  const url = webview.src;
+  if (isPdfUrl(url)) {
+    console.log('PDF finished loading:', url);
+    
+    // Apply PDF specific styles
+    webview.executeJavaScript(`
+      // Ensure background is white
+      document.body.style.backgroundColor = 'white';
+      document.documentElement.style.backgroundColor = 'white';
+      
+      // Add styling for PDF elements
+      const pdfStyle = document.createElement('style');
+      pdfStyle.textContent = \`
+        body, html {
+          background-color: white !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          height: 100% !important;
+          overflow: hidden !important;
+        }
+        
+        embed[type="application/pdf"],
+        object[type="application/pdf"],
+        iframe {
+          width: 100% !important;
+          height: 100% !important;
+          border: none !important;
+          background-color: white !important;
+        }
+      \`;
+      document.head.appendChild(pdfStyle);
+    `).catch(err => console.error('Error applying PDF styles:', err));
+  }
+});
+
+// Handle failed loads differently
+webview.addEventListener('did-fail-load', (event) => {
+  if (event.errorCode === -3) {
+    // This is often a PDF-related abort, which can be ignored
+    console.log('Ignoring error code -3, likely PDF-related navigation');
+    return;
+  }
+  
+  // For all other errors, remove PDF mode
+  webviewContainer.classList.remove('pdf-mode');
+  document.body.classList.remove('pdf-viewing');
+});
+
+// Allow right-clicking on PDFs to view them externally
+webview.addEventListener('context-menu', (event) => {
+  if (isPdfUrl(webview.src)) {
+    // Add a context menu with an option to view the PDF externally
+    const { Menu, MenuItem } = require('electron').remote;
+    const menu = new Menu();
+    
+    menu.append(new MenuItem({
+      label: '在浏览器中打开PDF',
+      click: () => {
+        require('electron').shell.openExternal(webview.src);
+      }
+    }));
+    
+    menu.popup();
+  }
+});
+
+// Add this to your renderer.js file
+
+// Function to extract file name from URL
+function getFileNameFromUrl(url) {
+  if (!url) return "PDF文档";
+  
+  try {
+    // Try to extract file_name parameter from URL
+    const urlObj = new URL(url);
+    const fileName = urlObj.searchParams.get('file_name');
+    if (fileName) {
+      // Decode the file name (it's often URL encoded)
+      return decodeURIComponent(fileName);
+    }
+    
+    // If no file_name parameter found, try to extract from path
+    const pathParts = url.split('/');
+    let lastPart = pathParts[pathParts.length - 1];
+    
+    // Remove query parameters if present
+    if (lastPart.includes('?')) {
+      lastPart = lastPart.split('?')[0];
+    }
+    
+    // Check if it's a PDF
+    if (lastPart.toLowerCase().endsWith('.pdf')) {
+      return decodeURIComponent(lastPart);
+    }
+    
+    return "PDF文档";
+  } catch (error) {
+    console.error('Error parsing URL:', error);
+    return "PDF文档";
+  }
+}
+
+// Intercept navigation to PDFs and set title
+webview.addEventListener('did-start-navigation', (event) => {
+  const url = event.url || webview.src;
+  if (isPdfUrl(url)) {
+    // Extract file name to use as title
+    const fileName = getFileNameFromUrl(url);
+    
+    // Set document title (will be reflected in the window title)
+    setTimeout(() => {
+      webview.executeJavaScript(`
+        // Set document title
+        document.title = "${fileName}";
+      `).catch(err => console.error('Error setting PDF title:', err));
+    }, 500);
+  }
+});
+
+// Add additional handler for when PDF is fully loaded
+webview.addEventListener('did-finish-load', () => {
+  const url = webview.src;
+  if (isPdfUrl(url)) {
+    // Extract file name to use as title
+    const fileName = getFileNameFromUrl(url);
+    
+    // Set document title (will be reflected in the window title)
+    webview.executeJavaScript(`
+      // Set document title
+      document.title = "${fileName}";
+      
+      // Create favicon link if not exists
+      if (!document.querySelector("link[rel='icon']")) {
+        const favicon = document.createElement('link');
+        favicon.rel = 'icon';
+        favicon.href = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="%23F44336" d="M14,2H6C4.9,2,4,2.9,4,4v16c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V8L14,2z M14,4l5,5h-5V4z M9,15v-2h6v2H9z M9,11V9h6v2H9z"/></svg>';
+        document.head.appendChild(favicon);
+      }
+    `).catch(err => console.error('Error setting PDF title and favicon:', err));
+  }
+});
+
+// Monitor popup windows to modify their title
+webview.addEventListener('new-window', (event) => {
+  const url = event.url;
+  if (isPdfUrl(url)) {
+    // This is triggered when a new window is opened for a PDF
+    console.log('PDF opened in new window:', url);
+    
+    // Unfortunately, we can't directly modify the title of the popup window through this event
+    // We'll need to handle this in the main process
+    
+    // Pass the desired title to the main process
+    const fileName = getFileNameFromUrl(url);
+    window.electronAPI.notifyPdfWindowOpened(url, fileName);
+    
+    // Note: We'll need to add this method to preload.js and implement it in main.js
+  }
+});
