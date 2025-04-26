@@ -250,7 +250,7 @@ function togglePanels() {
     // 确保按钮在控制面板下方
     const updateButtonPosition = () => {
       const panelHeight = controlPanel.offsetHeight;
-      toggleBtn.style.top = `${panelHeight + 16}px`;
+      toggleBtn.style.top = `${panelHeight + 48}px`;
     };
     
     // 等待过渡效果完成后再更新按钮位置

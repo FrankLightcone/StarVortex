@@ -75,17 +75,10 @@
   .title-bar-button.close-button:hover {
     background-color: #e74c3c;
   }
-  
-  /* 调整应用布局以适应标题栏 */
-  #app {
-    padding-top: 36px; /* A safe space for the title bar */
-  }
-  
-  #webviewContainer {
-    height: calc(100vh - 36px - 16px); /* 减去标题栏高度和边距 */
-    top: 36px; /* 确保webview容器从标题栏下方开始 */
-  }
-  
+/*   
+
+*/
+
   /* 调整切换按钮位置，避免与标题栏重叠 */
   .toggle-button {
     top: 52px; /* 标题栏高度 + 原来的 16px */
