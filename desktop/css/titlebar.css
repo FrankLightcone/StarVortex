@@ -1,11 +1,11 @@
-/* titlebar.css - 自定义标题栏样式 */
+/* titlebar.css - 现代化自定义标题栏样式 */
 
 .title-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 36px;
-    background: linear-gradient(to right, #4dabf7, #339af0);
+    background: linear-gradient(to right, #3a7bd5, #00d2ff);
     color: white;
     position: fixed;
     top: 0;
@@ -14,7 +14,8 @@
     z-index: 1000;
     -webkit-app-region: drag; /* 允许拖动窗口 */
     user-select: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
   }
   
   .title-bar-drag-area {
@@ -34,6 +35,7 @@
   .title-icon {
     height: 20px;
     width: 20px;
+    object-fit: contain;
   }
   
   .title-bar-text {
@@ -42,6 +44,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
   .title-bar-controls {
@@ -60,26 +63,27 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
     cursor: pointer;
     outline: none;
   }
   
   .title-bar-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.2);
   }
   
   .title-bar-button.close-button:hover {
-    background-color: #e25563;
+    background-color: #e74c3c;
   }
   
   /* 调整应用布局以适应标题栏 */
   #app {
-    padding-top: 36px; /* 与标题栏高度相同 */
+    padding-top: 36px; /* A safe space for the title bar */
   }
   
   #webviewContainer {
     height: calc(100vh - 36px - 16px); /* 减去标题栏高度和边距 */
+    top: 36px; /* 确保webview容器从标题栏下方开始 */
   }
   
   /* 调整切换按钮位置，避免与标题栏重叠 */
@@ -103,13 +107,22 @@
     }
   }
   
-  /* 深色主题 */
-  @media (prefers-color-scheme: dark) {
-    .title-bar {
-      background: linear-gradient(to right, #1c7ed6, #1971c2);
-    }
-    
-    .title-bar-button:hover {
-      background-color: rgba(255, 255, 255, 0.15);
-    }
+  /* 滚动条样式美化 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
   }

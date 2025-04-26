@@ -241,7 +241,7 @@ function togglePanels() {
     // 隐藏面板
     controlPanel.classList.add('hidden');
     statusPanel.classList.add('hidden');
-    toggleBtn.style.top = '16px';
+    toggleBtn.style.top = '48px';
   } else {
     // 显示面板
     controlPanel.classList.remove('hidden');
