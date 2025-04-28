@@ -1,272 +1,357 @@
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-  
-  body, html {
-    height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    overflow: hidden;
-    background-color: #f8f9fa;
-  }
-  
-  #app {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    overflow: hidden;
-  }
-  
- /* 面板样式 */
- .panel {
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(10px);
-    overflow: hidden;
-    margin: 8px;
-    z-index: 50;
-    width: calc(100% - 16px);
-  }
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f8f9fa;
+  color: #495057;
+  overflow: hidden;
+}
+
+#app {
+  position: absolute;  /* 相对自己的窗口 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: 36px;   /* 留标题栏空间 */
+  overflow: hidden;
+}
+/* 面板样式 */
+.panel {
+  background-color: rgba(240, 240, 245, 0.25);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  margin: 8px;
+  z-index: 50;
+  width: calc(100% - 16px);
+}
+.panel-content {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Adjust panel positions */
+#controlPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform-origin: top;
+  margin-top: 36px;
+  z-index: 100; /* Ensure it stays above webview */
+}
+
+
+#controlPanel label {
+  margin-right: 12px;
+  font-weight: 500;
+  color: #dfdfdf;
+  white-space: nowrap;
+}
+
+#serverUrl {
+  background-color: rgba(240, 240, 245, 0.15);
+  color: #dfdfdf;
+  flex: 1;
+  border: 1px solid #f3f3f3;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-right: 12px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  min-width: 200px;
+}
+
+/* 状态面板 */
+#statusPanel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transform-origin: bottom;
+  z-index: 100; /* Ensure it stays above webview */
+}
+
+
+/* 确保状态面板内容正确对齐 */
+#statusLabel {
+  color: #1fd46b;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* 联系信息 */
+#contactLabel {
+  color: #a1d466;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.spacer {
+  flex: 1;
+}
+
+#refreshBtn, .update-check-button {
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  background-color: rgba(240, 240, 245, 0.3);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+#refreshBtn {
+  color: rgba(30, 64, 175, 0.85);
+}
+
+.update-check-button {
+  color: rgba(4, 120, 87, 0.85);
+  margin-left: 10px;
+}
+
+#refreshBtn:hover, .update-check-button:hover {
+  background-color: rgba(240, 240, 245, 0.5);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+#refreshBtn:active, .update-check-button:active {
+  background-color: rgba(240, 240, 245, 0.65);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
+}
+
+#refreshBtn:active, .update-check-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Add subtle glow effect on hover */
+#refreshBtn:hover, .update-check-button:hover {
+  transform: translateY(-1px);
+}
+
+#refreshBtn:hover {
+  box-shadow: 0 0 8px rgba(95, 125, 205, 0.25);
+  color: rgba(30, 64, 175, 1);
+}
+
+.update-check-button:hover {
+  box-shadow: 0 0 8px rgba(0, 150, 136, 0.25);
+  color: rgba(4, 120, 87, 1);
+}
+
+/* Add subtle icons to buttons for better visual cues */
+#refreshBtn::before, .update-check-button::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  margin-right: 8px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+#refreshBtn::before {
+  content: "\f021"; /* refresh icon */
+}
+
+.update-check-button::before {
+  content: "\f062"; /* arrow-up icon - more appropriate for update */
+}
+
+/* 增强浮动按钮 - 调整位置以考虑标题栏 */
+.toggle-button {
+  position: fixed;
+  top: 52px; /* 原来的16px加上标题栏的36px */
+  left: 16px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: rgba(51, 51, 51, 0.3);
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+
+.toggle-button:hover {
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #333;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+.toggle-button:active {
+  transform: scale(0.98);
+}
+
+#webviewContainer {
+  position: absolute;
+  top: 36px;    /* 刚好在 #app padding-top 下方 */
+  left: 0;
+  right: 0;
+  bottom: 0;    /* 自动撑满到底部，无须 height 计算 */
+  margin: 0;
+  padding: 0;
+  background-color: rgb(255, 255, 255);  /* 或者你需要的背景色 */
+}
+/* 把状态栏的底部 margin 清掉 */
+#statusPanel {
+  margin-bottom: 0;  /* 或者：margin:8px 8px 0; */
+}
+
+
+/* Ensure webview fills entire container */
+webview {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: rgb(255, 255, 255);
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+webview.ready {
+  opacity: 1;
+}
+
+/* 链接样式 */
+a {
+  color: #4dabf7;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #339af0;
+  text-decoration: underline;
+}
+
+/* 动画类 */
+.hidden {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+  box-shadow: none;
+}
+
+#statusPanel.hidden {
+  transform: translateY(100%);
+}
+
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 确保面板完全隐藏时不占用空间 */
+.panel.hidden {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* 优化响应式布局 */
+@media (max-width: 768px) {
   .panel-content {
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-  
- /* 控制面板 */
- #controlPanel {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    transform-origin: top;
-  }
-  
-  #controlPanel label {
-    margin-right: 12px;
-    font-weight: 500;
-    color: #333;
-    white-space: nowrap;
+    flex-direction: column;
+    align-items: stretch;
   }
   
   #serverUrl {
-    flex: 1;
-    border: 1px solid #e1e4e8;
-    border-radius: 6px;
-    padding: 8px 12px;
-    margin-right: 12px;
-    font-size: 14px;
-    transition: border-color 0.2s;
-    min-width: 200px;
+    margin-right: 0;
+    margin-bottom: 8px;
   }
   
-  /* 状态面板 */
-  #statusPanel {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    transform-origin: bottom;
-  }
-
-  /* 更新检查按钮 */
- .update-check-button {
-  background-color: #10b981;
-  border: none;
-  border-radius: 6px;
-  color: white;
-  padding: 8px 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-left: 8px;
-}
-
- .update-check-button:hover {
-  background-color: #059669;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
- .update-check-button:active {
-  transform: translateY(1px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-  
-  /* 确保状态面板内容正确对齐 */
-  #statusLabel {
-    color: #1fd46b;
-    font-weight: 500;
-    font-size: 14px;
-    white-space: nowrap;
+  #refreshBtn {
+    width: 100%;
   }
   
-  /* 联系信息 */
-  #contactLabel {
-    color: #a1d466;
-    font-size: 13px;
-    white-space: nowrap;
-    text-align: right;
+  #statusPanel .panel-content {
+    flex-direction: column;
+    align-items: flex-start;
   }
   
   .spacer {
-    flex: 1;
+    display: none;
   }
   
-  /* 刷新按钮 */
-  #refreshBtn {
-    background-color: #4dabf7;
-    border: none;
-    border-radius: 6px;
-    color: white;
-    padding: 8px 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  #contactLabel {
+    margin-top: 8px;
   }
-  
-  #refreshBtn:hover {
-    background-color: #339af0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-  
-  #refreshBtn:active {
-    transform: translateY(1px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-  
- /* 增强浮动按钮 */
- .toggle-button {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    width: 40px;
-    height: 40px;
-    border: none;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.2); /* 提高透明度 */
-    color: rgba(51, 51, 51, 0.3); /* 提高文字透明度 */
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 100;
-    transition: all 0.3s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(2px); /* 添加模糊效果使按钮更好辨识 */
-  }
-  
-  .toggle-button:hover {
-    background-color: rgba(255, 255, 255, 0.95);
-    color: #333;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    transform: scale(1.05);
-  }
-  
-  .toggle-button:active {
-    transform: scale(0.98);
-  }
-  
-  /* 网页视图容器 */
- #webviewContainer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
-    border-radius: 8px;
-    margin: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    background-color: white;
-    width: calc(100% - 16px);
-    height: calc(100vh - 16px);
-  }
-  
-  webview {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background-color: white;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-  }
-  
-  webview.ready {
-    opacity: 1;
-  }
-  
-  /* 链接样式 */
-  a {
-    color: #4dabf7;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  
-  a:hover {
-    color: #339af0;
-    text-decoration: underline;
-  }
-  
-  /* 动画类 */
- .hidden {
-    opacity: 0;
-    transform: translateY(-100%);
-    pointer-events: none;
-    box-shadow: none;
-  }
-  
-  #statusPanel.hidden {
-    transform: translateY(100%);
-  }
-  
-  .visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  /* 确保面板完全隐藏时不占用空间 */
-  .panel.hidden {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-  
-  /* 优化响应式布局 */
-  @media (max-width: 768px) {
-    .panel-content {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    
-    #serverUrl {
-      margin-right: 0;
-      margin-bottom: 8px;
-    }
-    
-    #refreshBtn {
-      width: 100%;
-    }
-    
-    #statusPanel .panel-content {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .spacer {
-      display: none;
-    }
-    
-    #contactLabel {
-      margin-top: 8px;
-    }
-  }
+}
+
+/* PDF mode specific styles */
+#webviewContainer.pdf-mode {
+  background-color: white !important;
+}
+
+.pdf-mode webview {
+  background-color: white !important;
+  opacity: 1 !important;
+}
+
+body.pdf-viewing,
+html.pdf-viewing {
+  background-color: white !important;
+}
+
+/* Ensure proper colors for PDF viewing */
+body.pdf-viewing #webviewContainer,
+html.pdf-viewing #webviewContainer {
+  background-color: white !important;
+  border: none !important;
+}
+
+/* Ensure proper button visibility during PDF viewing */
+body.pdf-viewing .toggle-button,
+html.pdf-viewing .toggle-button {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
+body.pdf-viewing .toggle-button:hover,
+html.pdf-viewing .toggle-button:hover {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* Modify webview's background */
+webview {
+  transition: background-color 0.3s ease;
+}
+
+webview.pdf-viewing {
+  background-color: white !important;
+}
