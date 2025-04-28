@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作业提交系统 - 客户端下载</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/3.1.2/flowbite.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .download-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.08);
+        }
+        
+        .download-card:hover {
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5, #2563EB);
+        }
+        
+        .hero-text {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease-out;
+        }
+        
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Particle background */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md fixed w-full z-50">
+        <div class="flex flex-wrap items-center justify-between max-w-screen-xl mx-auto p-4">
+            <a href="/login" class="flex items-center space-x-3 rtl:space-x-reverse">
+                <img src="/static/img/logo.png" class="h-8" alt="作业提交系统 Logo" />
+                <span class="self-center text-2xl font-semibold whitespace-nowrap">作业提交系统</span>
+            </a>
+            <div class="flex items-center md:order-2 space-x-1 md:space-x-2 rtl:space-x-reverse">
+                <a href="/login" class="text-gray-800 hover:bg-gray-50 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 py-2 md:px-5 md:py-2.5 transition-all duration-300 ease-in-out hover:shadow-md">登录</a>
+                <a href="/register" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 md:px-5 md:py-2.5 transition-all duration-300 ease-in-out hover:shadow-lg">注册</a>
+                <button data-collapse-toggle="navbar-default" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200" aria-controls="navbar-default" aria-expanded="false">
+                    <span class="sr-only">打开主菜单</span>
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="hidden w-full md:block md:w-auto" id="navbar-default">
+                <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white">
+                    <li>
+                        <a href="/login" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 transition-colors duration-300">首页</a>
+                    </li>
+                    <li>
+                        <a href="#" class="block py-2 px-3 text-blue-700 bg-blue-50 rounded md:bg-transparent md:text-blue-700 md:p-0" aria-current="page">客户端下载</a>
+                    </li>
+                    <li>
+                        <a href="#contact" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 transition-colors duration-300">联系我们</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="relative overflow-hidden pt-24 pb-12"
+                style="background:url('/static/img/hero-bg.jpg') center/cover">
+        <div class="absolute inset-0 bg-gray-900 opacity-60"></div>
+        <div id="particles-js"></div>
+
+        <!-- 这才是内容真正的容器 -->
+        <div class="relative z-10 mx-auto max-w-screen-xl px-4 py-24 text-center lg:py-40">
+            <h1 class="mb-4 animate__animated animate__fadeInDown
+                    text-4xl font-extrabold leading-none text-white
+                    md:text-5xl lg:text-6xl">
+            作业提交系统客户端
+            </h1>
+            <p class="mb-8 animate__animated animate__fadeIn animate__delay-1s
+                    mx-auto text-lg font-normal text-gray-100
+                    lg:text-xl sm:px-16 lg:px-48">
+            更高效、更便捷的作业提交体验，支持 Windows、macOS 和 Linux 系统，让您的学习生活更轻松。
+            </p>
+
+            <!-- 按钮组容器，加上 justify-center，默认即居中（不是仅限 sm） -->
+            <div class="animate__animated animate__fadeInUp animate__delay-1s
+                        flex flex-col justify-center items-center space-y-4
+                        sm:flex-row sm:space-y-0 sm:space-x-4">
+            <a href="#download-section"
+                class="inline-flex justify-center items-center
+                        py-3 px-5 text-base font-medium text-white
+                        bg-blue-700 rounded-lg
+                        hover:bg-blue-800 focus:ring-4 focus:ring-blue-300
+                        transition ease-in-out duration-300">
+                立即下载
+                <svg class="w-3.5 h-3.5 ms-2" …>…</svg>
+            </a>
+            <a href="#requirements"
+                class="inline-flex justify-center items-center
+                        py-3 px-5 text-base font-medium text-white
+                        border border-white rounded-lg
+                        hover:bg-white hover:text-blue-700
+                        focus:ring-4 focus:ring-gray-400
+                        transition ease-in-out duration-300">
+                系统需求
+            </a>
+            </div>
+        </div>
+
+        <!-- 波浪 SVG -->
+        <div class="absolute bottom-0 left-0 right-0">
+            <svg …>…</svg>
+        </div>
+        </section>
+
+
+    <!-- 系统需求部分 -->
+    <section id="requirements" class="py-20 bg-white">
+        <div class="max-w-screen-xl mx-auto px-4">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">系统需求</h2>
+                <p class="text-lg text-gray-600">确保您的设备满足以下配置要求</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-10">
+                <!-- Windows 系统需求 -->
+                <div class="bg-gray-50 rounded-xl shadow-md p-8 hover:shadow-lg transition-all duration-300 scroll-reveal">
+                    <div class="flex items-center mb-6">
+                        <svg class="w-8 h-8 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+                        </svg>
+                        <h3 class="text-2xl font-bold">Windows</h3>
+                    </div>
+                    <ul class="space-y-4 text-gray-600">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Windows 10/11 (64位)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>处理器: 1.6 GHz 或更快</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>内存: 4 GB 或更多</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>磁盘空间: 最少 200 MB</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- macOS 系统需求 -->
+                <div class="bg-gray-50 rounded-xl shadow-md p-8 hover:shadow-lg transition-all duration-300 scroll-reveal" style="transition-delay: 0.2s">
+                    <div class="flex items-center mb-6">
+                        <svg class="w-8 h-8 text-gray-600 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.624 7.222c-.876 0-2.232-.996-3.66-.96-1.884.024-3.612 1.092-4.584 2.784-1.956 3.396-.504 8.412 1.404 11.172.936 1.344 2.04 2.856 3.504 2.808 1.404-.06 1.932-.912 3.636-.912 1.692 0 2.172.912 3.66.876 1.512-.024 2.472-1.368 3.408-2.724 1.08-1.56 1.524-3.072 1.548-3.156-.036-.012-2.964-1.14-2.988-4.524-.024-2.832 2.304-4.188 2.412-4.248-1.32-1.944-3.36-2.16-4.08-2.196-1.848-.144-3.384 1.008-4.26 1.008zm3.12-2.892c.78-.936 1.296-2.244 1.152-3.54-1.116.048-2.46.744-3.264 1.68-.72.828-1.344 2.16-1.176 3.432 1.236.096 2.508-.636 3.288-1.572z"/>
+                        </svg>
+                        <h3 class="text-2xl font-bold">macOS</h3>
+                    </div>
+                    <ul class="space-y-4 text-gray-600">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>macOS 11.0 或更高版本</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Intel 或 Apple Silicon 处理器</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>内存: 4 GB 或更多</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>磁盘空间: 最少 200 MB</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Linux 系统需求 -->
+                <div class="bg-gray-50 rounded-xl shadow-md p-8 hover:shadow-lg transition-all duration-300 scroll-reveal" style="transition-delay: 0.4s">
+                    <div class="flex items-center mb-6">
+                        <svg class="w-8 h-8 text-gray-800 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489.125.804.52 1.59 1.249 2.156.58.461 1.34.7 2.102.7 1.607 0 3.172-.7 4.348-1.518 1.176-.817 2.455-.906 2.955-.108l.016.015c.017.015.033.03.05.044.293.235.692.398 1.117.16.426-.239.631-.648.631-1.083 0-.435-.193-.833-.58-1.108-.215-.151-.545-.269-.886-.29-1.568-.042-1.45-.788-1.122-1.896.224-.656 0-1.445-.356-1.87-.107-.128-.298-.364-.362-.642-.148-.637-.156-2.025.047-2.945.135-.608.76-1.61 1.328-1.937.687-.394 1.988-1.063 1.28-1.315-.15-.05-.336-.078-.504-.086-.572-.023-1.4.08-2.108.32-.98.335-1.859 1.001-2.067 1.98-.153.71-.118 1.493.334 1.353 1.403-.433-.34 4.285-3.088 2.028 1.871-3.422 4.956-3.895 6.43-5.622.104-.125.217-.226.306-.362.636-.97-.201-1.756-1.176-1.756zm4.871 19.262c-.048 0-.097-.001-.143-.004-.423-.015-.97-.074-1.375-.145-.89-.158-2.448-.645-3.218-1.222-.174-.132-.424-.15-.631-.048-1.221.6-2.293.923-3.306.923-.414 0-.831-.04-1.235-.117-.752-.146-1.223-.593-1.315-1.236-.124-.87.168-1.815.482-2.522.42-.94 1.035-1.816 1.628-2.408.148-.147.15-.348.047-.47-.245-.287-.64-.697-.825-1.065-.49-.981-.76-2.203-.517-3.027l.016-.053c.118-.392.422-1.044.964-1.096.043-.005.088-.003.132.005.213.026.522.11.835.238 1.094.453 1.873.479 2.398.082.26-.197.462-.401.304-.62-.364-.505-.77-1.202-.872-1.666-.226-1.037-.15-2.17.133-2.892.103-.262.338-.465.563-.577l.066-.032c.304-.15.605-.247.908-.347.826-.27 1.683-.481 2.534-.137.073.03.15.041.223.041.46 0 .807-.331.768-.729-.04-.433-.28-.789-.584-1.048-.125-.105-.161-.287-.092-.43.42-.884 1.422-1.556 2.278-1.893.748-.295 2.03-.456 2.546.827.199.494.108 1.067-.233 1.513l-.028.034c-.174.203-.418.414-.68.607-.366.273-.87.612-1.134.991-.619.891-.879 2.158-.64 3.406.255 1.32 1.265 2.287 2.463 2.358 1.905.114 2.361 1.22 1.864 3.172-.083.33.056.691.346.884.895.599 1.081 1.707.517 2.406-.194.24-.462.458-.778.605-.585.272-1.25.364-1.907.364z"/>
+                        </svg>
+                        <h3 class="text-2xl font-bold">Linux</h3>
+                    </div>
+                    <ul class="space-y-4 text-gray-600">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>支持主流 Linux 发行版</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>处理器: 64位, 1.6 GHz 或更快</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>内存: 4 GB 或更多</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mt-1 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>磁盘空间: 最少 200 MB</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 下载部分 -->
+    <section id="download-section" class="py-20 bg-gray-50">
+        <div class="max-w-screen-xl mx-auto px-4">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">选择您的平台下载</h2>
+                <p class="text-lg text-gray-600">我们提供多平台支持，请选择符合您设备的版本</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-10">
+                <!-- Windows -->
+                <div class="bg-white rounded-xl shadow-md p-8 download-card scroll-reveal">
+                    <div class="flex justify-center mb-6">
+                        <svg class="w-20 h-20 text-blue-600 float-animation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-center mb-3">Windows 版本</h3>
+                    <p class="text-gray-600 text-center mb-6">支持 Windows 10/11 64位系统</p>
+                    <div class="text-center mb-6">
+                        <span class="text-sm text-gray-500">版本 1.4.3 | 更新日期: 2025-04-27</span>
+                    </div>
+                    <a href="/static/updates/download/StarVortex_Setup_1.4.3.exe" class="block text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-center px-5 py-3 transition-all duration-300 ease-in-out hover:shadow-lg">
+                        下载 Windows 版本
+                    </a>
+                </div>
+
+                <!-- macOS -->
+                <div class="bg-white rounded-xl shadow-md p-8 download-card scroll-reveal" style="transition-delay: 0.2s">
+                    <div class="flex justify-center mb-6">
+                        <svg class="w-20 h-20 text-gray-600 float-animation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.624 7.222c-.876 0-2.232-.996-3.66-.96-1.884.024-3.612 1.092-4.584 2.784-1.956 3.396-.504 8.412 1.404 11.172.936 1.344 2.04 2.856 3.504 2.808 1.404-.06 1.932-.912 3.636-.912 1.692 0 2.172.912 3.66.876 1.512-.024 2.472-1.368 3.408-2.724 1.08-1.56 1.524-3.072 1.548-3.156-.036-.012-2.964-1.14-2.988-4.524-.024-2.832 2.304-4.188 2.412-4.248-1.32-1.944-3.36-2.16-4.08-2.196-1.848-.144-3.384 1.008-4.26 1.008zm3.12-2.892c.78-.936 1.296-2.244 1.152-3.54-1.116.048-2.46.744-3.264 1.68-.72.828-1.344 2.16-1.176 3.432 1.236.096 2.508-.636 3.288-1.572z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-center mb-3">macOS 版本</h3>
+                    <p class="text-gray-600 text-center mb-6">支持 macOS 11.0+ (Intel/Apple Silicon)</p>
+                    <div class="text-center mb-6">
+                        <span class="text-sm text-gray-500">版本 1.4.3 | 更新日期: 2025-04-27</span>
+                    </div>
+                    <a href="/static/updates/download/StarVortex-1.4.3-arm64.dmg" class="block text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-center px-5 py-3 transition-all duration-300 ease-in-out hover:shadow-lg">
+                        下载 macOS 版本
+                    </a>
+                </div>
+
+                <!-- Linux -->
+                <div class="bg-white rounded-xl shadow-md p-8 download-card scroll-reveal" style="transition-delay: 0.4s">
+                    <div class="flex justify-center mb-6">
+                        <svg class="w-20 h-20 text-gray-800 float-animation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489.125.804.52 1.59 1.249 2.156.58.461 1.34.7 2.102.7 1.607 0 3.172-.7 4.348-1.518 1.176-.817 2.455-.906 2.955-.108l.016.015c.017.015.033.03.05.044.293.235.692.398 1.117.16.426-.239.631-.648.631-1.083 0-.435-.193-.833-.58-1.108-.215-.151-.545-.269-.886-.29-1.568-.042-1.45-.788-1.122-1.896.224-.656 0-1.445-.356-1.87-.107-.128-.298-.364-.362-.642-.148-.637-.156-2.025.047-2.945.135-.608.76-1.61 1.328-1.937.687-.394 1.988-1.063 1.28-1.315-.15-.05-.336-.078-.504-.086-.572-.023-1.4.08-2.108.32-.98.335-1.859 1.001-2.067 1.98-.153.71-.118 1.493.334 1.353 1.403-.433-.34 4.285-3.088 2.028 1.871-3.422 4.956-3.895 6.43-5.622.104-.125.217-.226.306-.362.636-.97-.201-1.756-1.176-1.756zm4.871 19.262c-.048 0-.097-.001-.143-.004-.423-.015-.97-.074-1.375-.145-.89-.158-2.448-.645-3.218-1.222-.174-.132-.424-.15-.631-.048-1.221.6-2.293.923-3.306.923-.414 0-.831-.04-1.235-.117-.752-.146-1.223-.593-1.315-1.236-.124-.87.168-1.815.482-2.522.42-.94 1.035-1.816 1.628-2.408.148-.147.15-.348.047-.47-.245-.287-.64-.697-.825-1.065-.49-.981-.76-2.203-.517-3.027l.016-.053c.118-.392.422-1.044.964-1.096.043-.005.088-.003.132.005.213.026.522.11.835.238 1.094.453 1.873.479 2.398.082.26-.197.462-.401.304-.62-.364-.505-.77-1.202-.872-1.666-.226-1.037-.15-2.17.133-2.892.103-.262.338-.465.563-.577l.066-.032c.304-.15.605-.247.908-.347.826-.27 1.683-.481 2.534-.137.073.03.15.041.223.041.46 0 .807-.331.768-.729-.04-.433-.28-.789-.584-1.048-.125-.105-.161-.287-.092-.43.42-.884 1.422-1.556 2.278-1.893.748-.295 2.03-.456 2.546.827.199.494.108 1.067-.233 1.513l-.028.034c-.174.203-.418.414-.68.607-.366.273-.87.612-1.134.991-.619.891-.879 2.158-.64 3.406.255 1.32 1.265 2.287 2.463 2.358 1.905.114 2.361 1.22 1.864 3.172-.083.33.056.691.346.884.895.599 1.081 1.707.517 2.406-.194.24-.462.458-.778.605-.585.272-1.25.364-1.907.364z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-center mb-3">Linux 版本</h3>
+                    <p class="text-gray-600 text-center mb-6">支持主流 Linux 发行版 (AppImage)</p>
+                    <div class="text-center mb-6">
+                        <span class="text-sm text-gray-500">版本 1.3.6 | 更新日期: 2025-04-08</span>
+                    </div>
+                    <a href="/api/update/download/hw_desktop-1.3.6.AppImage" class="block text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-center px-5 py-3 transition-all duration-300 ease-in-out hover:shadow-lg">
+                        下载 Linux 版本
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系我们部分 -->
+    <section id="contact" class="py-20 bg-gray-50">
+        <div class="max-w-screen-xl mx-auto px-4">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">联系与支持</h2>
+                <p class="text-lg text-gray-600">有问题或建议？请随时联系我们</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-10">
+                <div class="bg-white p-8 rounded-xl shadow-md text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 scroll-reveal">
+                    <div class="flex justify-center mb-6">
+                        <svg class="w-16 h-16 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M2.94 6.412A2 2 0 002 8.108V16a2 2 0 002 2h12a2 2 0 002-2V8.108a2 2 0 00-.94-1.696l-6-3.75a2 2 0 00-2.12 0l-6 3.75zm2.615 2.423a1 1 0 10-1.11 1.664l5 3.333a1 1 0 001.11 0l5-3.333a1 1 0 00-1.11-1.664L10 11.798 5.555 8.835z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">邮件支持</h3>
+                    <p class="text-gray-600 mb-5">发送邮件获取技术支持</p>
+                    <a href="mailto:support@starvortex.cn" class="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors duration-300">support@example.com</a>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-md text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 scroll-reveal" style="transition-delay: 0.2s">
+                    <div class="flex justify-center mb-6">
+                        <svg class="w-16 h-16 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">常见问题</h3>
+                    <p class="text-gray-600 mb-5">查看常见问题解答</p>
+                    <a href="#" class="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors duration-300">访问帮助中心</a>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-md text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 scroll-reveal" style="transition-delay: 0.4s">
+                    <div class="flex justify-center mb-6">
+                        <svg class="w-16 h-16 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"></path>
+                            <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">在线反馈</h3>
+                    <p class="text-gray-600 mb-5">提交产品使用反馈</p>
+                    <a href="#" class="text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors duration-300">提交反馈</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white">
+        <div class="max-w-screen-xl mx-auto p-6 md:py-10">
+            <div class="sm:flex sm:items-center sm:justify-between">
+                <a href="#" class="flex items-center mb-6 sm:mb-0 space-x-3 rtl:space-x-reverse">
+                    <img src="/static/img/logo.png" class="h-8" alt="作业提交系统 Logo" />
+                    <span class="self-center text-2xl font-semibold whitespace-nowrap">作业提交系统</span>
+                </a>
+                <ul class="flex flex-wrap items-center mb-6 text-sm font-medium sm:mb-0">
+                    <li>
+                        <a href="#" class="hover:text-blue-300 me-4 md:me-6 transition-colors duration-300">关于我们</a>
+                    </li>
+                    <li>
+                        <a href="#" class="hover:text-blue-300 me-4 md:me-6 transition-colors duration-300">隐私政策</a>
+                    </li>
+                    <li>
+                        <a href="#" class="hover:text-blue-300 me-4 md:me-6 transition-colors duration-300">许可协议</a>
+                    </li>
+                    <li>
+                        <a href="#contact" class="hover:text-blue-300 transition-colors duration-300">联系我们</a>
+                    </li>
+                </ul>
+            </div>
+            <hr class="my-6 border-gray-700 sm:mx-auto lg:my-8" />
+            <span class="block text-sm text-gray-400 sm:text-center">© 2025 <a href="#" class="hover:text-blue-300 transition-colors duration-300">作业提交系统</a>. 遥感科学与技术 | 中山大学. 保留所有权利.</span>
+        </div>
+    </footer>
+
+    <!-- 粒子效果 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/3.1.2/flowbite.min.js"></script>
+    
+    <script>
+        // 粒子背景配置
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ffffff"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    }
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false,
+                    "anim": {
+                        "enable": false,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": false,
+                        "speed": 40,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ffffff",
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 2,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 140,
+                        "line_linked": {
+                            "opacity": 1
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 200,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+        
+        // 滚动动画
+        function revealOnScroll() {
+            var reveals = document.querySelectorAll('.scroll-reveal');
+            
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 150;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add('active');
+                }
+            }
+        }
+        
+        window.addEventListener('scroll', revealOnScroll);
+        window.addEventListener('load', revealOnScroll);
+    </script>
+</body>

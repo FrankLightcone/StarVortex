@@ -23,7 +23,9 @@ let updateConfig = {
   // 检查间隔（小时）
   checkInterval: 24,
   // 等待重试的最大时间（分钟）
-  maxWaitMinutes: 120
+  maxWaitMinutes: 120,
+  // 添加一个标记，表示当前版本是否刚安装
+  justUpdated: false
 };
 
 // 更新状态
@@ -59,6 +61,14 @@ function initialize(window, config = {}) {
   
   // 设置IPC处理程序
   setupIpcHandlers();
+  
+  // 检查命令行参数，如果是从更新启动的，设置刚更新标记
+  if (process.argv.includes('--updated')) {
+    console.log('应用程序刚刚更新完成，设置 justUpdated 标记');
+    updateConfig.justUpdated = true;
+    // 保存配置确保标记被持久化
+    saveUpdateConfig();
+  }
   
   // 返回控制器
   return {
@@ -153,17 +163,26 @@ async function checkForUpdates(force = false) {
     return { checking: true };
   }
   
+  // 如果应用程序刚刚更新过，并且不是强制检查，则跳过此次检查
+  if (updateConfig.justUpdated && !force) {
+    console.log('应用程序刚刚更新过，跳过自动检查更新');
+    // 清除标记，下次将正常检查
+    updateConfig.justUpdated = false;
+    saveUpdateConfig();
+    return { skipped: true, reason: 'just_updated' };
+  }
+  
   // 如果不是强制检查且最近检查时间在间隔内，跳过检查
-  // if (!force && updateConfig.lastCheck) {
-  //   const lastCheck = new Date(updateConfig.lastCheck);
-  //   const now = new Date();
-  //   const hoursSinceLastCheck = (now - lastCheck) / (1000 * 60 * 60);
+  if (!force && updateConfig.lastCheck) {
+    const lastCheck = new Date(updateConfig.lastCheck);
+    const now = new Date();
+    const hoursSinceLastCheck = (now - lastCheck) / (1000 * 60 * 60);
     
-  //   if (hoursSinceLastCheck < updateConfig.checkInterval) {
-  //     console.log(`距上次检查仅 ${hoursSinceLastCheck.toFixed(1)} 小时，跳过检查`);
-  //     return { skipped: true };
-  //   }
-  // }
+    if (hoursSinceLastCheck < updateConfig.checkInterval) {
+      console.log(`距上次检查仅 ${hoursSinceLastCheck.toFixed(1)} 小时，跳过检查`);
+      return { skipped: true, reason: 'recent_check' };
+    }
+  }
   
   // 更新检查状态
   updateStatus.checking = true;
@@ -651,6 +670,7 @@ function loadLastCheckTime() {
       if (typeof config.autoDownload === 'boolean') updateConfig.autoDownload = config.autoDownload;
       if (typeof config.showNotification === 'boolean') updateConfig.showNotification = config.showNotification;
       if (config.checkInterval) updateConfig.checkInterval = config.checkInterval;
+      if (typeof config.justUpdated === 'boolean') updateConfig.justUpdated = config.justUpdated;
     }
   } catch (error) {
     console.error('加载更新配置失败:', error);

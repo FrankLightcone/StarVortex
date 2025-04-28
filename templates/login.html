@@ -195,6 +195,49 @@
                 </div>
             </div>
         </div>
+
+        <!-- 下载按钮 - 右上角 -->
+        <div style="position:absolute; top:1rem; right:1rem; z-index:20;">
+            <a
+            href="/download"
+            style="
+                display: inline-flex;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: #fff;
+                /* 毛玻璃半透明背景 */
+                background: rgba(0, 0, 0, 0.4);
+                backdrop-filter: blur(6px);
+                /* 圆角和内阴影 */
+                border-radius: 0.5rem;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                /* 动画过渡 */
+                transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+                text-decoration: none;
+            "
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'; this.style.background='rgba(0,0,0,0.6)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.3)'; this.style.background='rgba(0,0,0,0.4)';"
+            >
+            <svg
+                style="width:1rem; height:1rem; margin-right:0.5rem; flex-shrink:0;"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+            >
+                <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                />
+            </svg>
+            下载桌面客户端
+            </a>
+        </div>
+
         
         <!-- 页脚 -->
         <div class="mt-8 text-center text-white text-sm opacity-80">

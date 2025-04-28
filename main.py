@@ -29,10 +29,22 @@ from util.feedback import feedback_bp
 from util.notification import notification_bp, init_app as init_notification_app
 from util.materials import materials_bp, init_app as init_materials
 from util.stats_api import stats_api_bp, init_app as init_stats_api
-
+from flask import render_template, redirect, url_for
 
 def create_app():
     app = Flask(__name__)
+
+    # 客户端下载页面路由
+    @app.route('/download')
+    def download_page():
+        """客户端下载页面"""
+        return render_template('download.html')
+    
+    # 如果用户访问/software路径，重定向到/download
+    @app.route('/software')
+    def software_redirect():
+        """软件下载页面重定向"""
+        return redirect(url_for('download_page'))
     
     # 配置应用
     app.secret_key = SECRET_KEY
